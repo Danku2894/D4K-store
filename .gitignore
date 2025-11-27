@@ -1,0 +1,63 @@
+# ====================================
+# D4K E-commerce - Git Ignore
+# ====================================
+
+# ============ Backend (Spring Boot) ============
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/.idea/
+backend/*.iml
+backend/*.iws
+backend/*.ipr
+backend/.settings/
+backend/.classpath
+backend/.project
+backend/.vscode/
+
+# Application properties (with secrets)
+backend/src/main/resources/application-*.yml
+!backend/src/main/resources/application.yml
+
+# Logs
+backend/logs/
+backend/*.log
+
+# ============ Frontend (React) ============
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.cache/
+frontend/.env.local
+frontend/.env.production.local
+frontend/.DS_Store
+frontend/coverage/
+frontend/*.local
+
+# ============ Database ============
+*.sql.bak
+*.db
+
+# ============ IDE ============
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ============ OS ============
+Thumbs.db
+desktop.ini
+
+# ============ Temp Files ============
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ============ Documentation (keep generated docs) ============
+# No ignore for docs/
+
