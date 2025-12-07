@@ -35,6 +35,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     /**
      * Tìm kiếm products theo keyword trong name hoặc description
      */
+    /**
+     * Tìm kiếm products theo keyword trong name hoặc description
+     */
     @Query("SELECT p FROM Product p WHERE " +
            "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
@@ -44,29 +47,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                    Pageable pageable);
     
     /**
-     * Tìm products có stock thấp (warning)
+     * Đếm products có ít nhất 1 variant còn hàng (stock > 0)
      */
-    @Query("SELECT p FROM Product p WHERE p.stock < :threshold AND p.isActive = true")
-    List<Product> findLowStockProducts(@Param("threshold") Integer threshold);
-    
+    @Query("SELECT COUNT(DISTINCT p) FROM Product p JOIN p.variants v WHERE v.stock > 0")
+    Long countProductsWithStock();
+
     /**
-     * Tìm products hết hàng
+     * Đếm products có tổng stock = 0
      */
-    List<Product> findByStockAndIsActive(Integer stock, Boolean isActive);
-    
+    @Query("SELECT COUNT(p) FROM Product p WHERE (SELECT COALESCE(SUM(v.stock), 0) FROM ProductVariant v WHERE v.product = p) = 0")
+    Long countOutOfStockProducts();
+
     /**
-     * Đếm products có stock lớn hơn threshold
+     * Đếm products có tổng stock trong khoảng
      */
-    Long countByStockGreaterThan(Integer threshold);
-    
-    /**
-     * Đếm products có stock trong khoảng
-     */
-    Long countByStockBetween(Integer min, Integer max);
-    
-    /**
-     * Đếm products có stock bằng giá trị cụ thể
-     */
-    Long countByStock(Integer stock);
+    @Query("SELECT COUNT(p) FROM Product p WHERE (SELECT COALESCE(SUM(v.stock), 0) FROM ProductVariant v WHERE v.product = p) BETWEEN :min AND :max")
+    Long countProductsWithTotalStockBetween(@Param("min") Integer min, @Param("max") Integer max);
 }
 

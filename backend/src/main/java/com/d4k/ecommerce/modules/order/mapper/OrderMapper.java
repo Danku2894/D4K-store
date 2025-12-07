@@ -70,6 +70,8 @@ public class OrderMapper {
                 .price(item.getPrice())
                 .quantity(item.getQuantity())
                 .subtotal(item.getSubtotal())
+                .size(item.getSize())
+                .color(item.getColor())
                 .imageUrl(item.getImageUrl())
                 .build();
     }

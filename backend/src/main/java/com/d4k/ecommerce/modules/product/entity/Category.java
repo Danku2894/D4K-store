@@ -38,6 +38,9 @@ public class Category {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
     
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+    
     /**
      * Parent category ID (null nếu là root category)
      */
@@ -60,4 +63,3 @@ public class Category {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
-

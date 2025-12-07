@@ -40,6 +40,9 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
     
+    @Column(name = "phone_number", length = 15)
+    private String phoneNumber;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     @Builder.Default

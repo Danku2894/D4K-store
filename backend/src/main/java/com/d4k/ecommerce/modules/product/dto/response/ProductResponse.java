@@ -30,6 +30,8 @@ public class ProductResponse {
     private Integer stock;
     
     private String imageUrl;
+
+    private java.util.List<String> additionalImages;
     
     private Long categoryId;
     
@@ -42,5 +44,7 @@ public class ProductResponse {
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
+
+    private java.util.List<ProductVariantResponse> variants;
 }
 

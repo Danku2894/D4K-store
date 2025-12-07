@@ -1,0 +1,37 @@
+{
+  "name": "d4k-ecommerce-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "D4K E-commerce Fashion Store - Y2K Style",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.20.0",
+    "axios": "^1.6.2",
+    "zustand": "^4.4.7",
+    "react-icons": "^4.12.0",
+    "swiper": "^11.0.5",
+    "react-hot-toast": "^2.4.1",
+    "clsx": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "vite": "^5.0.8"
+  }
+}
+

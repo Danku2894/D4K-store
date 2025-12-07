@@ -17,6 +17,7 @@ import com.d4k.ecommerce.common.exception.UnauthorizedException;
 import com.d4k.ecommerce.modules.user.mapper.UserMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +35,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('USER')")
+@Slf4j
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class UserController {
     
     private final SecurityUtils securityUtils;
@@ -81,6 +83,7 @@ public class UserController {
         
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
+        user.setPhoneNumber(request.getPhoneNumber());
         
         User updatedUser = userRepository.save(user);
         UserDetailResponse response = userMapper.toDetailResponse(updatedUser);
@@ -163,10 +166,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<AddressResponse>> addAddress(
             @Valid @RequestBody AddressRequest request
     ) {
+        log.info("Request to add address: {}", request);
         User user = securityUtils.getCurrentUser();
+        log.info("Current user: {}", user.getEmail());
         
         // Nếu là default address, unset tất cả addresses khác
         if (Boolean.TRUE.equals(request.getIsDefault())) {
+            log.info("Unsetting default addresses for user {}", user.getId());
             unsetDefaultAddresses(user.getId());
         }
         
@@ -181,7 +187,10 @@ public class UserController {
                 .isDefault(request.getIsDefault())
                 .build();
         
+        log.info("Saving address: {}", address);
         Address savedAddress = addressRepository.save(address);
+        log.info("Address saved with ID: {}", savedAddress.getId());
+        
         AddressResponse response = toAddressResponse(savedAddress);
         
         ApiResponse<AddressResponse> apiResponse = ApiResponse.<AddressResponse>builder()

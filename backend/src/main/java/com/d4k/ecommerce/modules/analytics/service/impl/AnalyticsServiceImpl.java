@@ -35,7 +35,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
     private final CouponRepository couponRepository;
-    // private final OrderRepository orderRepository; // TODO: Uncomment sau khi có Order module
+    private final com.d4k.ecommerce.modules.order.repository.OrderRepository orderRepository;
     
     /**
      * Lấy thống kê tổng quan
@@ -65,28 +65,27 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         Long activeCoupons = countActiveCoupons();
         Long expiredCoupons = countExpiredCoupons();
         
-        // TODO: Order & Revenue Statistics (cần Order module)
-        // Tạm thời return 0 hoặc null
-        Long totalOrders = 0L;
-        Long pendingOrders = 0L;
-        Long completedOrders = 0L;
-        Long cancelledOrders = 0L;
-        BigDecimal totalRevenue = BigDecimal.ZERO;
-        BigDecimal revenueThisMonth = BigDecimal.ZERO;
-        BigDecimal revenueThisYear = BigDecimal.ZERO;
-        BigDecimal averageOrderValue = BigDecimal.ZERO;
+        // Order & Revenue Statistics
+        Long totalOrders = orderRepository.count();
+        Long pendingOrders = orderRepository.countByStatus(com.d4k.ecommerce.modules.order.enums.OrderStatus.PENDING);
+        Long completedOrders = orderRepository.countByStatus(com.d4k.ecommerce.modules.order.enums.OrderStatus.DELIVERED);
+        Long cancelledOrders = orderRepository.countByStatus(com.d4k.ecommerce.modules.order.enums.OrderStatus.CANCELLED);
         
-        /*
-        TODO: Implement sau khi có Order module
-        totalOrders = orderRepository.count();
-        pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);
-        completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
-        cancelledOrders = orderRepository.countByStatus(OrderStatus.CANCELLED);
-        totalRevenue = orderRepository.sumTotalAmount();
-        revenueThisMonth = orderRepository.sumRevenueByMonth(YearMonth.now());
-        revenueThisYear = orderRepository.sumRevenueByYear(Year.now());
-        averageOrderValue = totalOrders > 0 ? totalRevenue.divide(new BigDecimal(totalOrders), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-        */
+        BigDecimal totalRevenue = orderRepository.sumTotalRevenue();
+        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+        
+        BigDecimal revenueThisMonth = orderRepository.sumRevenueByMonth(
+            java.time.YearMonth.now().getYear(), 
+            java.time.YearMonth.now().getMonthValue()
+        );
+        if (revenueThisMonth == null) revenueThisMonth = BigDecimal.ZERO;
+        
+        BigDecimal revenueThisYear = orderRepository.sumRevenueByYear(java.time.Year.now().getValue());
+        if (revenueThisYear == null) revenueThisYear = BigDecimal.ZERO;
+        
+        BigDecimal averageOrderValue = totalOrders > 0 
+            ? totalRevenue.divide(new BigDecimal(totalOrders), 2, java.math.RoundingMode.HALF_UP) 
+            : BigDecimal.ZERO;
         
         return DashboardOverviewResponse.builder()
                 // Users
@@ -232,21 +231,21 @@ public class AnalyticsServiceImpl implements AnalyticsService {
      */
     private Long countActiveProducts() {
         // Products có stock > 0
-        return productRepository.countByStockGreaterThan(0);
+        return productRepository.countProductsWithStock();
     }
     
     /**
      * Đếm low stock products (stock <= 10)
      */
     private Long countLowStockProducts() {
-        return productRepository.countByStockBetween(1, 10);
+        return productRepository.countProductsWithTotalStockBetween(1, 10);
     }
     
     /**
      * Đếm out of stock products
      */
     private Long countOutOfStockProducts() {
-        return productRepository.countByStock(0);
+        return productRepository.countOutOfStockProducts();
     }
     
     /**

@@ -13,6 +13,7 @@ import com.d4k.ecommerce.modules.cart.repository.CartItemRepository;
 import com.d4k.ecommerce.modules.cart.repository.CartRepository;
 import com.d4k.ecommerce.modules.cart.service.CartService;
 import com.d4k.ecommerce.modules.product.entity.Product;
+import com.d4k.ecommerce.modules.product.entity.ProductVariant;
 import com.d4k.ecommerce.modules.product.repository.ProductRepository;
 import com.d4k.ecommerce.modules.user.entity.User;
 import com.d4k.ecommerce.modules.user.repository.UserRepository;
@@ -42,12 +43,38 @@ public class CartServiceImpl implements CartService {
      * Lấy giỏ hàng của user
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CartResponse getCart(Long userId) {
         log.info("Fetching cart for user ID: {}", userId);
         
         Cart cart = cartRepository.findByUserIdWithItems(userId)
                 .orElseGet(() -> getOrCreateCart(userId));
+        
+        // Validate items and remove invalid ones (e.g. variant deleted)
+        boolean cartUpdated = false;
+        java.util.Iterator<CartItem> iterator = cart.getItems().iterator();
+        
+        while (iterator.hasNext()) {
+            CartItem item = iterator.next();
+            Product product = item.getProduct();
+            
+            if (item.getSize() != null) {
+                boolean variantExists = product.getVariants().stream()
+                        .anyMatch(v -> v.getSize().equalsIgnoreCase(item.getSize()) && 
+                                      (item.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(item.getColor()))));
+                
+                if (!variantExists) {
+                    log.warn("Removing invalid cart item {} (Variant not found: {} - {})", item.getId(), product.getName(), item.getSize());
+                    iterator.remove();
+                    cartItemRepository.delete(item); // Explicitly delete from DB
+                    cartUpdated = true;
+                }
+            }
+        }
+        
+        if (cartUpdated) {
+            cart = cartRepository.save(cart);
+        }
         
         return cartMapper.toCartResponse(cart);
     }
@@ -60,43 +87,41 @@ public class CartServiceImpl implements CartService {
     public CartResponse addToCart(Long userId, AddToCartRequest request) {
         log.info("Adding product {} to cart for user {}", request.getProductId(), userId);
         
-        // Get or create cart
-        Cart cart = getOrCreateCart(userId);
-        
-        // Validate product tồn tại và active
+        Cart cart = cartRepository.findByUserIdWithItems(userId)
+                .orElseGet(() -> getOrCreateCart(userId));
+                
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> {
-                    log.error("Product not found with ID: {}", request.getProductId());
-                    return new ResourceNotFoundException("Product", "id", request.getProductId());
-                });
-        
-        if (!product.getIsActive()) {
-            throw new BusinessException("Product is not available", "PRODUCT_NOT_AVAILABLE");
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", request.getProductId()));
+                
+        // Check stock based on variant
+        int availableStock = 0;
+        if (request.getSize() != null) {
+            ProductVariant variant = product.getVariants().stream()
+                    .filter(v -> v.getSize().equalsIgnoreCase(request.getSize()))
+                    .filter(v -> request.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(request.getColor())))
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException(
+                            String.format("Variant not found for product '%s' (Size: %s, Color: %s)", 
+                                    product.getName(), request.getSize(), request.getColor()), 
+                            "VARIANT_NOT_FOUND"));
+            availableStock = variant.getStock();
+        } else {
+             // Fallback to total stock if no size specified (should be improved)
+             availableStock = product.getTotalStock();
         }
         
-        // Kiểm tra stock
-        if (product.getStock() < request.getQuantity()) {
-            log.error("Insufficient stock for product {}. Requested: {}, Available: {}", 
-                    product.getId(), request.getQuantity(), product.getStock());
-            throw new BusinessException(
-                    String.format("Insufficient stock. Only %d items available", product.getStock()),
-                    ErrorCodes.INSUFFICIENT_STOCK
-            );
-        }
-        
-        // Kiểm tra product đã có trong cart chưa
-        Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndProductId(
-                cart.getId(), product.getId());
-        
+        // Check existing item
+        Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndProductIdAndSize(
+                cart.getId(), product.getId(), request.getSize());
+                
         if (existingItem.isPresent()) {
-            // Update quantity nếu đã tồn tại
+            // Update quantity
             CartItem item = existingItem.get();
             int newQuantity = item.getQuantity() + request.getQuantity();
             
-            // Kiểm tra stock cho quantity mới
-            if (product.getStock() < newQuantity) {
+            if (newQuantity > availableStock) {
                 throw new BusinessException(
-                        String.format("Insufficient stock. Only %d items available", product.getStock()),
+                        String.format("Insufficient stock. Only %d items available", availableStock),
                         ErrorCodes.INSUFFICIENT_STOCK
                 );
             }
@@ -105,11 +130,20 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.save(item);
             log.info("Updated quantity for existing cart item: {}", item.getId());
         } else {
-            // Thêm item mới
+            // Add new item
+            if (request.getQuantity() > availableStock) {
+                throw new BusinessException(
+                        String.format("Insufficient stock. Only %d items available", availableStock),
+                        ErrorCodes.INSUFFICIENT_STOCK
+                );
+            }
+            
             CartItem newItem = CartItem.builder()
                     .cart(cart)
                     .product(product)
                     .quantity(request.getQuantity())
+                    .size(request.getSize())
+                    .color(request.getColor())
                     .build();
             
             cart.addItem(newItem);
@@ -132,25 +166,33 @@ public class CartServiceImpl implements CartService {
     public CartResponse updateCartItem(Long userId, Long itemId, UpdateCartItemRequest request) {
         log.info("Updating cart item {} for user {}", itemId, userId);
         
-        // Validate cart item thuộc về user
-        if (!cartItemRepository.existsByIdAndUserId(itemId, userId)) {
-            throw new ResourceNotFoundException("Cart item", "id", itemId);
+        CartItem cartItem = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item", "id", itemId));
+                
+        if (!cartItem.getCart().getUser().getId().equals(userId)) {
+             throw new ResourceNotFoundException("Cart item", "id", itemId);
         }
         
-        // Get cart item với product
-        CartItem cartItem = cartItemRepository.findByIdWithProduct(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart item", "id", itemId));
-        
-        // Kiểm tra stock
+        // Check stock
         Product product = cartItem.getProduct();
-        if (product.getStock() < request.getQuantity()) {
-            throw new BusinessException(
-                    String.format("Insufficient stock. Only %d items available", product.getStock()),
+        int availableStock = 0;
+        if (cartItem.getSize() != null) {
+             ProductVariant variant = product.getVariants().stream()
+                    .filter(v -> v.getSize().equalsIgnoreCase(cartItem.getSize()))
+                    .findFirst()
+                    .orElse(null);
+             availableStock = variant != null ? variant.getStock() : 0;
+        } else {
+            availableStock = product.getTotalStock();
+        }
+        
+        if (request.getQuantity() > availableStock) {
+             throw new BusinessException(
+                    String.format("Insufficient stock. Only %d items available", availableStock),
                     ErrorCodes.INSUFFICIENT_STOCK
             );
         }
         
-        // Update quantity
         cartItem.setQuantity(request.getQuantity());
         cartItemRepository.save(cartItem);
         log.info("Cart item {} updated to quantity: {}", itemId, request.getQuantity());
@@ -170,16 +212,13 @@ public class CartServiceImpl implements CartService {
     public CartResponse removeCartItem(Long userId, Long itemId) {
         log.info("Removing cart item {} for user {}", itemId, userId);
         
-        // Validate cart item thuộc về user
         if (!cartItemRepository.existsByIdAndUserId(itemId, userId)) {
             throw new ResourceNotFoundException("Cart item", "id", itemId);
         }
         
-        // Delete cart item
         cartItemRepository.deleteById(itemId);
         log.info("Cart item {} removed successfully", itemId);
         
-        // Return updated cart
         Cart cart = cartRepository.findByUserIdWithItems(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart", "userId", userId));
         
@@ -220,4 +259,3 @@ public class CartServiceImpl implements CartService {
                 });
     }
 }
-

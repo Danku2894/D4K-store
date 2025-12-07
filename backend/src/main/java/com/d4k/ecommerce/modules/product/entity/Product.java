@@ -41,12 +41,26 @@ public class Product {
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
     
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @Column(name = "stock", nullable = false)
     @Builder.Default
     private Integer stock = 0;
     
-    @Column(name = "image_url", length = 500)
-    private String imageUrl;
+    /**
+     * Product Variants (Size/Color/Stock)
+     */
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<ProductVariant> variants = new java.util.ArrayList<>();
+
+    /**
+     * Additional Product Images
+     */
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<ProductImage> images = new java.util.ArrayList<>();
     
     /**
      * Reference to Category
@@ -66,5 +80,13 @@ public class Product {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    // Helper method to get total stock
+    public Integer getTotalStock() {
+        if (variants == null || variants.isEmpty()) {
+            return 0;
+        }
+        return variants.stream().mapToInt(ProductVariant::getStock).sum();
+    }
 }
 

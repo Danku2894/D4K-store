@@ -50,6 +50,12 @@ public class CartItem {
      */
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
+
+    @Column(name = "size")
+    private String size;
+
+    @Column(name = "color")
+    private String color;
     
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

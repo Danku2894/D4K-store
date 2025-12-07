@@ -32,7 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    // private final OrderRepository orderRepository; // TODO: Uncomment khi implement Order module
+    private final com.d4k.ecommerce.modules.order.repository.OrderRepository orderRepository;
     private final ReviewMapper reviewMapper;
     
     /**
@@ -57,19 +57,14 @@ public class ReviewServiceImpl implements ReviewService {
             throw new BusinessException("You have already reviewed this product", "REVIEW_ALREADY_EXISTS");
         }
         
-        // TODO: Validate user đã mua sản phẩm này chưa
-        // Sẽ implement sau khi có Order module
-        /*
-        boolean hasPurchased = orderRepository.existsByUserIdAndProductIdAndStatus(
-            userId, request.getProductId(), OrderStatus.DELIVERED
-        );
+        // Validate user đã mua sản phẩm này chưa
+        boolean hasPurchased = orderRepository.existsByUserIdAndProductIdAndDelivered(userId, request.getProductId());
         if (!hasPurchased) {
             throw new BusinessException(
                 "You must purchase this product before reviewing", 
                 "PURCHASE_REQUIRED"
             );
         }
-        */
         
         // Validate rating
         if (request.getRating() < 1 || request.getRating() > 5) {

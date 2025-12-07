@@ -1,0 +1,294 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   STREETWEAR THEME - D4K Fashion Store
+   Street Culture / Bad Habits Style
+   ============================================ */
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  
+  body {
+    @apply bg-light-50 text-dark-950 font-street;
+    min-height: 100vh;
+    position: relative;
+  }
+  
+  /* Subtle noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Street Bold Text */
+  .text-street-bold {
+    @apply font-display font-black uppercase tracking-tight;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Red Accent Text */
+  .text-accent-red {
+    @apply text-street-red;
+  }
+  
+  /* Street Button - Primary (Black) */
+  .btn-street {
+    @apply px-8 py-3 bg-dark-950 text-light-50 font-bold uppercase tracking-wide;
+    @apply border-2 border-dark-950 transition-all duration-300;
+    @apply hover:bg-light-50 hover:text-dark-950 hover:scale-105;
+    @apply relative overflow-hidden;
+  }
+  
+  .btn-street::before {
+    content: '';
+    @apply absolute inset-0 bg-grunge opacity-0 transition-opacity duration-300;
+    pointer-events: none;
+  }
+  
+  .btn-street:hover::before {
+    @apply opacity-100;
+  }
+  
+  /* Street Button - Accent (Red) */
+  .btn-street-accent {
+    @apply px-8 py-3 bg-street-red text-light-50 font-bold uppercase tracking-wide;
+    @apply border-2 border-street-red transition-all duration-300;
+    @apply hover:bg-transparent hover:text-street-red hover:scale-105;
+    @apply shadow-street hover:shadow-red-glow;
+  }
+  
+  /* Product Card - Street Style */
+  .product-card-street {
+    @apply bg-light-50 border-2 border-dark-950 overflow-hidden;
+    @apply transition-all duration-300;
+    @apply hover:shadow-street-hover hover:scale-[1.02];
+    position: relative;
+  }
+  
+  .product-card-street::after {
+    content: '';
+    @apply absolute inset-0 bg-noise opacity-0 transition-opacity duration-300;
+    pointer-events: none;
+  }
+  
+  .product-card-street:hover::after {
+    @apply opacity-100;
+  }
+  
+  /* Container */
+  .container-street {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Glitch Effect - Street Style */
+  .glitch-street {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .glitch-street:hover {
+    animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
+  }
+  
+  /* Grid Lines Background */
+  .grid-lines {
+    background-image: 
+      linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  
+  /* Glass Effect - Light */
+  .glass-street {
+    @apply backdrop-blur-sm bg-light-50/80;
+    @apply border-2 border-dark-950/10;
+  }
+  
+  /* Harsh Shadow Card */
+  .card-harsh {
+    @apply bg-light-50 border-2 border-dark-950;
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+    transition: all 0.3s ease;
+  }
+  
+  .card-harsh:hover {
+    box-shadow: 12px 12px 0px rgba(0, 0, 0, 1);
+    transform: translate(-2px, -2px);
+  }
+  
+  /* Grunge Overlay */
+  .grunge-overlay {
+    position: relative;
+  }
+  
+  .grunge-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence baseFrequency='1.5' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  
+  /* Strikethrough Effect */
+  .strikethrough-red {
+    position: relative;
+  }
+  
+  .strikethrough-red::after {
+    content: '';
+    @apply absolute left-0 right-0 top-1/2 h-0.5 bg-street-red;
+    transform: rotate(-5deg);
+  }
+}
+
+@layer utilities {
+  /* Text Shadow Utilities */
+  .text-shadow-harsh {
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 1);
+  }
+  
+  .text-shadow-soft {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .text-shadow-red {
+    text-shadow: 0 0 10px theme('colors.street.red'),
+                 0 0 20px theme('colors.street.red');
+  }
+  
+  .text-shadow-neon {
+    text-shadow: 0 0 10px theme('colors.street.neon'),
+                 0 0 20px theme('colors.street.neon');
+  }
+  
+  /* Filter Utilities */
+  .filter-grayscale-80 {
+    filter: grayscale(80%);
+    transition: filter 0.3s ease;
+  }
+  
+  .filter-grayscale-80:hover {
+    filter: grayscale(0%);
+  }
+  
+  .filter-contrast-high {
+    filter: contrast(120%);
+  }
+  
+  /* Border Utilities */
+  .border-asymmetric {
+    border-top: 3px solid currentColor;
+    border-right: 1px solid currentColor;
+    border-bottom: 3px solid currentColor;
+    border-left: 1px solid currentColor;
+  }
+}
+
+/* Custom Animations */
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scrollbar - Street Style */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-light-200;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-dark-950;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-street-red;
+}
+
+/* Selection */
+::selection {
+  @apply bg-dark-950 text-light-50;
+}
+
+::-moz-selection {
+  @apply bg-dark-950 text-light-50;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+

@@ -3,9 +3,12 @@ package com.d4k.ecommerce.modules.product.service.impl;
 import com.d4k.ecommerce.common.exception.BusinessException;
 import com.d4k.ecommerce.common.exception.ResourceNotFoundException;
 import com.d4k.ecommerce.modules.product.dto.request.ProductRequest;
+import com.d4k.ecommerce.modules.product.dto.request.ProductVariantRequest;
 import com.d4k.ecommerce.modules.product.dto.response.ProductResponse;
 import com.d4k.ecommerce.modules.product.entity.Category;
 import com.d4k.ecommerce.modules.product.entity.Product;
+import com.d4k.ecommerce.modules.product.entity.ProductImage;
+import com.d4k.ecommerce.modules.product.entity.ProductVariant;
 import com.d4k.ecommerce.modules.product.mapper.ProductMapper;
 import com.d4k.ecommerce.modules.product.repository.CategoryRepository;
 import com.d4k.ecommerce.modules.product.repository.ProductRepository;
@@ -45,34 +48,69 @@ public class ProductServiceImpl implements ProductService {
                     return new ResourceNotFoundException("Category", "id", request.getCategoryId());
                 });
         
-        // Validate stock
-        if (request.getStock() < 0) {
-            throw new BusinessException("Stock cannot be negative", "INVALID_STOCK");
-        }
-        
         // Validate price
         if (request.getPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
             throw new BusinessException("Price must be greater than 0", "INVALID_PRICE");
         }
         
-        // Build product entity
+        // Create Product
         Product product = Product.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
-                .stock(request.getStock())
                 .imageUrl(request.getImageUrl())
                 .category(category)
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .stock(0) // Will be updated based on variants
                 .build();
         
-        // Lưu vào database
+        // Handle Variants or Stock
+        int totalStock = 0;
+        if (request.getVariants() != null && !request.getVariants().isEmpty()) {
+            for (ProductVariantRequest vr : request.getVariants()) {
+                ProductVariant variant = ProductVariant.builder()
+                        .product(product)
+                        .size(vr.getSize())
+                        .color(vr.getColor())
+                        .stock(vr.getStock())
+                        .priceAdjustment(vr.getPriceAdjustment())
+                        .build();
+                product.getVariants().add(variant);
+                totalStock += vr.getStock();
+            }
+        } else if (request.getStock() != null) {
+            if (request.getStock() < 0) {
+                throw new BusinessException("Stock cannot be negative", "INVALID_STOCK");
+            }
+            // Default variant
+             ProductVariant variant = ProductVariant.builder()
+                        .product(product)
+                        .size("FREESIZE")
+                        .stock(request.getStock())
+                        .build();
+             product.getVariants().add(variant);
+             totalStock = request.getStock();
+        }
+        product.setStock(totalStock);
+
+        // Handle Additional Images
+        if (request.getAdditionalImages() != null && !request.getAdditionalImages().isEmpty()) {
+            for (String imgUrl : request.getAdditionalImages()) {
+                ProductImage productImage = ProductImage.builder()
+                        .product(product)
+                        .imageUrl(imgUrl)
+                        .build();
+                product.getImages().add(productImage);
+            }
+        }
+        
+        // Save
         Product savedProduct = productRepository.save(product);
         log.info("Product created successfully with ID: {}", savedProduct.getId());
         
         return productMapper.toResponse(savedProduct);
     }
-    
+
     /**
      * Cập nhật product
      */
@@ -81,45 +119,78 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         log.info("Updating product with ID: {}", id);
         
-        // Tìm product
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Product not found with ID: {}", id);
-                    return new ResourceNotFoundException("Product", "id", id);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         
-        // Validate category nếu thay đổi
-        if (!product.getCategory().getId().equals(request.getCategoryId())) {
-            Category category = categoryRepository.findById(request.getCategoryId())
+        // Update Category if needed
+        if (request.getCategoryId() != null && !request.getCategoryId().equals(product.getCategory().getId())) {
+             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> {
                         log.error("Category not found with ID: {}", request.getCategoryId());
                         return new ResourceNotFoundException("Category", "id", request.getCategoryId());
                     });
-            product.setCategory(category);
+             product.setCategory(category);
         }
         
-        // Validate stock
-        if (request.getStock() < 0) {
-            throw new BusinessException("Stock cannot be negative", "INVALID_STOCK");
+        // Update basic fields
+        if (request.getName() != null) product.setName(request.getName());
+        if (request.getDescription() != null) product.setDescription(request.getDescription());
+        if (request.getPrice() != null) {
+            if (request.getPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                throw new BusinessException("Price must be greater than 0", "INVALID_PRICE");
+            }
+            product.setPrice(request.getPrice());
+        }
+        if (request.getImageUrl() != null) product.setImageUrl(request.getImageUrl());
+        
+        // Update Additional Images
+        if (request.getAdditionalImages() != null) {
+            product.getImages().clear();
+            for (String imgUrl : request.getAdditionalImages()) {
+                ProductImage productImage = ProductImage.builder()
+                        .product(product)
+                        .imageUrl(imgUrl)
+                        .build();
+                product.getImages().add(productImage);
+            }
         }
         
-        // Validate price
-        if (request.getPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
-            throw new BusinessException("Price must be greater than 0", "INVALID_PRICE");
+        if (request.getIsActive() != null) product.setIsActive(request.getIsActive());
+        if (request.getStock() != null) product.setStock(request.getStock());
+        
+        // Update Variants
+        if (request.getVariants() != null) {
+            // Replace all variants
+            product.getVariants().clear();
+            for (ProductVariantRequest vr : request.getVariants()) {
+                 ProductVariant variant = ProductVariant.builder()
+                        .product(product)
+                        .size(vr.getSize())
+                        .color(vr.getColor())
+                        .stock(vr.getStock())
+                        .priceAdjustment(vr.getPriceAdjustment())
+                        .build();
+                product.getVariants().add(variant);
+            }
+        } else if (request.getStock() != null) {
+            if (request.getStock() < 0) {
+                throw new BusinessException("Stock cannot be negative", "INVALID_STOCK");
+            }
+            // Update default variant or create one
+            if (product.getVariants().isEmpty()) {
+                 ProductVariant variant = ProductVariant.builder()
+                        .product(product)
+                        .size("FREESIZE")
+                        .stock(request.getStock())
+                        .build();
+                 product.getVariants().add(variant);
+            } else if (product.getVariants().size() == 1) {
+                // Update the single existing variant
+                product.getVariants().get(0).setStock(request.getStock());
+            }
+            // If multiple variants exist and no variants provided in request, ignore stock update to be safe
         }
         
-        // Cập nhật thông tin
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setStock(request.getStock());
-        product.setImageUrl(request.getImageUrl());
-        
-        if (request.getIsActive() != null) {
-            product.setIsActive(request.getIsActive());
-        }
-        
-        // Lưu vào database
         Product updatedProduct = productRepository.save(product);
         log.info("Product updated successfully with ID: {}", id);
         
@@ -134,15 +205,10 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
         log.info("Deleting product with ID: {}", id);
         
-        // Kiểm tra product có tồn tại không
         if (!productRepository.existsById(id)) {
-            log.error("Product not found with ID: {}", id);
             throw new ResourceNotFoundException("Product", "id", id);
         }
         
-        // TODO: Kiểm tra product có trong orders không (implement sau)
-        
-        // Xóa product
         productRepository.deleteById(id);
         log.info("Product deleted successfully with ID: {}", id);
     }
@@ -156,10 +222,7 @@ public class ProductServiceImpl implements ProductService {
         log.info("Fetching product with ID: {}", id);
         
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Product not found with ID: {}", id);
-                    return new ResourceNotFoundException("Product", "id", id);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         
         return productMapper.toResponse(product);
     }
@@ -171,10 +234,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
         log.info("Fetching all active products");
-        
-        Page<Product> products = productRepository.findByIsActive(true, pageable);
-        
-        return products.map(productMapper::toResponse);
+        return productRepository.findByIsActive(true, pageable)
+                .map(productMapper::toResponse);
     }
     
     /**
@@ -185,15 +246,12 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable) {
         log.info("Fetching products by category ID: {}", categoryId);
         
-        // Validate category tồn tại
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Category", "id", categoryId);
         }
         
-        Page<Product> products = productRepository.findByCategoryIdAndIsActive(
-                categoryId, true, pageable);
-        
-        return products.map(productMapper::toResponse);
+        return productRepository.findByCategoryIdAndIsActive(categoryId, true, pageable)
+                .map(productMapper::toResponse);
     }
     
     /**
@@ -203,10 +261,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponse> searchProducts(String keyword, Pageable pageable) {
         log.info("Searching products with keyword: {}", keyword);
-        
-        Page<Product> products = productRepository.searchByKeyword(keyword, true, pageable);
-        
-        return products.map(productMapper::toResponse);
+        return productRepository.searchByKeyword(keyword, true, pageable)
+                .map(productMapper::toResponse);
     }
     
     /**
@@ -216,10 +272,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProductsAdmin(Pageable pageable) {
         log.info("Admin fetching all products");
-        
-        Page<Product> products = productRepository.findAll(pageable);
-        
-        return products.map(productMapper::toResponse);
+        return productRepository.findAll(pageable)
+                .map(productMapper::toResponse);
     }
 }
-

@@ -29,18 +29,17 @@ public class CartMapper {
         Integer quantity = cartItem.getQuantity();
         BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
         
-        // Check availability: product còn đủ stock không
-        boolean available = cartItem.getProduct().getStock() >= quantity;
-        
         return CartItemResponse.builder()
                 .id(cartItem.getId())
                 .productId(cartItem.getProduct().getId())
                 .productName(cartItem.getProduct().getName())
-                .productPrice(price)
                 .productImageUrl(cartItem.getProduct().getImageUrl())
+                .productPrice(price)
                 .quantity(quantity)
                 .subtotal(subtotal)
-                .available(available)
+                .stock(cartItem.getProduct().getTotalStock())
+                .size(cartItem.getSize())
+                .color(cartItem.getColor())
                 .build();
     }
     
@@ -72,4 +71,3 @@ public class CartMapper {
                 .build();
     }
 }
-

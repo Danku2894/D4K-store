@@ -25,6 +25,8 @@ public class CategoryResponse {
     
     private String description;
     
+    private String imageUrl;
+    
     private Long parentId;
     
     private String parentName;
@@ -38,4 +40,3 @@ public class CategoryResponse {
     
     private LocalDateTime updatedAt;
 }
-

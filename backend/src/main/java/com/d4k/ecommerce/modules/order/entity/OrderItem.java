@@ -51,6 +51,15 @@ public class OrderItem {
     private String productName;
     
     /**
+     * Size đã chọn
+     */
+    @Column(name = "size", length = 50)
+    private String size;
+
+    @Column(name = "color", length = 50)
+    private String color;
+    
+    /**
      * Giá sản phẩm tại thời điểm đặt hàng
      */
     @Column(name = "price", nullable = false, precision = 10, scale = 2)

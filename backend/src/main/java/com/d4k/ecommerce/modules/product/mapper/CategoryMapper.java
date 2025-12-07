@@ -26,12 +26,13 @@ public class CategoryMapper {
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .imageUrl(category.getImageUrl())
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .parentName(category.getParent() != null ? category.getParent().getName() : null)
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();
-    }
+   }
     
     /**
      * Convert Category entity sang CategoryResponse (include children - recursive)
@@ -64,4 +65,3 @@ public class CategoryMapper {
                 .collect(Collectors.toList());
     }
 }
-

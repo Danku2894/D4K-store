@@ -25,6 +25,29 @@ spring:
       write-dates-as-timestamps: false
     time-zone: Asia/Ho_Chi_Minh
 
+  # Multipart File Upload Configuration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+
+  # Email Configuration (Example for Gmail - Change username/password)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: 22520242@gm.uit.edu.vn
+    password: yfwi uzma rdfe mrea
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    protocol: smtp
+    test-connection: false
+
 # JWT Configuration
 jwt:
   secret: d4kEcommerceSecretKeyForJWTTokenGenerationPleaseChangeThisInProduction
@@ -47,3 +70,8 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
+# File Storage Configuration
+app:
+  file:
+    upload-dir: uploads
+    max-file-size: 10MB

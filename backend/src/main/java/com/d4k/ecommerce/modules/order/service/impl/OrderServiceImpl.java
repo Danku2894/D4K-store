@@ -1,10 +1,12 @@
 package com.d4k.ecommerce.modules.order.service.impl;
 
+import com.d4k.ecommerce.common.constants.ErrorCodes;
 import com.d4k.ecommerce.common.exception.BusinessException;
 import com.d4k.ecommerce.common.exception.ResourceNotFoundException;
 import com.d4k.ecommerce.common.exception.UnauthorizedException;
 import com.d4k.ecommerce.modules.cart.entity.Cart;
 import com.d4k.ecommerce.modules.cart.entity.CartItem;
+import com.d4k.ecommerce.modules.cart.repository.CartItemRepository;
 import com.d4k.ecommerce.modules.cart.repository.CartRepository;
 import com.d4k.ecommerce.modules.order.dto.request.CancelOrderRequest;
 import com.d4k.ecommerce.modules.order.dto.request.CreateOrderRequest;
@@ -18,6 +20,7 @@ import com.d4k.ecommerce.modules.order.mapper.OrderMapper;
 import com.d4k.ecommerce.modules.order.repository.OrderRepository;
 import com.d4k.ecommerce.modules.order.service.OrderService;
 import com.d4k.ecommerce.modules.product.entity.Product;
+import com.d4k.ecommerce.modules.product.entity.ProductVariant;
 import com.d4k.ecommerce.modules.product.repository.ProductRepository;
 import com.d4k.ecommerce.modules.promotion.entity.Coupon;
 import com.d4k.ecommerce.modules.promotion.repository.CouponRepository;
@@ -50,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final CouponRepository couponRepository;
     private final OrderMapper orderMapper;
@@ -68,33 +72,60 @@ public class OrderServiceImpl implements OrderService {
         // 1. Validate user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-        
-        // 2. Get cart với items
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException("Cart is empty", "CART_EMPTY"));
-        
-        if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new BusinessException("Cart is empty", "CART_EMPTY");
+                
+        // 2. Get cart
+        Cart cart = cartRepository.findByUserIdWithItems(userId)
+                .orElseGet(() -> {
+                    // If cart not found, create a new one (to avoid error, though it will be empty)
+                    log.info("Cart not found for user {}, creating new one", userId);
+                    Cart newCart = Cart.builder()
+                            .user(user)
+                            .build();
+                    return cartRepository.save(newCart);
+                });
+
+        if (cart.getItems().isEmpty()) {
+            // Fallback: Try to fetch items directly
+            log.warn("Cart items empty for user {}, trying fallback fetch", userId);
+            List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+            if (items.isEmpty()) {
+                throw new BusinessException("Cart is empty", "CART_EMPTY");
+            }
+            cart.setItems(items);
+            log.info("Fallback fetch found {} items", items.size());
         }
         
-        // 3. Calculate subtotal và validate stock
-        BigDecimal subtotal = BigDecimal.ZERO;
+        // 3. Create order items
         List<OrderItem> orderItems = new ArrayList<>();
+        BigDecimal subtotal = BigDecimal.ZERO;
         
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
             
-            // Validate stock
-            if (product.getStock() < cartItem.getQuantity()) {
-                throw new BusinessException(
-                    String.format("Product '%s' is out of stock. Available: %d, Requested: %d", 
-                        product.getName(), product.getStock(), cartItem.getQuantity()),
-                    "INSUFFICIENT_STOCK"
+            // Check stock again (double check)
+            int availableStock = 0;
+            if (cartItem.getSize() != null) {
+                ProductVariant variant = product.getVariants().stream()
+                        .filter(v -> v.getSize().equalsIgnoreCase(cartItem.getSize()))
+                        .filter(v -> cartItem.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(cartItem.getColor())))
+                        .findFirst()
+                        .orElseThrow(() -> new BusinessException(
+                                String.format("Product variant not found for '%s' (Size: %s). Please remove it from your cart.", 
+                                        product.getName(), cartItem.getSize()), 
+                                "VARIANT_NOT_FOUND"));
+                availableStock = variant.getStock();
+            } else {
+                 availableStock = product.getTotalStock();
+            }
+            
+            if (cartItem.getQuantity() > availableStock) {
+                 throw new BusinessException(
+                        String.format("Insufficient stock for product %s. Only %d items available", product.getName(), availableStock),
+                        ErrorCodes.INSUFFICIENT_STOCK
                 );
             }
             
-            // Create order item (snapshot)
-            BigDecimal itemSubtotal = product.getPrice().multiply(new BigDecimal(cartItem.getQuantity()));
+            BigDecimal itemSubtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             
             OrderItem orderItem = OrderItem.builder()
                     .product(product)
@@ -103,6 +134,8 @@ public class OrderServiceImpl implements OrderService {
                     .quantity(cartItem.getQuantity())
                     .subtotal(itemSubtotal)
                     .imageUrl(product.getImageUrl())
+                    .size(cartItem.getSize())
+                    .color(cartItem.getColor())
                     .build();
             
             orderItems.add(orderItem);
@@ -147,9 +180,7 @@ public class OrderServiceImpl implements OrderService {
         String orderNumber = generateOrderNumber();
         
         // 7. Determine payment status based on method
-        PaymentStatus paymentStatus = request.getPaymentMethod().toString().equals("COD") 
-                ? PaymentStatus.PENDING 
-                : PaymentStatus.PENDING;
+        PaymentStatus paymentStatus = PaymentStatus.PENDING;
         
         // 8. Create order
         Order order = Order.builder()
@@ -182,7 +213,24 @@ public class OrderServiceImpl implements OrderService {
         // 11. Deduct stock
         for (OrderItem item : savedOrder.getOrderItems()) {
             Product product = item.getProduct();
-            product.setStock(product.getStock() - item.getQuantity());
+            if (item.getSize() != null) {
+                ProductVariant variant = product.getVariants().stream()
+                    .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
+                    .filter(v -> item.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(item.getColor())))
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException(
+                            String.format("Variant not found for stock deduction: %s (Size: %s)", 
+                                    product.getName(), item.getSize()), 
+                            "VARIANT_NOT_FOUND"));
+                
+                variant.setStock(variant.getStock() - item.getQuantity());
+            } else {
+                 // Fallback
+                 if (!product.getVariants().isEmpty()) {
+                      ProductVariant variant = product.getVariants().get(0);
+                      variant.setStock(variant.getStock() - item.getQuantity());
+                 }
+            }
             productRepository.save(product);
         }
         
@@ -243,23 +291,34 @@ public class OrderServiceImpl implements OrderService {
             throw new UnauthorizedException("You can only cancel your own orders");
         }
         
-        // Check if cancellable
-        if (!order.isCancellable()) {
-            throw new BusinessException("Order cannot be cancelled at this stage", "ORDER_NOT_CANCELLABLE");
+        if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.DELIVERED) {
+             throw new BusinessException("Cannot cancel completed or already cancelled order", "INVALID_STATUS");
         }
-        
-        // Update status
-        order.setStatus(OrderStatus.CANCELLED);
-        order.setCancelledAt(LocalDateTime.now());
-        order.setCancelReason(request.getCancelReason());
         
         // Restore stock
         for (OrderItem item : order.getOrderItems()) {
             Product product = item.getProduct();
-            product.setStock(product.getStock() + item.getQuantity());
+            if (item.getSize() != null) {
+                ProductVariant variant = product.getVariants().stream()
+                    .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
+                    .filter(v -> item.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(item.getColor())))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (variant != null) {
+                    variant.setStock(variant.getStock() + item.getQuantity());
+                }
+            } else {
+                 if (!product.getVariants().isEmpty()) {
+                      ProductVariant variant = product.getVariants().get(0);
+                      variant.setStock(variant.getStock() + item.getQuantity());
+                 }
+            }
             productRepository.save(product);
         }
         
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCancelledAt(LocalDateTime.now());
         orderRepository.save(order);
         log.info("Order {} cancelled successfully", orderId);
     }
@@ -317,19 +376,29 @@ public class OrderServiceImpl implements OrderService {
             order.setPaymentStatus(PaymentStatus.PAID);
         } else if (newStatus == OrderStatus.CANCELLED) {
             order.setCancelledAt(LocalDateTime.now());
-            order.setCancelReason(request.getNote());
             
-            // Restore stock
+            // Restore stock for admin cancellation
             for (OrderItem item : order.getOrderItems()) {
                 Product product = item.getProduct();
-                product.setStock(product.getStock() + item.getQuantity());
+                if (item.getSize() != null) {
+                    ProductVariant variant = product.getVariants().stream()
+                        .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
+                        .findFirst()
+                        .orElse(null);
+                    if (variant != null) {
+                        variant.setStock(variant.getStock() + item.getQuantity());
+                    }
+                } else {
+                     if (!product.getVariants().isEmpty()) {
+                          ProductVariant variant = product.getVariants().get(0);
+                          variant.setStock(variant.getStock() + item.getQuantity());
+                     }
+                }
                 productRepository.save(product);
             }
         }
         
         Order updatedOrder = orderRepository.save(order);
-        log.info("Order {} status updated from {} to {}", orderId, oldStatus, newStatus);
-        
         return orderMapper.toResponse(updatedOrder);
     }
     
@@ -392,4 +461,3 @@ public class OrderServiceImpl implements OrderService {
         // Add more validation rules as needed
     }
 }
-

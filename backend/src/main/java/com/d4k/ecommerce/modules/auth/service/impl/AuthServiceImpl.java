@@ -8,6 +8,8 @@ import com.d4k.ecommerce.modules.auth.dto.request.RegisterRequest;
 import com.d4k.ecommerce.modules.auth.dto.response.LoginResponse;
 import com.d4k.ecommerce.modules.auth.dto.response.UserResponse;
 import com.d4k.ecommerce.modules.auth.service.AuthService;
+import com.d4k.ecommerce.modules.cart.entity.Cart;
+import com.d4k.ecommerce.modules.cart.repository.CartRepository;
 import com.d4k.ecommerce.modules.user.entity.User;
 import com.d4k.ecommerce.modules.user.enums.RoleType;
 import com.d4k.ecommerce.modules.user.repository.UserRepository;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
     
     private final UserRepository userRepository;
+    private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     
@@ -57,6 +60,13 @@ public class AuthServiceImpl implements AuthService {
         // Lưu vào database
         User savedUser = userRepository.save(user);
         log.info("User registered successfully with ID: {}", savedUser.getId());
+        
+        // Tạo cart cho user
+        Cart cart = Cart.builder()
+                .user(savedUser)
+                .build();
+        cartRepository.save(cart);
+        log.info("Cart created for user ID: {}", savedUser.getId());
         
         // Map sang response DTO
         return UserResponse.builder()

@@ -24,6 +24,8 @@ public class UserDetailResponse {
     
     private String email;
     
+    private String phoneNumber;
+    
     private RoleType role;
     
     private Boolean isActive;

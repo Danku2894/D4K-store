@@ -30,6 +30,10 @@ public class CartItemResponse {
     
     private BigDecimal subtotal; // price * quantity
     
+    private String size;
+    private String color;
+    private Integer stock;
+
     private Boolean available; // product còn đủ stock không
 }
 

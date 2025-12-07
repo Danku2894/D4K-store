@@ -27,6 +27,9 @@ public class OrderItemResponse {
     private Integer quantity;
     
     private BigDecimal subtotal;
+
+    private String size;
+    private String color;
     
     private String imageUrl;
 }

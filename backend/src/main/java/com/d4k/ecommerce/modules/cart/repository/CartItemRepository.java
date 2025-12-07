@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,6 +20,8 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
      * Tìm cart item theo cart ID và product ID
      */
     Optional<CartItem> findByCartIdAndProductId(Long cartId, Long productId);
+
+    Optional<CartItem> findByCartIdAndProductIdAndSize(Long cartId, Long productId, String size);
     
     /**
      * Tìm cart item với eager loading product
@@ -32,5 +35,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Query("SELECT CASE WHEN COUNT(ci) > 0 THEN true ELSE false END " +
            "FROM CartItem ci WHERE ci.id = :itemId AND ci.cart.user.id = :userId")
     Boolean existsByIdAndUserId(@Param("itemId") Long itemId, @Param("userId") Long userId);
+
+    List<CartItem> findByCartId(Long cartId);
 }
 

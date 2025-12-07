@@ -17,29 +17,6 @@ import java.util.stream.Collectors;
 public class WishlistMapper {
     
     /**
-     * Convert WishlistItem entity sang WishlistItemResponse
-     */
-    public WishlistItemResponse toWishlistItemResponse(WishlistItem wishlistItem) {
-        if (wishlistItem == null || wishlistItem.getProduct() == null) {
-            return null;
-        }
-        
-        var product = wishlistItem.getProduct();
-        boolean available = product.getIsActive() && product.getStock() > 0;
-        
-        return WishlistItemResponse.builder()
-                .id(wishlistItem.getId())
-                .productId(product.getId())
-                .productName(product.getName())
-                .productPrice(product.getPrice())
-                .productImageUrl(product.getImageUrl())
-                .productStock(product.getStock())
-                .available(available)
-                .addedAt(wishlistItem.getCreatedAt())
-                .build();
-    }
-    
-    /**
      * Convert Wishlist entity sang WishlistResponse
      */
     public WishlistResponse toWishlistResponse(Wishlist wishlist) {
@@ -58,5 +35,19 @@ public class WishlistMapper {
                 .totalItems(itemResponses.size())
                 .build();
     }
-}
 
+    public WishlistItemResponse toWishlistItemResponse(WishlistItem item) {
+        if (item == null) return null;
+        
+        return WishlistItemResponse.builder()
+                .id(item.getId())
+                .productId(item.getProduct().getId())
+                .productName(item.getProduct().getName())
+                .productPrice(item.getProduct().getPrice())
+                .productImageUrl(item.getProduct().getImageUrl())
+                .productStock(item.getProduct().getTotalStock())
+                .available(item.getProduct().getTotalStock() > 0 && item.getProduct().getIsActive())
+                .addedAt(item.getCreatedAt())
+                .build();
+    }
+}

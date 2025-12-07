@@ -29,12 +29,15 @@ public class ProductRequest {
     @Digits(integer = 8, fraction = 2, message = "Price must have at most 8 digits and 2 decimal places")
     private BigDecimal price;
     
-    @NotNull(message = "Stock is required")
     @Min(value = 0, message = "Stock must be non-negative")
     private Integer stock;
+
+    private java.util.List<ProductVariantRequest> variants;
     
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
+
+    private java.util.List<String> additionalImages;
     
     @NotNull(message = "Category ID is required")
     private Long categoryId;
