@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiArrowRight } from 'react-icons/fi';
 import CouponInput from './CouponInput';
 
@@ -19,6 +19,8 @@ const CartSummary = ({
   onApplyCoupon,
   onRemoveCoupon,
 }) => {
+  const navigate = useNavigate();
+
   // Format price
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -27,31 +29,43 @@ const CartSummary = ({
     }).format(price);
   };
 
-  // Calculate discount
+  // Calculate discount - use discountAmount directly from backend CouponValidationResponse
   const calculateDiscount = () => {
     if (!appliedCoupon) return 0;
 
+    // Backend returns discountAmount directly in CouponValidationResponse
+    if (appliedCoupon.discountAmount !== undefined) {
+      return parseFloat(appliedCoupon.discountAmount) || 0;
+    }
+
+    // Fallback: manual calculation if using CouponResponse
+    const discountValue = parseFloat(appliedCoupon.discountValue) || 0;
+    const maxDiscount = appliedCoupon.maxDiscount ? parseFloat(appliedCoupon.maxDiscount) : null;
+
     if (appliedCoupon.discountType === 'PERCENTAGE') {
-      const discount = (subtotal * appliedCoupon.discountValue) / 100;
-      // Apply max discount if exists
-      if (appliedCoupon.maxDiscount && discount > appliedCoupon.maxDiscount) {
-        return appliedCoupon.maxDiscount;
+      const discount = (subtotal * discountValue) / 100;
+      if (maxDiscount && discount > maxDiscount) {
+        return maxDiscount;
       }
       return discount;
     } else {
-      // Fixed amount
-      return Math.min(appliedCoupon.discountValue, subtotal);
+      return Math.min(discountValue, subtotal);
     }
   };
 
   const discount = calculateDiscount();
-  const shipping = 0; // Free shipping
+  const shipping = 30000; // Shipping fee (matches backend DEFAULT_SHIPPING_FEE)
   const total = Math.max(subtotal - discount + shipping, 0);
+
+  // Handle checkout with coupon state
+  const handleCheckout = () => {
+    navigate('/checkout', { state: { appliedCoupon, discount } });
+  };
 
   return (
     <div className="space-y-6 sticky top-24">
       {/* Card */}
-      <div className="p-6 border-4 border-dark-950 bg-light-50 space-y-6">
+      <div className="p-6 border-2 border-dark-950 bg-light-50 space-y-6">
         {/* Header */}
         <div className="pb-4 border-b-2 border-dark-950">
           <h2 className="text-2xl font-display font-black uppercase tracking-tight flex items-center space-x-3">
@@ -89,8 +103,8 @@ const CartSummary = ({
             <span className="text-sm font-bold uppercase tracking-wider text-gray-600">
               SHIPPING
             </span>
-            <span className="text-lg font-black text-street-neon">
-              FREE
+            <span className="text-lg font-black">
+              {formatPrice(shipping)}
             </span>
           </div>
 
@@ -119,8 +133,8 @@ const CartSummary = ({
         </div>
 
         {/* Checkout Button */}
-        <Link
-          to="/checkout"
+        <button
+          onClick={handleCheckout}
           className="w-full flex items-center justify-center space-x-3 py-4 
                    bg-dark-950 border-2 border-dark-950 text-light-50 
                    font-black uppercase text-lg tracking-wider
@@ -129,7 +143,7 @@ const CartSummary = ({
         >
           <span>PROCEED TO CHECKOUT</span>
           <FiArrowRight size={24} />
-        </Link>
+        </button>
 
         {/* Continue Shopping */}
         <Link

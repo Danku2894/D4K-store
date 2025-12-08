@@ -93,23 +93,34 @@ const CategoriesPage = () => {
         {/* Categories Grid */}
         {!loading && !error && categories.length > 0 && (
           <>
-            {/* Grid Layout - Asymmetric */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {categories.map((category, index) => (
-                <div
-                  key={category.id}
-                  className={`
-                    ${index % 7 === 0 ? 'sm:col-span-2 lg:col-span-2' : ''}
-                    ${index % 11 === 0 ? 'lg:row-span-2' : ''}
-                  `}
-                >
-                  <CategoryCard category={category} />
-                </div>
-              ))}
+            {/* Grid Layout - Asymmetric Street Style */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[minmax(450px,auto)]">
+              {categories.map((category, index) => {
+                // Logic for Alternating Bento Grid
+                // Pattern repeats every 5 items (1 block)
+                // Even blocks (0, 2...): Large item at index 2 (Right side)
+                // Odd blocks (1, 3...): Large item at index 0 (Left side)
+                const blockIndex = Math.floor(index / 5);
+                const isEvenBlock = blockIndex % 2 === 0;
+                const posInBlock = index % 5;
+                
+                const isLarge = isEvenBlock ? posInBlock === 2 : posInBlock === 0;
+                
+                return (
+                  <div
+                    key={category.id}
+                    className={`
+                      ${isLarge ? 'sm:col-span-2 lg:col-span-2 lg:row-span-2' : ''}
+                    `}
+                  >
+                    <CategoryCard category={category} className="h-full" />
+                  </div>
+                );
+              })}
             </div>
 
             {/* Total Count */}
-            <div className="mt-12 pt-8 border-t-4 border-dark-950 text-center">
+            <div className="mt-12 pt-8 border-t-2 border-dark-950 text-center">
               <p className="text-lg font-black uppercase tracking-wide text-gray-600">
                 TOTAL: {categories.length} {categories.length === 1 ? 'CATEGORY' : 'CATEGORIES'}
               </p>

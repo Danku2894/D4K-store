@@ -6,20 +6,20 @@ import { Link } from 'react-router-dom';
  * 
  * @param {Object} category - Category data
  */
-const CategoryCard = ({ category }) => {
+const CategoryCard = ({ category, className = '' }) => {
   return (
     <Link
       to={`/products?category=${category.id}`}
-      className="group block border-2 border-dark-950 bg-light-50 overflow-hidden
-               hover:border-street-red hover:scale-[1.02] transition-all duration-300"
+      className={`group flex flex-col h-full border-2 border-dark-950 bg-light-50 overflow-hidden
+               hover:border-street-red hover:scale-[1.02] transition-all duration-300 ${className}`}
     >
       {/* Image with Overlay */}
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative flex-1 overflow-hidden min-h-[200px]">
         {/* Category Image */}
         <img
           src={category.imageUrl || '/placeholder-category.jpg'}
           alt={category.name}
-          className="w-full h-full object-cover filter-grayscale-80 
+          className="absolute inset-0 w-full h-full object-cover filter-grayscale-80 
                    group-hover:filter-grayscale-0 group-hover:scale-110 
                    transition-all duration-500"
         />
@@ -34,7 +34,7 @@ const CategoryCard = ({ category }) => {
         {/* Product Count Badge */}
         {category.productCount !== undefined && (
           <div className="absolute top-4 right-4 px-3 py-1 bg-dark-950 border-2 border-dark-950 
-                        group-hover:bg-street-red group-hover:border-street-red transition-all">
+                        group-hover:bg-street-red group-hover:border-street-red transition-all z-10">
             <span className="text-light-50 font-black text-xs uppercase tracking-wider">
               {category.productCount} ITEMS
             </span>
@@ -43,7 +43,7 @@ const CategoryCard = ({ category }) => {
       </div>
 
       {/* Category Info */}
-      <div className="p-6 bg-light-50 border-t-2 border-dark-950">
+      <div className="p-5 bg-light-50 border-t-2 border-dark-950 shrink-0">
         <h3 className="text-xl font-display font-black uppercase tracking-tight 
                      text-dark-950 group-hover:text-street-red transition-colors mb-2">
           {category.name}

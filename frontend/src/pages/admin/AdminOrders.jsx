@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FiShoppingBag, FiEye, FiSearch } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '@components/admin/AdminLayout';
@@ -187,14 +188,14 @@ const AdminOrders = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center space-x-2">
-                          <button
-                            onClick={() => toast('VIEW DETAILS - COMING SOON')}
+                          <Link
+                            to={`/admin/orders/${order.id}`}
                             className="p-2 border-2 border-dark-950 hover:bg-dark-950 
                                      hover:text-light-50 transition-all"
                             title="View Details"
                           >
                             <FiEye size={16} />
-                          </button>
+                          </Link>
                         </div>
                       </td>
                     </tr>

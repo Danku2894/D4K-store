@@ -39,6 +39,19 @@ const ProductsPage = () => {
   }, []);
 
   useEffect(() => {
+    // Sync filters from URL params when they change
+    setFilters({
+      categoryId: searchParams.get('category') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      size: searchParams.get('size') || '',
+      color: searchParams.get('color') || '',
+      sort: searchParams.get('sort') || 'createdAt,desc',
+    });
+    setCurrentPage(1);
+  }, [searchParams]);
+
+  useEffect(() => {
     fetchProducts();
   }, [filters, currentPage]);
 
@@ -58,7 +71,17 @@ const ProductsPage = () => {
         ...(filters.sort && { sort: filters.sort }),
       };
 
-      const response = await productService.getProductsByCategory(null, params);
+      let response;
+      
+      if (filters.categoryId) {
+        // If category is selected, use the category specific endpoint
+        // Don't send categoryId in params since it's already in the URL
+        const { categoryId, ...paramsWithoutCategory } = params;
+        response = await productService.getProductsByCategory(filters.categoryId, paramsWithoutCategory);
+      } else {
+        // Otherwise use the general endpoint
+        response = await productService.getProducts(params);
+      }
 
       if (response.success && response.data) {
         setProducts(response.data.content || response.data);
@@ -74,19 +97,22 @@ const ProductsPage = () => {
   };
 
   const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    setCurrentPage(1);
-
     // Update URL query params
     const params = new URLSearchParams();
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
+    if (newFilters.categoryId) params.set('category', newFilters.categoryId);
+    if (newFilters.minPrice) params.set('minPrice', newFilters.minPrice);
+    if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
+    if (newFilters.size) params.set('size', newFilters.size);
+    if (newFilters.color) params.set('color', newFilters.color);
+    if (newFilters.sort) params.set('sort', newFilters.sort);
+    
     setSearchParams(params);
+    // State update will happen via useEffect [searchParams]
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    // Pagination component passes 0-indexed page, convert to 1-indexed for our state
+    setCurrentPage(page + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -169,7 +195,7 @@ const ProductsPage = () => {
                 {totalPages > 1 && (
                   <div className="mt-12 pt-8 border-t-4 border-dark-950">
                     <Pagination
-                      currentPage={currentPage}
+                      currentPage={currentPage - 1}
                       totalPages={totalPages}
                       onPageChange={handlePageChange}
                     />

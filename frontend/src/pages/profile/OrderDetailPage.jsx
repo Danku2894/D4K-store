@@ -171,18 +171,36 @@ const OrderDetailPage = () => {
             <div className="border-2 border-dark-950 bg-white p-6">
               <h2 className="text-xl font-display font-black uppercase mb-6">Order Summary</h2>
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-gray-600 font-bold">
-                  <span>Subtotal</span>
-                  <span>{order.totalAmount?.toLocaleString('vi-VN')}đ</span>
-                </div>
-                <div className="flex justify-between text-gray-600 font-bold">
-                  <span>Shipping</span>
-                  <span>0đ</span>
-                </div>
-                <div className="pt-3 border-t-2 border-dark-950 flex justify-between text-xl font-black uppercase">
-                  <span>Total</span>
-                  <span>{order.totalAmount?.toLocaleString('vi-VN')}đ</span>
-                </div>
+                {/* Calculate subtotal: total - shipping + discount */}
+                {(() => {
+                  const total = parseFloat(order.totalAmount) || 0;
+                  const shipping = parseFloat(order.shippingFee) || 0;
+                  const discount = parseFloat(order.discountAmount) || 0;
+                  const subtotal = total - shipping + discount;
+                  
+                  return (
+                    <>
+                      <div className="flex justify-between text-gray-600 font-bold">
+                        <span>Subtotal</span>
+                        <span>{subtotal.toLocaleString('vi-VN')}đ</span>
+                      </div>
+                      {discount > 0 && (
+                        <div className="flex justify-between text-street-neon font-bold">
+                          <span>Discount {order.couponCode && <span className="text-xs">({order.couponCode})</span>}</span>
+                          <span>-{discount.toLocaleString('vi-VN')}đ</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-gray-600 font-bold">
+                        <span>Shipping</span>
+                        <span>{shipping > 0 ? `${shipping.toLocaleString('vi-VN')}đ` : 'FREE'}</span>
+                      </div>
+                      <div className="pt-3 border-t-2 border-dark-950 flex justify-between text-xl font-black uppercase">
+                        <span>Total</span>
+                        <span>{total.toLocaleString('vi-VN')}Đ</span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
               
               {order.status === 'PENDING' && (

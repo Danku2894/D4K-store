@@ -63,5 +63,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      */
     @Query("SELECT COUNT(p) FROM Product p WHERE (SELECT COALESCE(SUM(v.stock), 0) FROM ProductVariant v WHERE v.product = p) BETWEEN :min AND :max")
     Long countProductsWithTotalStockBetween(@Param("min") Integer min, @Param("max") Integer max);
+    
+    /**
+     * Lấy sản phẩm cùng category, loại trừ sản phẩm hiện tại (cho Similar Products)
+     */
+    @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId AND p.isActive = true AND p.id != :excludeId ORDER BY p.createdAt DESC")
+    List<Product> findByCategoryIdAndIsActiveTrueAndIdNot(
+        @Param("categoryId") Long categoryId, 
+        @Param("excludeId") Long excludeId, 
+        Pageable pageable
+    );
+    
+    /**
+     * Lấy sản phẩm active sắp xếp theo ngày tạo (fallback cho Popular Products)
+     */
+    Page<Product> findByIsActiveTrueOrderByCreatedAtDesc(Pageable pageable);
 }
 

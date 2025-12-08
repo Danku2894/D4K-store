@@ -34,14 +34,13 @@ const ImageGallery = ({ images = [], productName = 'Product' }) => {
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-[3/4] bg-light-200 border-4 border-dark-950 overflow-hidden group">
-        {/* Image với grayscale filter */}
+      <div className="relative aspect-[3/4] bg-light-200 border-2 border-dark-950 overflow-hidden group">
+        {/* Main Image */}
         <img
           src={imageList[currentIndex]}
           alt={`${productName} - Image ${currentIndex + 1}`}
-          className={`w-full h-full object-cover filter-grayscale-80 transition-all duration-500
-                    ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}
-                    group-hover:filter-grayscale-0`}
+          className={`w-full h-full object-cover transition-all duration-500
+                    ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
           onClick={toggleZoom}
         />
 
@@ -104,7 +103,7 @@ const ImageGallery = ({ images = [], productName = 'Product' }) => {
               <img
                 src={image}
                 alt={`${productName} thumbnail ${index + 1}`}
-                className="w-full h-full object-cover filter-grayscale-80 hover:filter-grayscale-0 transition-all"
+                className="w-full h-full object-cover transition-all"
               />
             </button>
           ))}

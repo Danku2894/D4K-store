@@ -6,7 +6,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/d4k_ecommerce
     username: postgres
-    password: dat12345
+    password: your_password_here
     driver-class-name: org.postgresql.Driver
   
   # JPA Configuration
@@ -37,8 +37,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: 22520242@gm.uit.edu.vn
-    password: yfwi uzma rdfe mrea
+    username: your_email@gmail.com
+    password: your_app_password_here
     properties:
       mail:
         smtp:
@@ -50,7 +50,7 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: d4kEcommerceSecretKeyForJWTTokenGenerationPleaseChangeThisInProduction
+  secret: your_jwt_secret_key_here_please_change_this_in_production
   expiration: 86400000  # 24 hours in milliseconds
 
 # Server Configuration

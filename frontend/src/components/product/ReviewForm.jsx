@@ -81,7 +81,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, hasExistingReview = false })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6 border-4 border-dark-950 bg-light-50">
+    <form onSubmit={handleSubmit} className="space-y-6 p-6 border-2 border-dark-950 bg-light-50">
       <h3 className="text-2xl font-display font-black uppercase tracking-tight">
         WRITE A REVIEW
       </h3>

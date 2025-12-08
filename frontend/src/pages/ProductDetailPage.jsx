@@ -10,6 +10,7 @@ import ReviewForm from '@components/product/ReviewForm';
 import ProductCard from '@components/product/ProductCard';
 import productService from '@services/product-service';
 import reviewService from '@services/review-service';
+import recommendationService from '@services/recommendation-service';
 
 /**
  * ProductDetailPage Component - Street Style
@@ -21,7 +22,7 @@ const ProductDetailPage = () => {
   // State
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [hasUserReviewed, setHasUserReviewed] = useState(false);
@@ -31,7 +32,7 @@ const ProductDetailPage = () => {
     if (id) {
       fetchProductDetails();
       fetchReviews();
-      fetchRelatedProducts();
+      fetchSimilarProducts();
     }
   }, [id]);
 
@@ -76,15 +77,15 @@ const ProductDetailPage = () => {
     }
   };
 
-  const fetchRelatedProducts = async () => {
+  const fetchSimilarProducts = async () => {
     try {
-      const response = await productService.getRelatedProducts(id, 4);
+      const response = await recommendationService.getSimilarProducts(id, 4);
       
       if (response.success && response.data) {
-        setRelatedProducts(response.data.content || []);
+        setSimilarProducts(response.data || []);
       }
     } catch (err) {
-      console.error('Error fetching related products:', err);
+      console.error('Error fetching similar products:', err);
     }
   };
 
@@ -155,7 +156,7 @@ const ProductDetailPage = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-light-50 flex items-center justify-center">
-        <div className="text-center p-12 border-4 border-dark-950">
+        <div className="text-center p-12 border-2 border-dark-950">
           <h1 className="text-6xl font-display font-black mb-4">404</h1>
           <p className="text-xl font-bold uppercase tracking-wide mb-6">
             PRODUCT NOT FOUND
@@ -271,7 +272,7 @@ const ProductDetailPage = () => {
         </div>
 
         {/* Reviews Section */}
-        <div className="py-12 border-t-4 border-dark-950">
+        <div className="py-12 border-t-2 border-dark-950">
           <h2 className="text-3xl font-display font-black uppercase tracking-tight mb-8">
             CUSTOMER REVIEWS
           </h2>
@@ -308,12 +309,12 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <div className="py-12 border-t-4 border-dark-950">
+        {/* Similar Products */}
+        {similarProducts.length > 0 && (
+          <div className="py-12 border-t-2 border-dark-950">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-3xl font-display font-black uppercase tracking-tight">
-                YOU MAY ALSO LIKE
+                SẢN PHẨM TƯƠNG TỰ
               </h2>
               <Link
                 to="/products"
@@ -326,8 +327,8 @@ const ProductDetailPage = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} />
+              {similarProducts.map((similarProduct) => (
+                <ProductCard key={similarProduct.id} product={similarProduct} />
               ))}
             </div>
           </div>

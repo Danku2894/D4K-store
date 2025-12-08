@@ -87,7 +87,7 @@ const ProductCard = ({ product }) => {
       className="product-card-street group block"
     >
       {/* Image Container */}
-      <div className="relative overflow-hidden aspect-[3/4] bg-light-200 filter-grayscale-80">
+      <div className="relative overflow-hidden aspect-[3/4] bg-light-200">
         {/* Product Image */}
         <img
           src={product.imageUrl || '/placeholder-product.jpg'}
@@ -171,7 +171,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Info */}
-      <div className="p-4 space-y-2 bg-light-50">
+      <div className="p-4 space-y-2 bg-light-50 flex flex-col min-h-[180px]">
         {/* Category */}
         {product.categoryName && (
           <p className="text-xs text-gray-600 font-bold uppercase tracking-widest">
@@ -181,16 +181,19 @@ const ProductCard = ({ product }) => {
 
         {/* Product Name */}
         <h3 className="text-dark-950 font-bold text-lg line-clamp-2 group-hover:text-street-red 
-                     transition-colors duration-300 uppercase">
+                     transition-colors duration-300 uppercase min-h-[56px]">
           {product.name}
         </h3>
 
         {/* Description */}
         {product.description && (
-          <p className="text-gray-600 text-sm line-clamp-2">
+          <p className="text-gray-600 text-sm line-clamp-2 min-h-[40px]">
             {product.description}
           </p>
         )}
+
+        {/* Spacer to push price to bottom */}
+        <div className="flex-1"></div>
 
         {/* Price */}
         <div className="flex items-center space-x-3 pt-2">

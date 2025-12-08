@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import HeroBanner from '@components/home/HeroBanner';
 import CategoriesSection from '@components/home/CategoriesSection';
 import FeaturedProducts from '@components/home/FeaturedProducts';
+import PopularProducts from '@components/home/PopularProducts';
 import NewArrivals from '@components/home/NewArrivals';
 
 /**
@@ -27,6 +28,9 @@ const HomePage = () => {
 
       {/* Featured Products */}
       <FeaturedProducts />
+
+      {/* Popular Products - Recommendation */}
+      <PopularProducts />
 
       {/* Promo Banner */}
       <section className="w-full">

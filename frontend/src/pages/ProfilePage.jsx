@@ -123,7 +123,7 @@ const ProfilePage = () => {
         <Breadcrumb items={breadcrumbItems} />
 
         {/* Page Header */}
-        <div className="py-8 border-b-4 border-dark-950 mb-8">
+        <div className="py-8 border-b-2 border-dark-950 mb-8">
           <div className="flex items-center space-x-4 mb-4">
             <FiUser size={48} className="text-dark-950" />
             <div>
@@ -150,7 +150,7 @@ const ProfilePage = () => {
           <main className="lg:col-span-3">
             {loading ? (
               // Loading State
-              <div className="p-8 border-4 border-dark-950 bg-light-50">
+              <div className="p-8 border-2 border-dark-950 bg-light-50">
                 <div className="animate-pulse space-y-6">
                   <div className="h-12 bg-light-200 border-2 border-gray-300"></div>
                   <div className="h-12 bg-light-200 border-2 border-gray-300"></div>
@@ -160,7 +160,7 @@ const ProfilePage = () => {
               </div>
             ) : user ? (
               // Profile Form
-              <div className="p-8 border-4 border-dark-950 bg-light-50">
+              <div className="p-8 border-2 border-dark-950 bg-light-50">
                 <div className="mb-6 pb-6 border-b-2 border-dark-950">
                   <h2 className="text-2xl font-display font-black uppercase tracking-tight text-dark-950 mb-2">
                     PERSONAL INFORMATION
@@ -209,7 +209,7 @@ const ProfilePage = () => {
               </div>
             ) : (
               // Error State
-              <div className="p-8 border-4 border-street-red text-center">
+              <div className="p-8 border-2 border-street-red text-center">
                 <p className="text-street-red font-bold uppercase mb-4">
                   FAILED TO LOAD PROFILE
                 </p>

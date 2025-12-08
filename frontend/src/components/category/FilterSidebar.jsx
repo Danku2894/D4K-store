@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import categoryService from '@services/category-service';
 
 /**
  * FilterSidebar Component - Street Style
@@ -13,11 +14,29 @@ import { FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
  */
 const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, onClose }) => {
   const [expandedSections, setExpandedSections] = useState({
-    price: true,
-    size: true,
-    color: true,
+    category: true,
     sort: true,
   });
+  
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryService.getAllCategories();
+        if (response.success && response.data) {
+          setCategories(response.data);
+        }
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -26,54 +45,18 @@ const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, o
     }));
   };
 
-  // Price ranges
-  const priceRanges = [
-    { label: 'Under 500k', value: '0-500000' },
-    { label: '500k - 1M', value: '500000-1000000' },
-    { label: '1M - 2M', value: '1000000-2000000' },
-    { label: '2M - 5M', value: '2000000-5000000' },
-    { label: 'Over 5M', value: '5000000-999999999' },
-  ];
-
-  // Sizes
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
-  // Colors
-  const colors = [
-    { name: 'Black', hex: '#000000' },
-    { name: 'White', hex: '#FFFFFF' },
-    { name: 'Red', hex: '#FF0000' },
-    { name: 'Gray', hex: '#808080' },
-    { name: 'Navy', hex: '#000080' },
-    { name: 'Olive', hex: '#808000' },
-  ];
-
-  // Sort options
+  // Sort options (backend supports: sortBy and direction)
   const sortOptions = [
     { label: 'Newest First', value: 'createdAt,desc' },
+    { label: 'Oldest First', value: 'createdAt,asc' },
     { label: 'Price: Low to High', value: 'price,asc' },
     { label: 'Price: High to Low', value: 'price,desc' },
     { label: 'Name: A-Z', value: 'name,asc' },
+    { label: 'Name: Z-A', value: 'name,desc' },
   ];
 
-  const handlePriceChange = (value) => {
-    onFilterChange({ ...filters, priceRange: value });
-  };
-
-  const handleSizeChange = (size) => {
-    const currentSizes = filters.sizes || [];
-    const newSizes = currentSizes.includes(size)
-      ? currentSizes.filter(s => s !== size)
-      : [...currentSizes, size];
-    onFilterChange({ ...filters, sizes: newSizes });
-  };
-
-  const handleColorChange = (color) => {
-    const currentColors = filters.colors || [];
-    const newColors = currentColors.includes(color)
-      ? currentColors.filter(c => c !== color)
-      : [...currentColors, color];
-    onFilterChange({ ...filters, colors: newColors });
+  const handleCategoryChange = (categoryId) => {
+    onFilterChange({ ...filters, categoryId: categoryId || '' });
   };
 
   const handleSortChange = (value) => {
@@ -126,76 +109,60 @@ const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, o
             RESET ALL
           </button>
 
-          {/* Price Range */}
+          {/* Category Filter */}
           <div className="space-y-3">
             <button
-              onClick={() => toggleSection('price')}
+              onClick={() => toggleSection('category')}
               className="w-full flex items-center justify-between font-bold uppercase text-sm tracking-wide"
             >
-              <span>PRICE</span>
-              {expandedSections.price ? <FiChevronUp /> : <FiChevronDown />}
+              <span>CATEGORY</span>
+              {expandedSections.category ? <FiChevronUp /> : <FiChevronDown />}
             </button>
             
-            {expandedSections.price && (
+            {expandedSections.category && (
               <div className="space-y-2 pl-2">
-                {priceRanges.map((range) => (
-                  <label
-                    key={range.value}
-                    className="flex items-center space-x-3 cursor-pointer group"
-                  >
-                    <input
-                      type="radio"
-                      name="priceRange"
-                      value={range.value}
-                      checked={filters.priceRange === range.value}
-                      onChange={() => handlePriceChange(range.value)}
-                      className="w-4 h-4 border-2 border-dark-950 checked:bg-dark-950"
-                    />
-                    <span className="text-sm font-medium group-hover:text-street-red transition-colors">
-                      {range.label}
-                    </span>
-                  </label>
-                ))}
+                {/* All Categories option */}
+                <label className="flex items-center space-x-3 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="category"
+                    value=""
+                    checked={!filters.categoryId}
+                    onChange={() => handleCategoryChange('')}
+                    className="w-4 h-4 border-2 border-dark-950 checked:bg-dark-950"
+                  />
+                  <span className="text-sm font-medium group-hover:text-street-red transition-colors">
+                    All Categories
+                  </span>
+                </label>
+                
+                {loadingCategories ? (
+                  <div className="text-sm text-gray-500">Loading...</div>
+                ) : (
+                  categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className="flex items-center space-x-3 cursor-pointer group"
+                    >
+                      <input
+                        type="radio"
+                        name="category"
+                        value={category.id}
+                        checked={filters.categoryId === String(category.id)}
+                        onChange={() => handleCategoryChange(String(category.id))}
+                        className="w-4 h-4 border-2 border-dark-950 checked:bg-dark-950"
+                      />
+                      <span className="text-sm font-medium group-hover:text-street-red transition-colors">
+                        {category.name}
+                      </span>
+                    </label>
+                  ))
+                )}
               </div>
             )}
           </div>
 
           {/* Divider */}
-          <div className="border-t-2 border-dark-950"></div>
-
-          {/* Size */}
-          <div className="space-y-3">
-            <button
-              onClick={() => toggleSection('size')}
-              className="w-full flex items-center justify-between font-bold uppercase text-sm tracking-wide"
-            >
-              <span>SIZE</span>
-              {expandedSections.size ? <FiChevronUp /> : <FiChevronDown />}
-            </button>
-            
-            {expandedSections.size && (
-              <div className="grid grid-cols-3 gap-2">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => handleSizeChange(size)}
-                    className={`
-                      py-2 border-2 border-dark-950 font-bold uppercase text-sm
-                      transition-all
-                      ${(filters.sizes || []).includes(size)
-                        ? 'bg-dark-950 text-light-50'
-                        : 'bg-transparent text-dark-950 hover:bg-dark-950 hover:text-light-50'
-                      }
-                    `}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-
           <div className="border-t-2 border-dark-950"></div>
 
           {/* Sort */}

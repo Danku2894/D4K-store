@@ -11,7 +11,17 @@ const productService = {
    * @returns {Promise}
    */
   getProducts: (params = {}) => {
-    return apiClient.get('/products', { params });
+    // Parse sort param into sortBy and direction for backend
+    const { sort, ...otherParams } = params;
+    let queryParams = { ...otherParams };
+    
+    if (sort) {
+      const [sortBy, direction] = sort.split(',');
+      queryParams.sortBy = sortBy || 'createdAt';
+      queryParams.direction = direction || 'desc';
+    }
+    
+    return apiClient.get('/products', { params: queryParams });
   },
 
   /**
@@ -41,7 +51,8 @@ const productService = {
       params: {
         page,
         size,
-        sort: 'createdAt,desc',
+        sortBy: 'createdAt',
+        direction: 'desc',
       },
     });
   },
@@ -77,11 +88,18 @@ const productService = {
    * @returns {Promise}
    */
   getProductsByCategory: (categoryId, params = {}) => {
-    return apiClient.get('/products', {
-      params: {
-        categoryId,
-        ...params,
-      },
+    // Parse sort param into sortBy and direction for backend
+    const { sort, ...otherParams } = params;
+    let queryParams = { ...otherParams };
+    
+    if (sort) {
+      const [sortBy, direction] = sort.split(',');
+      queryParams.sortBy = sortBy || 'createdAt';
+      queryParams.direction = direction || 'desc';
+    }
+    
+    return apiClient.get(`/products/category/${categoryId}`, {
+      params: queryParams,
     });
   },
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import Breadcrumb from '@components/common/Breadcrumb';
@@ -16,6 +16,7 @@ import addressService from '@services/address-service';
  */
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Cart state
   const cartItems = useCartStore((state) => state.items);
@@ -29,7 +30,8 @@ const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('COD');
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  // Receive coupon from CartPage navigation state
+  const [appliedCoupon, setAppliedCoupon] = useState(location.state?.appliedCoupon || null);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
@@ -157,21 +159,29 @@ const CheckoutPage = () => {
     }
   };
 
-  // Calculate totals
-  const discount = appliedCoupon ? calculateDiscount(totalPrice, appliedCoupon) : 0;
-  const shipping = 0; // Free shipping
-  const total = totalPrice - discount + shipping;
-
+  // Calculate totals - use discountAmount directly from CouponValidationResponse
   const calculateDiscount = (amount, coupon) => {
     if (!coupon) return 0;
 
+    // Backend returns discountAmount directly in CouponValidationResponse
+    if (coupon.discountAmount !== undefined) {
+      return parseFloat(coupon.discountAmount) || 0;
+    }
+
+    // Fallback: manual calculation
+    const discountValue = parseFloat(coupon.discountValue) || 0;
     if (coupon.discountType === 'PERCENTAGE') {
-      const discount = (amount * coupon.discountValue) / 100;
-      return coupon.maxDiscount ? Math.min(discount, coupon.maxDiscount) : discount;
+      const maxDiscount = coupon.maxDiscount ? parseFloat(coupon.maxDiscount) : null;
+      const discount = (amount * discountValue) / 100;
+      return maxDiscount ? Math.min(discount, maxDiscount) : discount;
     } else {
-      return Math.min(coupon.discountValue, amount);
+      return Math.min(discountValue, amount);
     }
   };
+
+  const discount = appliedCoupon ? calculateDiscount(totalPrice, appliedCoupon) : 0;
+  const shipping = 30000; // Shipping fee (matches backend DEFAULT_SHIPPING_FEE)
+  const total = Math.max(totalPrice - discount + shipping, 0);
 
   // Breadcrumb items
   const breadcrumbItems = [

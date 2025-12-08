@@ -8,6 +8,7 @@ import 'swiper/css/effect-fade';
 
 import hero1 from '../../assets/images/hero1.jpg';
 import hero2 from '../../assets/images/hero2.jpg';
+import hero3 from '../../assets/images/hero3.gif';
 
 /**
  * HeroBanner Component - Y2K Style
@@ -25,7 +26,8 @@ const HeroBanner = () => {
       description: 'Authentic streetwear for the bold',
       image: '/banners/street-collection.jpg', // Fallback/Background pattern
       heroImage: hero1, // Specific hero image
-      imageScale: 1.2, // Zoom in
+      imageBgColor: '#FAFAFA', // Light gray background of the image
+      imageScale: 1.5, // Zoom in
       imageTranslateY: '3%', // Move down to show heads
       bgColor: 'bg-dark-950',
       textColor: 'text-light-50',
@@ -41,7 +43,7 @@ const HeroBanner = () => {
       heroImage: hero2, // Specific hero image
       enableBlending: false, // Disable blending for this banner
       imageScale: 1.4, // Zoom in
-      imageTranslateY: '10%', // Move down to show heads
+      imageTranslateY: '5%', // Move down to show heads
       bgColor: 'bg-light-50',
       textColor: 'text-dark-950',
       ctaText: 'EXPLORE',
@@ -53,6 +55,8 @@ const HeroBanner = () => {
       subtitle: 'UP TO 50% OFF',
       description: 'Limited time on selected items',
       image: '/banners/sale.jpg',
+      heroImage: hero3,
+      imageBgColor: '#DD1320', // Match red background
       bgColor: 'bg-street-red',
       textColor: 'text-light-50',
       ctaText: 'GET DEALS',
@@ -64,7 +68,7 @@ const HeroBanner = () => {
   const bannerColors = {
     'bg-dark-950': '#000000',
     'bg-light-50': '#ffffff',
-    'bg-street-red': '#FF0000'
+    'bg-street-red': '#DD1320'
   };
 
   return (
@@ -92,47 +96,36 @@ const HeroBanner = () => {
               {/* Background Color */}
               <div className={`absolute inset-0 ${banner.bgColor} grid-lines`} />
 
-              {/* Specific Hero Image (Right Side with Blend) */}
+              {/* Specific Hero Image (Right Side) */}
               {banner.heroImage && (
-                <div className="absolute inset-0 flex justify-end">
-                  <div className="relative w-full md:w-[75%] h-full">
-                    <img 
-                      src={banner.heroImage} 
-                      alt={banner.title} 
-                      className="w-full h-full object-contain object-right-bottom"
-                      style={{
-                        ...(banner.enableBlending !== false ? {
-                          maskImage: 'linear-gradient(to right, transparent 0%, black 59%)',
-                          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 59%)'
-                        } : {}),
-                        ...(banner.imageScale || banner.imageTranslateY ? { 
-                          transform: `scale(${banner.imageScale || 1}) translateY(${banner.imageTranslateY || '0'})`,
-                          transformOrigin: 'bottom right'
-                        } : {})
+                <>
+                  {/* Background gradient from banner color to image bg color */}
+                  {banner.imageBgColor && (
+                    <div 
+                      className="absolute inset-0"
+                      style={{ 
+                        background: `linear-gradient(to right, ${bannerColors[banner.bgColor] || '#000000'} 0%, ${bannerColors[banner.bgColor] || '#000000'} 30%, ${banner.imageBgColor} 48%, ${banner.imageBgColor} 100%)`
                       }}
                     />
-                    
-                    {/* Strong Overlay Gradient - Adjusted to not cover text */}
-                    {banner.enableBlending !== false && (
-                      <div 
-                        className="absolute inset-0 pointer-events-none"
+                  )}
+                  
+                  {/* Hero Image - displayed without overlay */}
+                  <div className="absolute inset-0 flex justify-end items-center">
+                    <div className="relative w-full md:w-[55%] h-full">
+                      <img 
+                        src={banner.heroImage} 
+                        alt={banner.title} 
+                        className="w-full h-full object-contain object-center"
                         style={{
-                          background: `linear-gradient(to right, ${bannerColors[banner.bgColor] || '#000000'} 15%, ${bannerColors[banner.bgColor] || '#000000'} 50%, transparent 100%)`
+                          ...(banner.imageScale || banner.imageTranslateY ? { 
+                            transform: `scale(${banner.imageScale || 1}) translateY(${banner.imageTranslateY || '0'})`,
+                            transformOrigin: 'center center'
+                          } : {})
                         }}
-                      ></div>
-                    )}
-
-                    {/* Inner Shadow for extra blending depth */}
-                    {banner.enableBlending !== false && (
-                      <div className="absolute inset-0 pointer-events-none shadow-[inset_50px_0_50px_-20px_rgba(0,0,0,1)]"></div>
-                    )}
-                    
-                    {/* Bottom fade for mobile */}
-                    {banner.enableBlending !== false && (
-                      <div className={`md:hidden absolute inset-0 bg-gradient-to-t ${banner.bgColor.replace('bg-', 'from-')} via-transparent to-transparent`}></div>
-                    )}
+                      />
+                    </div>
                   </div>
-                </div>
+                </>
               )}
 
               {/* Background Pattern (if no hero image or for texture) */}

@@ -46,3 +46,7 @@ logs/
 .DS_Store
 Thumbs.db
 
+
+### Secrets ###
+application.yml
+src/main/resources/application.yml

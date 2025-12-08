@@ -22,6 +22,7 @@ import AdminDashboard from '@pages/admin/AdminDashboard';
 import AdminProducts from '@pages/admin/AdminProducts';
 import AdminCategories from '@pages/admin/AdminCategories';
 import AdminOrders from '@pages/admin/AdminOrders';
+import AdminOrderDetailPage from '@pages/admin/AdminOrderDetailPage';
 import AdminUsers from '@pages/admin/AdminUsers';
 import AdminCoupons from '@pages/admin/AdminCoupons';
 import AdminMedia from '@pages/admin/AdminMedia';
@@ -90,6 +91,7 @@ function App() {
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="/admin/categories" element={<AdminCategories />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/coupons" element={<AdminCoupons />} />
         <Route path="/admin/media" element={<AdminMedia />} />

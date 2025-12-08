@@ -62,15 +62,27 @@ const CouponInput = ({ orderAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon
     toast.success('COUPON REMOVED!');
   };
 
-  // Format discount
+  // Format discount - use discountAmount from CouponValidationResponse
   const formatDiscount = (coupon) => {
+    // Backend returns discountAmount directly in CouponValidationResponse
+    if (coupon.discountAmount !== undefined) {
+      const discountAmount = parseFloat(coupon.discountAmount) || 0;
+      return `-${new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      }).format(discountAmount)}`;
+    }
+    
+    // Fallback: manual display if using CouponResponse
+    const discountValue = parseFloat(coupon.discountValue) || 0;
+    
     if (coupon.discountType === 'PERCENTAGE') {
-      return `-${coupon.discountValue}%`;
+      return `-${discountValue}%`;
     } else {
       return `-${new Intl.NumberFormat('vi-VN', {
         style: 'currency',
         currency: 'VND',
-      }).format(coupon.discountValue)}`;
+      }).format(discountValue)}`;
     }
   };
 
@@ -105,13 +117,13 @@ const CouponInput = ({ orderAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon
         </div>
       ) : (
         // Coupon input form
-        <form onSubmit={handleApply} className="flex space-x-2">
+        <form onSubmit={handleApply} className="flex space-x-2 w-full">
           <input
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="ENTER CODE"
-            className="flex-1 px-4 py-3 border-2 border-dark-950 
+            className="flex-1 min-w-0 px-3 py-3 border-2 border-dark-950 
                      text-dark-950 placeholder-gray-400 uppercase font-bold
                      focus:outline-none focus:border-street-red
                      transition-all"
@@ -121,13 +133,14 @@ const CouponInput = ({ orderAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon
           <button
             type="submit"
             disabled={isApplying || !code.trim()}
-            className="px-6 py-3 bg-dark-950 border-2 border-dark-950 text-light-50 
+            className="px-4 py-3 bg-dark-950 border-2 border-dark-950 text-light-50 
                      font-black uppercase tracking-wider
                      hover:bg-street-red hover:border-street-red hover:scale-105
                      transition-all
-                     disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                     disabled:bg-gray-300 disabled:border-gray-300 disabled:text-gray-500 
+                     disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
           >
-            {isApplying ? 'APPLYING...' : 'APPLY'}
+            {isApplying ? '...' : 'APPLY'}
           </button>
         </form>
       )}
