@@ -30,7 +30,7 @@ spring:
             enable: true
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:temp_secret_key_for_debugging_123456789}
   expiration: 86400000
 
 server:
