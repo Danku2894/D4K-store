@@ -99,4 +99,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "LOWER(o.receiverName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(o.receiverPhone) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Order> searchOrders(@Param("keyword") String keyword, Pageable pageable);
+    /**
+     * Tìm order number mới nhất theo prefix (để generate order number tiếp theo)
+     */
+    Optional<Order> findTopByOrderNumberStartingWithOrderByOrderNumberDesc(String prefix);
 }

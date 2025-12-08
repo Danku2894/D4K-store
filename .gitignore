@@ -19,6 +19,7 @@ backend/.vscode/
 # Application properties (with secrets)
 backend/src/main/resources/application-*.yml
 !backend/src/main/resources/application.yml
+!backend/src/main/resources/application-prod.yml
 
 # Logs
 backend/logs/

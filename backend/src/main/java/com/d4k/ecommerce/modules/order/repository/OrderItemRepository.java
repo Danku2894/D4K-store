@@ -33,8 +33,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
      */
     @Query("SELECT oi.product.id, oi.product.name, SUM(oi.quantity) as totalSold " +
            "FROM OrderItem oi " +
-           "WHERE oi.order.status = 'DELIVERED' " +
+           "WHERE oi.order.status = :status " +
            "GROUP BY oi.product.id, oi.product.name " +
            "ORDER BY totalSold DESC")
-    List<Object[]> findTopSellingProducts(@Param("limit") int limit);
+    List<Object[]> findTopSellingProducts(@Param("status") com.d4k.ecommerce.modules.order.enums.OrderStatus status, org.springframework.data.domain.Pageable pageable);
 }

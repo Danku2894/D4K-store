@@ -59,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     
     private static final BigDecimal DEFAULT_SHIPPING_FEE = new BigDecimal("30000.00");
-    private static final AtomicLong orderCounter = new AtomicLong(1);
+    // private static final AtomicLong orderCounter = new AtomicLong(1); // Removed in favor of DB check
     
     /**
      * Tạo order từ cart
@@ -443,10 +443,23 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Generate unique order number
      */
+    /**
+     * Generate unique order number
+     */
     private synchronized String generateOrderNumber() {
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        long sequence = orderCounter.getAndIncrement();
-        return String.format("ORD-%s-%05d", date, sequence % 100000);
+        String prefix = String.format("ORD-%s-", date);
+        
+        // Find the latest order number for today
+        return orderRepository.findTopByOrderNumberStartingWithOrderByOrderNumberDesc(prefix)
+                .map(order -> {
+                    String currentOrderNumber = order.getOrderNumber();
+                    // Extract sequence number (last 5 digits)
+                    String sequenceStr = currentOrderNumber.substring(currentOrderNumber.length() - 5);
+                    long sequence = Long.parseLong(sequenceStr);
+                    return String.format("%s%05d", prefix, sequence + 1);
+                })
+                .orElse(String.format("%s%05d", prefix, 1));
     }
     
     /**
