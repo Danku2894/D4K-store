@@ -108,33 +108,6 @@ npm run dev
 
 Frontend sẽ chạy tại: `http://localhost:5173`
 
-## 📡 API Endpoints
-
-### Authentication
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| POST | `/api/v1/auth/signup` | Đăng ký |
-| POST | `/api/v1/auth/signin` | Đăng nhập |
-
-### Products
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| GET | `/api/v1/products` | Danh sách sản phẩm |
-| GET | `/api/v1/products/{id}` | Chi tiết sản phẩm |
-| GET | `/api/v1/products/category/{id}` | Sản phẩm theo danh mục |
-
-### Recommendations
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| GET | `/api/v1/recommendations/similar/{productId}` | Sản phẩm tương tự |
-| GET | `/api/v1/recommendations/popular` | Sản phẩm phổ biến |
-
-### Orders
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| POST | `/api/v1/orders` | Tạo đơn hàng |
-| GET | `/api/v1/orders/my-orders` | Đơn hàng của tôi |
-
 ## 🛠️ Tech Stack
 
 ### Backend
@@ -161,4 +134,3 @@ This project is licensed under the MIT License.
 
 ---
 
-⭐ Star repo này nếu bạn thấy hữu ích!
