@@ -103,12 +103,24 @@ const ProfilePage = () => {
   };
 
   const handleLogout = () => {
-    authService.logout();
-    clearCart();
-    navigate('/');
-    toast.success('LOGGED OUT SUCCESSFULLY!', {
-      icon: '👋',
-    });
+    try {
+      authService.logout();
+      // Use try-catch for cart clearing in case of store issues
+      try {
+        if (clearCart) clearCart();
+      } catch (e) {
+        console.warn('Error clearing cart:', e);
+      }
+      
+      navigate('/');
+      toast.success('LOGGED OUT SUCCESSFULLY!', {
+        icon: '👋',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect even if error
+      window.location.href = '/';
+    }
   };
 
   // Breadcrumb items

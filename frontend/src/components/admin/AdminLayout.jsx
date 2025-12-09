@@ -68,7 +68,7 @@ const AdminLayout = ({ children }) => {
   const handleLogout = () => {
     authService.logout();
     clearCart();
-    navigate('/admin/login');
+    navigate('/');
     toast.success('LOGGED OUT!', { icon: '👋' });
   };
 

@@ -16,7 +16,7 @@ import RegisterPage from '@pages/RegisterPage';
 
 import ProfilePage from '@pages/ProfilePage';
 import WishlistPage from '@pages/WishlistPage';
-import AdminLoginPage from '@pages/admin/AdminLoginPage';
+// import AdminLoginPage from '@pages/admin/AdminLoginPage';
 import AdminDashboard from '@pages/admin/AdminDashboard';
 
 import AdminProducts from '@pages/admin/AdminProducts';
@@ -86,7 +86,7 @@ function App() {
         </Route>
 
         {/* Admin Routes - Standalone (Internal AdminLayout or Login) */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
+        {/* <Route path="/admin/login" element={<AdminLoginPage />} /> */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="/admin/categories" element={<AdminCategories />} />
