@@ -1,0 +1,12 @@
+target/
+.mvn/wrapper/maven-wrapper.jar
+**/target/
+.git
+.gitignore
+.env
+.env.*
+application.yml
+backend/src/main/resources/application.yml
+node_modules/
+dist/
+build/
