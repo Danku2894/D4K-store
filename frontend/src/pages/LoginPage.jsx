@@ -98,9 +98,16 @@ const LoginPage = () => {
           },
         });
 
-        // Redirect to intended page or home
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
+        // Check role and redirect
+        const userRole = response.data.user?.role;
+        
+        if (userRole === 'ADMIN') {
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          // Redirect to intended page or home
+          const from = location.state?.from?.pathname || '/';
+          navigate(from, { replace: true });
+        }
       }
     } catch (err) {
       console.error('Login error:', err);
