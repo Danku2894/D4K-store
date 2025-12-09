@@ -9,6 +9,10 @@
 
 **D4K Store** là một nền tảng thương mại điện tử full-stack hiện đại, được thiết kế với phong cách Street/Y2K độc đáo. Dự án bao gồm backend REST API được xây dựng bằng Spring Boot và frontend SPA sử dụng React + Vite.
 
+## DEMO
+
+https://d4-k-store.vercel.app/
+
 ## ✨ Tính năng chính
 
 ### 🛒 Quản lý sản phẩm
@@ -38,6 +42,26 @@
 - Quản lý đơn hàng
 - Thống kê doanh thu
 - Quản lý người dùng
+
+### Recommendation System (Product Suggestions)
+Hệ thống đề xuất sản phẩm được xây dựng theo mô hình đơn giản nhưng hiệu quả, giúp tăng tỷ lệ chuyển đổi và cải thiện trải nghiệm mua sắm.
+🔄 1. Related Products (Cùng Category)
+Khi người dùng xem chi tiết một sản phẩm, hệ thống sẽ tự động hiển thị danh sách sản phẩm gợi ý dựa trên:
+- Cùng category
+- Loại trừ chính sản phẩm hiện tại
+- Giới hạn số lượng đề xuất để UI gọn gàng 
+Logic backend:
+- Kết hợp category ID + trạng thái còn hàng
+- Ưu tiên sản phẩm mới trước
+Mục đích:
+- Tăng thời gian người dùng ở trên website và tạo cảm giác “đúng sở thích”.
+🔥 2. Popular Products (Sản phẩm phổ biến)
+Hệ thống đánh giá mức độ phổ biến của sản phẩm dựa trên các tiêu chí:
+- Số lần được đặt mua (order count)
+- Số lần được thêm vào giỏ hàng
+Sản phẩm được phân tích và hiển thị ở các mục:
+- Trending Now
+- Top Picks For You
 
 ## 🏗️ Kiến trúc
 
@@ -130,7 +154,7 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Author
 
-**Danku** - D4K Store
+**Danku**
 
 ---
 
