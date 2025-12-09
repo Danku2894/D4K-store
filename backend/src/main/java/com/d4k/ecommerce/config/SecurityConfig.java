@@ -82,6 +82,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints - không cần authentication
                         .requestMatchers(
+                                "/",
+                                "/health",
                                 "/api/v1/auth/**",
                                 "/api/v1/products/**",
                                 "/api/v1/categories/**",
@@ -90,7 +92,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api/v1/files/**"
+                                "/api/v1/files/**",
+                                "/api/v1/recommendations/**"
                         ).permitAll()
                         
                         // Admin endpoints - chỉ ADMIN mới được truy cập
