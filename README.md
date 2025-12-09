@@ -3,7 +3,7 @@
 ![D4K Store](https://img.shields.io/badge/D4K-Store-red?style=for-the-badge)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?style=for-the-badge&logo=spring)
 ![React](https://img.shields.io/badge/React-18-blue?style=for-the-badge&logo=react)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-orange?style=for-the-badge&logo=mysql)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?style=for-the-badge&logo=postgresql)
 
 ## 📖 Mô tả
 
@@ -77,7 +77,7 @@ D4K-store/
 ### Yêu cầu
 - Java 17+
 - Node.js 18+
-- MySQL 8.0+
+- PostgreSQL 15+
 - Maven 3.8+
 
 ### Backend
@@ -113,7 +113,7 @@ Frontend sẽ chạy tại: `http://localhost:5173`
 ### Backend
 - **Framework**: Spring Boot 3.x
 - **Security**: Spring Security + JWT
-- **Database**: MySQL + JPA/Hibernate
+- **Database**: PostgreSQL + JPA/Hibernate
 - **Build**: Maven
 
 ### Frontend
