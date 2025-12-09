@@ -62,3 +62,6 @@ desktop.ini
 # ============ Documentation (keep generated docs) ============
 # No ignore for docs/
 
+
+# User uploads
+backend/uploads/
