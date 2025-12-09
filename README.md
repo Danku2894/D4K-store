@@ -45,7 +45,8 @@ https://d4-k-store.vercel.app/
 
 ### Recommendation System (Product Suggestions)
 Hệ thống đề xuất sản phẩm được xây dựng theo mô hình đơn giản nhưng hiệu quả, giúp tăng tỷ lệ chuyển đổi và cải thiện trải nghiệm mua sắm.
-🔄 1. Related Products (Cùng Category)
+
+####🔄 1. Related Products (Cùng Category)
 Khi người dùng xem chi tiết một sản phẩm, hệ thống sẽ tự động hiển thị danh sách sản phẩm gợi ý dựa trên:
 - Cùng category
 - Loại trừ chính sản phẩm hiện tại
@@ -55,7 +56,8 @@ Logic backend:
 - Ưu tiên sản phẩm mới trước
 Mục đích:
 - Tăng thời gian người dùng ở trên website và tạo cảm giác “đúng sở thích”.
-🔥 2. Popular Products (Sản phẩm phổ biến)
+  
+####🔥 2. Popular Products (Sản phẩm phổ biến)
 Hệ thống đánh giá mức độ phổ biến của sản phẩm dựa trên các tiêu chí:
 - Số lần được đặt mua (order count)
 - Số lần được thêm vào giỏ hàng
