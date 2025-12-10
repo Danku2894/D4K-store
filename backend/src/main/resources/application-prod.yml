@@ -68,7 +68,7 @@ cloudinary:
   api-secret: ${CLOUDINARY_API_SECRET}
 
 vnpay:
-  tmn-code: ${VNP_TMN_CODE:RDDOLIXE}
-  hash-secret: ${VNP_HASH_SECRET:XPY5AT23H7EM46YSNAFTZ8IEBUSEP9UI}
+  tmn-code: ${VNP_TMN_CODE}
+  hash-secret: ${VNP_HASH_SECRET}
   url: ${VNP_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
   return-url: ${VNP_RETURN_URL:http://localhost:5173/order-success}
