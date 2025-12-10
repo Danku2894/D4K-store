@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -102,5 +103,56 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Tìm order number mới nhất theo prefix (để generate order number tiếp theo)
      */
+
     Optional<Order> findTopByOrderNumberStartingWithOrderByOrderNumberDesc(String prefix);
+
+    // ================= ANALYTICS QUERIES =================
+
+    /**
+     * Thống kê doanh thu theo ngày
+     * Return: [Date(backend-dependent), BigDecimal(revenue), Long(count)]
+     */
+    @Query("SELECT DATE(o.completedAt) as date, SUM(o.totalAmount), COUNT(o) " +
+           "FROM Order o " +
+           "WHERE o.status = 'DELIVERED' " +
+           "AND o.completedAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY DATE(o.completedAt) " +
+           "ORDER BY date")
+    List<Object[]> getSalesByDay(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Thống kê doanh thu theo tháng
+     * Return: [Integer(year), Integer(month), BigDecimal(revenue), Long(count)]
+     */
+    @Query("SELECT YEAR(o.completedAt) as y, MONTH(o.completedAt) as m, SUM(o.totalAmount), COUNT(o) " +
+           "FROM Order o " +
+           "WHERE o.status = 'DELIVERED' " +
+           "AND o.completedAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY YEAR(o.completedAt), MONTH(o.completedAt) " +
+           "ORDER BY y, m")
+    List<Object[]> getSalesByMonth(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Thống kê doanh thu theo năm
+     * Return: [Integer(year), BigDecimal(revenue), Long(count)]
+     */
+    @Query("SELECT YEAR(o.completedAt) as y, SUM(o.totalAmount), COUNT(o) " +
+           "FROM Order o " +
+           "WHERE o.status = 'DELIVERED' " +
+           "AND o.completedAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY YEAR(o.completedAt) " +
+           "ORDER BY y")
+    List<Object[]> getSalesByYear(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Top selling products
+     * Return: [Product, Long(totalSold), BigDecimal(totalRevenue)]
+     */
+    @Query("SELECT oi.product, SUM(oi.quantity) as totalSold, SUM(oi.subtotal) as totalRevenue " +
+           "FROM OrderItem oi " +
+           "JOIN oi.order o " +
+           "WHERE o.status = 'DELIVERED' " +
+           "GROUP BY oi.product " +
+           "ORDER BY totalSold DESC")
+    Page<Object[]> findTopSellingProducts(Pageable pageable);
 }

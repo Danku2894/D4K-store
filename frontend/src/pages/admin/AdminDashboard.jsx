@@ -35,6 +35,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [salesData, setSalesData] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,53 +47,51 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch Overview Stats
-      const overview = await dashboardService.getDashboardOverview().catch(() => null);
-      
-      // Fetch Sales Data (Mock if API fails)
-      // const sales = await dashboardService.getSalesData('DAILY').catch(() => []);
-      
-      // Fetch Recent Orders
-      const ordersRes = await orderService.getAllOrders({ page: 0, size: 5 }).catch(() => null);
+      // Calculate date range for sales data (Last 7 days)
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 6);
 
-      // Set Stats
-      if (overview) {
-        setStats(overview);
-      } else {
-        // Mock Stats
-        setStats({
-          totalRevenue: 12500000,
-          totalOrders: 145,
-          totalUsers: 89,
-          totalProducts: 234,
-          revenueChange: 12.5,
-          ordersChange: 8.3,
-          usersChange: -2.1,
-          productsChange: 5.7,
-        });
-      }
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
 
-      // Mock Sales Data for Chart
-      setSalesData([
-        { name: 'Mon', revenue: 4000000, orders: 24 },
-        { name: 'Tue', revenue: 3000000, orders: 18 },
-        { name: 'Wed', revenue: 2000000, orders: 12 },
-        { name: 'Thu', revenue: 2780000, orders: 16 },
-        { name: 'Fri', revenue: 1890000, orders: 10 },
-        { name: 'Sat', revenue: 2390000, orders: 14 },
-        { name: 'Sun', revenue: 3490000, orders: 20 },
+      // Parallel Fetch
+      const [overviewRes, salesRes, topProductsRes, ordersRes] = await Promise.all([
+        dashboardService.getDashboardOverview().catch(() => null),
+        dashboardService.getSalesData('DAILY', startDateStr, endDateStr).catch(() => null),
+        dashboardService.getTopProducts(5).catch(() => null),
+        orderService.getAllOrders({ page: 0, size: 5 }).catch(() => null)
       ]);
 
-      // Set Recent Orders
-      if (ordersRes && ordersRes.success) {
+      // 1. Set Overview Stats
+      if (overviewRes && overviewRes.success) {
+        setStats(overviewRes.data);
+      } else if (overviewRes && !overviewRes.success) {
+         // Fallback if response structure is direct data (legacy check)
+         setStats(overviewRes);
+      }
+
+      // 2. Set Sales Data
+      if (salesRes && salesRes.data) {
+        // Map backend response to Chart format
+        // Backend: { date: "2024-12-10", revenue: 100000, orderCount: 2 }
+        // Chart: { name: "10/12", revenue: 100000, orders: 2 }
+        const formattedSales = salesRes.data.map(item => ({
+          name: item.date.split('-').slice(1).reverse().join('/'), // 2024-12-10 -> 10/12
+          revenue: item.revenue,
+          orders: item.orderCount
+        }));
+        setSalesData(formattedSales);
+      }
+
+      // 3. Set Top Products
+      if (topProductsRes && topProductsRes.data) {
+        setTopProducts(topProductsRes.data.topProducts || []);
+      }
+
+      // 4. Set Recent Orders
+      if (ordersRes && ordersRes.success && ordersRes.data) {
         setRecentOrders(ordersRes.data.content);
-      } else {
-        // Mock Orders
-        setRecentOrders([
-          { id: 101, userName: 'John Doe', totalAmount: 1250000, status: 'PENDING', createdAt: new Date().toISOString() },
-          { id: 102, userName: 'Jane Smith', totalAmount: 890000, status: 'SHIPPED', createdAt: new Date().toISOString() },
-          { id: 103, userName: 'Mike Ross', totalAmount: 450000, status: 'DELIVERED', createdAt: new Date().toISOString() },
-        ]);
       }
 
     } catch (err) {
@@ -153,28 +152,28 @@ const AdminDashboard = () => {
             icon={FiDollarSign}
             label="Total Revenue"
             value={formatCurrency(stats?.totalRevenue || 0)}
-            change={stats?.revenueChange}
+            change={null} 
             changeLabel="vs last month"
           />
           <StatsCard
             icon={FiShoppingBag}
             label="Total Orders"
             value={stats?.totalOrders || 0}
-            change={stats?.ordersChange}
+            change={null}
             changeLabel="vs last month"
           />
           <StatsCard
             icon={FiUsers}
             label="Total Users"
             value={stats?.totalUsers || 0}
-            change={stats?.usersChange}
-            changeLabel="vs last month"
+            change={stats?.newUsersThisMonth > 0 ? `+${stats.newUsersThisMonth}` : null}
+            changeLabel="new this month"
           />
           <StatsCard
             icon={FiPackage}
             label="Total Products"
             value={stats?.totalProducts || 0}
-            change={stats?.productsChange}
+            change={null}
             changeLabel="vs last month"
           />
         </div>
@@ -235,29 +234,36 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y-2 divide-gray-100">
-                    {recentOrders.map((order) => (
-                      <tr key={order.id} className="group hover:bg-gray-50">
-                        <td className="py-3 font-bold text-sm">#{order.id}</td>
-                        <td className="py-3 font-medium text-sm">{order.userName || 'Guest'}</td>
-                        <td className="py-3 font-black text-sm">{formatCurrency(order.totalAmount)}</td>
-                        <td className="py-3">
-                          <span className={`
-                            px-2 py-0.5 text-[10px] font-black uppercase
-                            ${order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
-                              order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' : 
-                              order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' : 
-                              'bg-red-100 text-red-800'}
-                          `}>
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="py-3 text-right">
-                          <Link to={`/admin/orders/${order.id}`} className="text-gray-400 hover:text-dark-950 group-hover:translate-x-1 transition-transform inline-block">
-                            <FiArrowRight />
-                          </Link>
-                        </td>
+                    {recentOrders.length > 0 ? (
+                      recentOrders.map((order) => (
+                        <tr key={order.id} className="group hover:bg-gray-50">
+                          <td className="py-3 font-bold text-sm">#{order.orderNumber || order.id}</td>
+                          <td className="py-3 font-medium text-sm">{order.receiverName || order.userName || 'Guest'}</td>
+                          <td className="py-3 font-black text-sm">{formatCurrency(order.totalAmount)}</td>
+                          <td className="py-3">
+                            <span className={`
+                              px-2 py-0.5 text-[10px] font-black uppercase
+                              ${order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
+                                order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' : 
+                                order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' : 
+                                order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'}
+                            `}>
+                              {order.status}
+                            </span>
+                          </td>
+                          <td className="py-3 text-right">
+                            <Link to={`/admin/orders/${order.id}`} className="text-gray-400 hover:text-dark-950 group-hover:translate-x-1 transition-transform inline-block">
+                              <FiArrowRight />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="py-4 text-center text-gray-500 font-medium">No recent orders found</td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -286,26 +292,40 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Top Products (Mock) */}
+            {/* Top Products */}
             <div className="border-4 border-dark-950 bg-white p-6">
               <h3 className="text-xl font-display font-black uppercase mb-6 flex items-center gap-2">
                 <FiLayers /> Top Products
               </h3>
               <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gray-200 border-2 border-dark-950 font-black flex items-center justify-center text-sm">
-                      {i}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold uppercase text-sm truncate">Streetwear Tee V{i}</h4>
-                      <div className="w-full h-2 bg-gray-100 mt-1">
-                        <div className="h-full bg-dark-950" style={{width: `${100 - i * 15}%`}}></div>
+                {topProducts.length > 0 ? (
+                  topProducts.map((product, i) => (
+                    <div key={product.productId} className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-gray-200 border-2 border-dark-950 font-black flex items-center justify-center text-sm relative overflow-hidden">
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{i + 1}</span>
+                        )}
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <Link to={`/products/${product.productId}`} className="font-bold uppercase text-sm truncate block hover:text-street-red">
+                          {product.productName}
+                        </Link>
+                        <div className="w-full h-2 bg-gray-100 mt-1">
+                          {/* Mock progress bar based on sold count relative to top 1 */}
+                          <div 
+                            className="h-full bg-dark-950" 
+                            style={{width: `${(product.totalSold / (topProducts[0]?.totalSold || 1)) * 100}%`}}
+                          ></div>
+                        </div>
+                      </div>
+                      <span className="font-mono font-bold text-xs whitespace-nowrap">{product.totalSold} sold</span>
                     </div>
-                    <span className="font-mono font-bold text-xs">{100 - i * 10} sold</span>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500 text-sm">No sales data yet</div>
+                )}
               </div>
             </div>
           </div>

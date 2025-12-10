@@ -93,7 +93,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/v1/files/**",
-                                "/api/v1/recommendations/**"
+                                "/api/v1/recommendations/**",
+                                "/api/v1/payment/**"
                         ).permitAll()
                         
                         // Admin endpoints - chỉ ADMIN mới được truy cập

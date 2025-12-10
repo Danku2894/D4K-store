@@ -133,6 +133,37 @@ const CheckoutPage = () => {
       const response = await orderService.createOrder(orderData);
 
       if (response.success && response.data) {
+        // Clear cart
+        clearCart();
+
+        // Handle VNPAY Redirect
+        if (selectedPaymentMethod === 'VNPAY') {
+           try {
+              const orderId = response.data.id;
+              // Use total from calculation (ensure it's updated or pass the one from order response if available)
+              // Here we use 'total' calculated in the component
+              
+              // Note: paymentService needs to be imported
+              const paymentUrlRes = await import('@services/payment-service').then(m => m.default.createVnPayUrl(total, `Thanh toan don hang #${orderId}`, orderId));
+              console.log('Payment URL Response:', paymentUrlRes);
+              
+              if (paymentUrlRes.success && paymentUrlRes.data) {
+                  window.location.href = paymentUrlRes.data;
+                  return;
+              } else {
+                  console.error('Payment URL creation failed:', paymentUrlRes);
+                  toast.error(`FAILED TO CREATE PAYMENT URL: ${paymentUrlRes?.message || 'Unknown error'}`);
+                  navigate(`/order-success/${response.data.id}`);
+              }
+           } catch (payErr) {
+              console.error('VNPAY Error:', payErr);
+              toast.error('PAYMENT ERROR, ORDER PLACED AS UNPAID');
+              navigate(`/order-success/${response.data.id}`);
+           }
+           setIsSubmitting(false); // Only if redirect fails or logic ends here
+           return;
+        }
+
         toast.success('ORDER PLACED SUCCESSFULLY!', {
           icon: '🎉',
           duration: 5000,
@@ -144,9 +175,6 @@ const CheckoutPage = () => {
           },
         });
 
-        // Clear cart
-        clearCart();
-
         // Navigate to success page
         navigate(`/order-success/${response.data.id}`);
       }
@@ -155,7 +183,9 @@ const CheckoutPage = () => {
       const errorMessage = err.message || 'FAILED TO PLACE ORDER';
       toast.error(errorMessage.toUpperCase());
     } finally {
-      setIsSubmitting(false);
+      if (selectedPaymentMethod !== 'VNPAY') {
+          setIsSubmitting(false);
+      }
     }
   };
 

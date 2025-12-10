@@ -35,8 +35,7 @@ const CartPage = () => {
       // Update in Zustand store
       updateQuantity(itemId, newQuantity);
       
-      // TODO: API call để update backend
-      // await cartService.updateCartItem(itemId, { quantity: newQuantity });
+
       
       toast.success('QUANTITY UPDATED!');
     } catch (err) {
@@ -53,8 +52,7 @@ const CartPage = () => {
       // Remove from Zustand store
       removeFromCart(itemId);
       
-      // TODO: API call để remove từ backend
-      // await cartService.removeCartItem(itemId);
+
       
       toast.success('ITEM REMOVED FROM CART!', {
         icon: '🗑️',
@@ -80,8 +78,7 @@ const CartPage = () => {
     try {
       clearCart();
       
-      // TODO: API call để clear backend cart
-      // await cartService.clearCart();
+
       
       toast.success('CART CLEARED!', {
         icon: '🗑️',

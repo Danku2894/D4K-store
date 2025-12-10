@@ -101,12 +101,14 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-light-50 border-b-4 border-dark-950">
       <div className="container-street">
         {/* Main Header */}
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-2">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="text-4xl font-display font-black text-dark-950 glitch-street hover:scale-105 transition-transform uppercase">
-              D4K
-            </div>
+            <img 
+              src="/src/assets/images/Black White Grunge Typographic  Handwritten Apparel Logo (1).png" 
+              alt="D4K Logo" 
+              className="h-10 md:h-14 object-contain scale-[1.75] origin-center hover:scale-[1.85] transition-transform"
+            />
           </Link>
 
           {/* Desktop Navigation */}

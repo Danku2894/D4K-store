@@ -28,7 +28,7 @@ const PaymentMethodSelector = ({ selectedMethod, onSelectMethod }) => {
       name: 'VNPAY',
       description: 'Pay with VNPay',
       icon: FiSmartphone,
-      available: false, // Coming soon
+      available: true,
     },
     {
       id: 'MOMO',

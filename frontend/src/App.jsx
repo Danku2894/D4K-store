@@ -13,6 +13,7 @@ import CheckoutPage from '@pages/CheckoutPage';
 import OrderSuccessPage from '@pages/OrderSuccessPage';
 import LoginPage from '@pages/LoginPage';
 import RegisterPage from '@pages/RegisterPage';
+import PaymentCallbackPage from '@pages/PaymentCallbackPage';
 
 import ProfilePage from '@pages/ProfilePage';
 import WishlistPage from '@pages/WishlistPage';
@@ -65,6 +66,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-success" element={<PaymentCallbackPage />} />
           <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

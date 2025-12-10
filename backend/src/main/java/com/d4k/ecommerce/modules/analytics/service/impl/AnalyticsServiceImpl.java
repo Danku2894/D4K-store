@@ -125,48 +125,60 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     public SalesDataResponse getSalesData(String period, LocalDate startDate, LocalDate endDate) {
         log.info("Fetching sales data for period: {}, from {} to {}", period, startDate, endDate);
         
-        // TODO: Implement sau khi có Order module
-        // Tạm thời return empty data
         List<SalesDataResponse.SalesDataPoint> dataPoints = new ArrayList<>();
+        List<Object[]> rawData = new ArrayList<>();
         
-        /*
-        TODO: Implement logic
+        // 1. Fetch raw data from Repository
         if ("DAILY".equalsIgnoreCase(period)) {
-            dataPoints = orderRepository.getSalesByDay(startDate, endDate);
+            // startDate and endDate come as LocalDate, need to convert to LocalDateTime 
+            // startDate at 00:00:00, endDate at 23:59:59
+            rawData = orderRepository.getSalesByDay(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusSeconds(1));
         } else if ("MONTHLY".equalsIgnoreCase(period)) {
-            dataPoints = orderRepository.getSalesByMonth(startDate, endDate);
+            rawData = orderRepository.getSalesByMonth(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusSeconds(1));
         } else if ("YEARLY".equalsIgnoreCase(period)) {
-            dataPoints = orderRepository.getSalesByYear(startDate, endDate);
+            rawData = orderRepository.getSalesByYear(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusSeconds(1));
         }
-        */
         
-        // Mock data for demonstration
-        if ("DAILY".equalsIgnoreCase(period)) {
-            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-                dataPoints.add(SalesDataResponse.SalesDataPoint.builder()
-                        .date(date.toString())
-                        .revenue(BigDecimal.ZERO)
-                        .orderCount(0L)
-                        .build());
+        // 2. Map raw data to DTO
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        Long totalOrders = 0L;
+        
+        for (Object[] row : rawData) {
+            String dateLabel = "";
+            BigDecimal revenue = (BigDecimal) row[row.length - 2];
+            Long count = (Long) row[row.length - 1];
+            
+            if ("DAILY".equalsIgnoreCase(period)) {
+                // row[0] is Date
+                dateLabel = row[0].toString();
+            } else if ("MONTHLY".equalsIgnoreCase(period)) {
+                // row[0] is Year, row[1] is Month
+                int y = (Integer) row[0];
+                int m = (Integer) row[1];
+                dateLabel = String.format("%d-%02d", y, m);
+            } else {
+                // row[0] is Year
+                int y = (Integer) row[0];
+                dateLabel = String.valueOf(y);
             }
-        } else if ("MONTHLY".equalsIgnoreCase(period)) {
-            YearMonth current = YearMonth.from(startDate);
-            YearMonth end = YearMonth.from(endDate);
-            while (!current.isAfter(end)) {
-                dataPoints.add(SalesDataResponse.SalesDataPoint.builder()
-                        .date(current.toString())
-                        .revenue(BigDecimal.ZERO)
-                        .orderCount(0L)
-                        .build());
-                current = current.plusMonths(1);
-            }
+            
+            if (revenue == null) revenue = BigDecimal.ZERO;
+            
+            dataPoints.add(SalesDataResponse.SalesDataPoint.builder()
+                    .date(dateLabel)
+                    .revenue(revenue)
+                    .orderCount(count)
+                    .build());
+            
+            totalRevenue = totalRevenue.add(revenue);
+            totalOrders += count;
         }
         
         return SalesDataResponse.builder()
                 .period(period)
                 .data(dataPoints)
-                .totalRevenue(BigDecimal.ZERO)
-                .totalOrders(0L)
+                .totalRevenue(totalRevenue)
+                .totalOrders(totalOrders)
                 .build();
     }
     
@@ -176,15 +188,18 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     @Override
     @Transactional(readOnly = true)
     public TopProductsResponse getTopProducts(Integer limit) {
-        log.info("Fetching top {} products", limit);
+        int max = (limit != null && limit > 0) ? limit : 10;
+        log.info("Fetching top {} selling products", max);
         
-        // TODO: Implement sau khi có Order module
-        // Tạm thời lấy products có nhiều reviews nhất
-        List<Product> products = productRepository.findAll(PageRequest.of(0, limit != null ? limit : 10)).getContent();
-        
+        List<Object[]> rawData = orderRepository.findTopSellingProducts(PageRequest.of(0, max)).getContent();
         List<TopProductsResponse.TopProductItem> topProducts = new ArrayList<>();
         
-        for (Product product : products) {
+        for (Object[] row : rawData) {
+            Product product = (Product) row[0];
+            Long totalSold = (Long) row[1];
+            BigDecimal revenue = (BigDecimal) row[2];
+            
+            // Get review stats
             Long reviewCount = reviewRepository.countByProductId(product.getId());
             Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
             
@@ -194,17 +209,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                     .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                     .price(product.getPrice())
                     .imageUrl(product.getImageUrl())
-                    .totalSold(0L) // TODO: from OrderItems
-                    .totalRevenue(BigDecimal.ZERO) // TODO: from Orders
+                    .totalSold(totalSold)
+                    .totalRevenue(revenue)
                     .reviewCount(reviewCount)
                     .averageRating(avgRating != null ? avgRating : 0.0)
                     .build());
         }
-        
-        /*
-        TODO: Implement sau khi có Order module
-        List<TopProductItem> topProducts = orderRepository.findTopSellingProducts(limit);
-        */
         
         return TopProductsResponse.builder()
                 .topProducts(topProducts)
