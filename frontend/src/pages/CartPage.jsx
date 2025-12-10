@@ -215,40 +215,7 @@ const CartPage = () => {
           </div>
         </div>
 
-        {/* Additional Info */}
-        <div className="mt-12 pt-8 border-t-4 border-dark-950">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 border-2 border-dark-950 text-center">
-              <div className="text-3xl mb-3">🚚</div>
-              <h3 className="text-sm font-black uppercase tracking-wider mb-2">
-                FREE SHIPPING
-              </h3>
-              <p className="text-xs text-gray-600 font-medium">
-                On all orders with no minimum
-              </p>
-            </div>
 
-            <div className="p-6 border-2 border-dark-950 text-center">
-              <div className="text-3xl mb-3">🔄</div>
-              <h3 className="text-sm font-black uppercase tracking-wider mb-2">
-                EASY RETURNS
-              </h3>
-              <p className="text-xs text-gray-600 font-medium">
-                30-day return policy
-              </p>
-            </div>
-
-            <div className="p-6 border-2 border-dark-950 text-center">
-              <div className="text-3xl mb-3">🔒</div>
-              <h3 className="text-sm font-black uppercase tracking-wider mb-2">
-                SECURE PAYMENT
-              </h3>
-              <p className="text-xs text-gray-600 font-medium">
-                100% secure transactions
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

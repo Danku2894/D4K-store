@@ -297,7 +297,7 @@ const AdminCategories = () => {
                 </button>
               </div>
               
-              <form onSubmit={handleCreateOrUpdateCategory} className="p-6 space-y-4">
+              <form onSubmit={handleCreateOrUpdateCategory} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                 <div className="space-y-2">
                   <label className="text-sm font-black uppercase tracking-wide">Category Name</label>
                   <input

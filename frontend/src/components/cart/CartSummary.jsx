@@ -155,30 +155,6 @@ const CartSummary = ({
           CONTINUE SHOPPING
         </Link>
 
-        {/* Additional Info */}
-        <div className="pt-4 border-t-2 border-dark-950 space-y-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-600">
-            ✓ SECURE CHECKOUT
-          </p>
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-600">
-            ✓ FREE SHIPPING ON ALL ORDERS
-          </p>
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-600">
-            ✓ 30-DAY RETURN POLICY
-          </p>
-        </div>
-      </div>
-
-      {/* Payment Methods */}
-      <div className="p-4 border-2 border-dark-950 bg-light-100 text-center">
-        <p className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">
-          WE ACCEPT
-        </p>
-        <div className="flex items-center justify-center space-x-4">
-          <span className="text-2xl">💳</span>
-          <span className="text-2xl">💰</span>
-          <span className="text-2xl">🏦</span>
-        </div>
       </div>
     </div>
   );

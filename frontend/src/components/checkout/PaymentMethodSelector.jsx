@@ -17,25 +17,11 @@ const PaymentMethodSelector = ({ selectedMethod, onSelectMethod }) => {
       available: true,
     },
     {
-      id: 'BANK_TRANSFER',
-      name: 'BANK TRANSFER',
-      description: 'Direct bank transfer',
-      icon: FiCreditCard,
-      available: true,
-    },
-    {
       id: 'VNPAY',
       name: 'VNPAY',
       description: 'Pay with VNPay',
       icon: FiSmartphone,
       available: true,
-    },
-    {
-      id: 'MOMO',
-      name: 'MOMO',
-      description: 'Pay with MoMo e-wallet',
-      icon: FiSmartphone,
-      available: false, // Coming soon
     },
   ];
 
@@ -112,25 +98,14 @@ const PaymentMethodSelector = ({ selectedMethod, onSelectMethod }) => {
           {selectedMethod === 'COD' && (
             <div className="space-y-2">
               <p className="text-xs font-black uppercase tracking-wider text-gray-600">
-                ℹ️ PAYMENT INFORMATION
+                PAYMENT INFORMATION
               </p>
               <p className="text-sm text-gray-700 font-medium">
                 Pay in cash when you receive your order. Please prepare the exact amount.
               </p>
             </div>
           )}
-          
-          {selectedMethod === 'BANK_TRANSFER' && (
-            <div className="space-y-2">
-              <p className="text-xs font-black uppercase tracking-wider text-gray-600">
-                ℹ️ BANK INFORMATION
-              </p>
-              <p className="text-sm text-gray-700 font-medium">
-                You will receive bank transfer details after placing your order.
-                Please complete payment within 24 hours to confirm your order.
-              </p>
-            </div>
-          )}
+
         </div>
       )}
     </div>

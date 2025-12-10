@@ -4,6 +4,7 @@ import com.d4k.ecommerce.common.constants.ErrorCodes;
 import com.d4k.ecommerce.common.exception.BusinessException;
 import com.d4k.ecommerce.common.exception.ResourceNotFoundException;
 import com.d4k.ecommerce.common.exception.UnauthorizedException;
+import com.d4k.ecommerce.common.service.EmailService;
 import com.d4k.ecommerce.modules.cart.entity.Cart;
 import com.d4k.ecommerce.modules.cart.entity.CartItem;
 import com.d4k.ecommerce.modules.cart.repository.CartItemRepository;
@@ -39,7 +40,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Order Service Implementation
@@ -57,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final CouponRepository couponRepository;
     private final OrderMapper orderMapper;
+    private final EmailService emailService;
     
     private static final BigDecimal DEFAULT_SHIPPING_FEE = new BigDecimal("30000.00");
     // private static final AtomicLong orderCounter = new AtomicLong(1); // Removed in favor of DB check
@@ -240,6 +241,13 @@ public class OrderServiceImpl implements OrderService {
         
         log.info("Order created successfully: {}", savedOrder.getOrderNumber());
         
+        // Send email
+        try {
+            emailService.sendOrderConfirmation(savedOrder);
+        } catch (Exception e) {
+            log.error("Failed to send order confirmation email", e);
+        }
+        
         return orderMapper.toResponse(savedOrder);
     }
     
@@ -321,6 +329,12 @@ public class OrderServiceImpl implements OrderService {
         order.setCancelledAt(LocalDateTime.now());
         orderRepository.save(order);
         log.info("Order {} cancelled successfully", orderId);
+        
+        try {
+            emailService.sendOrderStatusUpdate(order);
+        } catch (Exception e) {
+            log.error("Failed to send cancellation email", e);
+        }
     }
     
     /**
@@ -399,6 +413,13 @@ public class OrderServiceImpl implements OrderService {
         }
         
         Order updatedOrder = orderRepository.save(order);
+        
+        try {
+            emailService.sendOrderStatusUpdate(updatedOrder);
+        } catch (Exception e) {
+            log.error("Failed to send status update email", e);
+        }
+        
         return orderMapper.toResponse(updatedOrder);
     }
     
@@ -432,6 +453,12 @@ public class OrderServiceImpl implements OrderService {
                 order.setPaymentStatus(PaymentStatus.PAID);
                 orderRepository.save(order);
                 log.info("Order {} confirmed and paid", orderId);
+                
+                try {
+                    emailService.sendOrderStatusUpdate(order);
+                } catch (Exception e) {
+                    log.error("Failed to send payment confirmation email", e);
+                }
             }
         } else {
             // Payment failed -> Cancel order and restore stock
@@ -465,6 +492,12 @@ public class OrderServiceImpl implements OrderService {
                 
                 orderRepository.save(order);
                 log.info("Order {} cancelled due to payment failure", orderId);
+                
+                try {
+                    emailService.sendOrderStatusUpdate(order);
+                } catch (Exception e) {
+                    log.error("Failed to send payment failure email", e);
+                }
             }
         }
     }
