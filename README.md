@@ -1,162 +1,112 @@
-# D4K Store - E-Commerce Platform
+# 🚀 D4K Store - Next-Gen E-Commerce Platform
 
-![D4K Store](https://img.shields.io/badge/D4K-Store-red?style=for-the-badge)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?style=for-the-badge&logo=spring)
+![D4K Store Banner](https://img.shields.io/badge/D4K%20Store-Premium%20E--Commerce-red?style=for-the-badge&logo=shopping-cart)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3-green?style=for-the-badge&logo=spring)
 ![React](https://img.shields.io/badge/React-18-blue?style=for-the-badge&logo=react)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?style=for-the-badge&logo=postgresql)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-orange?style=for-the-badge&logo=mysql)
+![VNPAY](https://img.shields.io/badge/Payment-VNPAY-blueviolet?style=for-the-badge&logo=credit-card)
+![JWT](https://img.shields.io/badge/Security-JWT-black?style=for-the-badge&logo=json-web-tokens)
 
-## 📖 Mô tả
+**D4K Store** là nền tảng thương mại điện tử hiện đại, mang phong cách **Streetwear / Brutalist Design** độc đáo. Hệ thống được xây dựng với kiến trúc Full-stack mạnh mẽ, tích hợp thanh toán trực tuyến, quản lý đơn hàng theo thời gian thực và các tính năng bảo mật thông minh.
 
-**D4K Store** là một nền tảng thương mại điện tử full-stack hiện đại, được thiết kế với phong cách Street/Y2K độc đáo. Dự án bao gồm backend REST API được xây dựng bằng Spring Boot và frontend SPA sử dụng React + Vite.
-
-## DEMO
-
-https://d4-k-store.vercel.app/
-
-## ✨ Tính năng chính
-
-### 🛒 Quản lý sản phẩm
-- Danh mục sản phẩm phân cấp
-- Tìm kiếm và lọc sản phẩm
-- Phân trang và sắp xếp
-- Quản lý variants (màu sắc, kích thước)
-
-### 🛍️ Giỏ hàng & Thanh toán
-- Thêm/xóa sản phẩm vào giỏ
-- Áp dụng mã giảm giá (Coupon)
-- Tính phí vận chuyển
-- Thanh toán COD & MoMo
-
-### 🎯 Hệ thống Recommendation
-- **Similar Products**: Đề xuất sản phẩm cùng danh mục
-- **Popular Products**: Sản phẩm bán chạy nhất
-
-### 👤 Quản lý người dùng
-- Đăng ký/Đăng nhập với JWT
-- Quản lý profile
-- Danh sách yêu thích (Wishlist)
-- Lịch sử đơn hàng
-
-### 📊 Admin Dashboard
-- Quản lý sản phẩm, danh mục
-- Quản lý đơn hàng
-- Thống kê doanh thu
-- Quản lý người dùng
-
-### Recommendation System (Product Suggestions)
-Hệ thống đề xuất sản phẩm được xây dựng theo mô hình đơn giản nhưng hiệu quả, giúp tăng tỷ lệ chuyển đổi và cải thiện trải nghiệm mua sắm.
-
-🔄 1. Related Products (Cùng Category)
-Khi người dùng xem chi tiết một sản phẩm, hệ thống sẽ tự động hiển thị danh sách sản phẩm gợi ý dựa trên:
-- Cùng category
-- Loại trừ chính sản phẩm hiện tại
-- Giới hạn số lượng đề xuất để UI gọn gàng 
-Logic backend:
-- Kết hợp category ID + trạng thái còn hàng
-- Ưu tiên sản phẩm mới trước
-Mục đích:
-- Tăng thời gian người dùng ở trên website và tạo cảm giác “đúng sở thích”.
-  
-🔥 2. Popular Products (Sản phẩm phổ biến)
-Hệ thống đánh giá mức độ phổ biến của sản phẩm dựa trên các tiêu chí:
-- Số lần được đặt mua (order count)
-- Số lần được thêm vào giỏ hàng
-Sản phẩm được phân tích và hiển thị ở các mục:
-- Trending Now
-- Top Picks For You
-
-## 🏗️ Kiến trúc
-
-```
-D4K-store/
-├── backend/                 # Spring Boot REST API
-│   ├── src/main/java/
-│   │   └── com/d4k/ecommerce/
-│   │       ├── common/          # Common utilities, responses
-│   │       ├── config/          # App configuration
-│   │       ├── modules/         # Feature modules
-│   │       │   ├── product/     # Product management
-│   │       │   ├── order/       # Order processing
-│   │       │   ├── user/        # User management
-│   │       │   ├── cart/        # Shopping cart
-│   │       │   ├── promotion/   # Coupons & promotions
-│   │       │   ├── recommendation/  # AI Recommendations
-│   │       │   └── ...
-│   │       └── security/        # JWT authentication
-│   └── src/main/resources/
-│       └── application.yml
-│
-├── frontend/                # React + Vite SPA
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/           # Page components
-│   │   ├── services/        # API services
-│   │   ├── store/           # Zustand state management
-│   │   └── ...
-│   └── package.json
-│
-└── README.md
-```
-
-## 🚀 Cài đặt & Chạy
-
-### Yêu cầu
-- Java 17+
-- Node.js 18+
-- PostgreSQL 15+
-- Maven 3.8+
-
-### Backend
-
-```bash
-cd backend
-
-# Cấu hình database trong application.yml
-cp src/main/resources/application.example.yml src/main/resources/application.yml
-
-# Chạy ứng dụng
-mvn spring-boot:run
-```
-
-Backend sẽ chạy tại: `http://localhost:8080`
-
-### Frontend
-
-```bash
-cd frontend
-
-# Cài đặt dependencies
-npm install
-
-# Chạy development server
-npm run dev
-```
-
-Frontend sẽ chạy tại: `http://localhost:5173`
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Framework**: Spring Boot 3.x
-- **Security**: Spring Security + JWT
-- **Database**: PostgreSQL + JPA/Hibernate
-- **Build**: Maven
-
-### Frontend
-- **Framework**: React 18
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **State**: Zustand
-- **HTTP Client**: Axios
-- **Icons**: React Icons
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
-## 👨‍💻 Author
-
-**Danku**
+🔗 **Live Demo:** [https://d4-k-store.vercel.app/](https://d4-k-store.vercel.app/)
 
 ---
 
+## ✨ Tính Năng Nổi Bật (Highlight Features)
+
+### �️ Trải Nghiệm Mua Sắm (Customer Experience)
+*   **Giao diện Brutalist Street Style**: Thiết kế độc quyền với hiệu ứng Glitch, tương phản cao, tối ưu cho mobile-first.
+*   **Tìm kiếm & Lọc thông minh**: Tìm sản phẩm theo từ khóa, lọc theo danh mục, khoảng giá và thương hiệu với tốc độ phản hồi tức thì.
+*   **Giỏ hàng & Checkout**:
+    *   Giỏ hàng đồng bộ thời gian thực.
+    *   Tích hợp mã giảm giá (Coupon System).
+    *   Tính phí vận chuyển tự động.
+*   **Thanh toán đa dạng**:
+    *   💳 **VNPAY QR**: Tích hợp cổng thanh toán VNPAY chính thức (Support IPN callback & checksum security).
+    *   � **COD**: Thanh toán khi nhận hàng.
+
+### 🛡️ Hệ Thống Bảo Mật & AI (Security & Intelligence)
+*   **Review Spam Protection**:
+    *   🛡️ **Rate Limiting**: Giới hạn tần suất đánh giá để chống spam.
+    *   🤬 **Content Moderation**: Tự động lọc từ ngữ không phù hợp (Bad word filter).
+    *   ✅ **Verified Purchase**: Chỉ cho phép đánh giá khi đã mua và nhận hàng thành công.
+*   **Authentication**: Hệ thống đăng nhập/đăng ký bảo mật với **Spring Security + JWT (Access Token & Refresh Token)**.
+*   **Forgot Password**: Quy trình quên mật khẩu an toàn qua Email OTP.
+
+### � Quản Trị Hệ Thống (Admin Dashboard)
+Một trang quản trị (Admin Panel) quyền lực dành cho chủ cửa hàng:
+*   **Real-time Analytics**:
+    *   📈 Biểu đồ doanh thu trực quan (Sales Chart) cập nhật theo thời gian thực (tính theo ngày đặt hàng).
+    *   🏆 Top sản phẩm bán chạy nhất.
+    *   💰 Thống kê tổng quan đơn hàng, người dùng mới.
+*   **Quản Lý Sản Phẩm (Product Management)**:
+    *   Thêm/Sửa/Xóa sản phẩm với **Multi-image Upload**.
+    *   Quản lý biến thể (Size/Color) và tồn kho (Stock) chi tiết.
+*   **Quản Lý Đơn Hàng (Order Management)**:
+    *   Cập nhật trạng thái đơn (Pending -> Confirmed -> Shipped -> Delivered).
+    *   Xử lý hoàn hàng/hủy đơn và tự động hoàn lại tồn kho (Stock Rollback).
+
+---
+
+## 🏗️ Kiến Trúc Hệ Thống (Architecture)
+
+### Backend (Spring Boot 3)
+*   **Core**: Spring Boot 3.3, Java 17.
+*   **Database**: MySQL, Spring Data JPA (Hibernate).
+*   **Security**: Spring Security 6, JWT Filter.
+*   **Payment**: VNPAY SDK Integration.
+*   **API Documentation**: Swagger UI / OpenAPI.
+*   **Storage**: Cloudinary (Image storage).
+
+### Frontend (React 18)
+*   **Core**: ReactJS, Vite.
+*   **State Management**: Zustand (nhẹ hơn và nhanh hơn Redux).
+*   **Routing**: React Router DOM v6.
+*   **UI/Styling**: Tailwind CSS, Framer Motion (Animations), Recharts (Biểu đồ).
+*   **HTTP Client**: Axios (với Interceptors xử lý Token tự động).
+
+---
+
+## 🚀 Hướng Dẫn Cài Đặt (Installation)
+
+### Yêu cầu hệ thống
+*   Java JDK 17+
+*   Node.js 18+
+*   MySQL 8.0+
+
+### 1. Backend Setup
+```bash
+cd backend
+# Cấu hình database trong src/main/resources/application.yml
+# Chạy ứng dụng
+mvn spring-boot:run
+```
+*Backend chạy tại: `http://localhost:8080`*
+
+### 2. Frontend Setup
+```bash
+cd frontend
+# Cài đặt thư viện
+npm install
+# Chạy development server
+npm run dev
+```
+*Frontend chạy tại: `http://localhost:5173`*
+
+---
+
+## � Screenshots
+
+| Trang chủ | Sản phẩm | Admin Dashboard |
+|-----------|-----------|-----------------|
+| ![Home](https://via.placeholder.com/300x150?text=Home+Page) | ![Product](https://via.placeholder.com/300x150?text=Product+Page) | ![Dashboard](https://via.placeholder.com/300x150?text=Admin+Dashboard) |
+
+---
+
+## 👨‍💻 Author
+**Danku** - *Fullstack Developer*
+*   Contact: [Danku2894](https://github.com/Danku2894)
+
+---
+*© 2024 D4K Store. All rights reserved.*
