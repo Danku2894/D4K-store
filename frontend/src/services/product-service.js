@@ -73,9 +73,9 @@ const productService = {
    * @returns {Promise}
    */
   searchProducts: (keyword, params = {}) => {
-    return apiClient.get('/products', {
+    return apiClient.get('/products/search', {
       params: {
-        search: keyword,
+        keyword,
         ...params,
       },
     });

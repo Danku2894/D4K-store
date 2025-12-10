@@ -56,9 +56,16 @@ const PublicLayout = () => {
  * Main App Component
  * Router và layout chính
  */
+import ScrollToTop from '@components/common/ScrollToTop';
+
+/**
+ * Main App Component
+ * Router và layout chính
+ */
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Public Routes wrapped in PublicLayout */}
         <Route element={<PublicLayout />}>

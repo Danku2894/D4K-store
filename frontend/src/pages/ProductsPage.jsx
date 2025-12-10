@@ -32,6 +32,7 @@ const ProductsPage = () => {
     size: searchParams.get('size') || '',
     color: searchParams.get('color') || '',
     sort: searchParams.get('sort') || 'createdAt,desc',
+    search: searchParams.get('search') || '',
   });
 
   useEffect(() => {
@@ -47,6 +48,7 @@ const ProductsPage = () => {
       size: searchParams.get('size') || '',
       color: searchParams.get('color') || '',
       sort: searchParams.get('sort') || 'createdAt,desc',
+      search: searchParams.get('search') || '',
     });
     setCurrentPage(1);
   }, [searchParams]);
@@ -73,7 +75,10 @@ const ProductsPage = () => {
 
       let response;
       
-      if (filters.categoryId) {
+      if (filters.search) {
+        // If search keyword is present, use search endpoint
+        response = await productService.searchProducts(filters.search, params);
+      } else if (filters.categoryId) {
         // If category is selected, use the category specific endpoint
         // Don't send categoryId in params since it's already in the URL
         const { categoryId, ...paramsWithoutCategory } = params;
@@ -105,6 +110,7 @@ const ProductsPage = () => {
     if (newFilters.size) params.set('size', newFilters.size);
     if (newFilters.color) params.set('color', newFilters.color);
     if (newFilters.sort) params.set('sort', newFilters.sort);
+    if (newFilters.search) params.set('search', newFilters.search);
     
     setSearchParams(params);
     // State update will happen via useEffect [searchParams]

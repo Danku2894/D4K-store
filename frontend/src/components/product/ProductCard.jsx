@@ -84,10 +84,10 @@ const ProductCard = ({ product }) => {
   return (
     <Link 
       to={`/product/${product.id}`}
-      className="product-card-street group block"
+      className="product-card-street group h-full flex flex-col"
     >
       {/* Image Container */}
-      <div className="relative overflow-hidden aspect-[3/4] bg-light-200">
+      <div className="relative overflow-hidden aspect-[3/4] bg-light-200 shrink-0">
         {/* Product Image */}
         <img
           src={product.imageUrl || '/placeholder-product.jpg'}
@@ -171,7 +171,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Info */}
-      <div className="p-4 space-y-2 bg-light-50 flex flex-col min-h-[180px]">
+      <div className="p-4 space-y-2 bg-light-50 flex flex-col grow min-h-[180px]">
         {/* Category */}
         {product.categoryName && (
           <p className="text-xs text-gray-600 font-bold uppercase tracking-widest">
@@ -185,12 +185,10 @@ const ProductCard = ({ product }) => {
           {product.name}
         </h3>
 
-        {/* Description */}
-        {product.description && (
-          <p className="text-gray-600 text-sm line-clamp-2 min-h-[40px]">
-            {product.description}
-          </p>
-        )}
+        {/* Description - Always render to maintain height consistency if needed, but flex-grow handles spacing */}
+        <p className="text-gray-600 text-sm line-clamp-2 min-h-[40px]">
+          {product.description || ''}
+        </p>
 
         {/* Spacer to push price to bottom */}
         <div className="flex-1"></div>
@@ -223,7 +221,7 @@ const ProductCard = ({ product }) => {
 
       {/* Decorative Bottom Line */}
       <div className="h-1 bg-dark-950 
-                    opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-300 shrink-0"></div>
     </Link>
   );
 };

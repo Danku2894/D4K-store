@@ -120,8 +120,16 @@ const OrderDetailPage = () => {
               <div className="space-y-6">
                 {order.orderItems?.map((item) => (
                   <div key={item.id} className="flex gap-4 pb-6 border-b-2 border-gray-100 last:border-0 last:pb-0">
-                    <div className="w-20 h-20 bg-gray-200 border-2 border-dark-950 flex items-center justify-center shrink-0">
-                      <FiPackage size={24} className="text-gray-400" />
+                    <div className="w-20 h-20 bg-gray-200 border-2 border-dark-950 flex items-center justify-center shrink-0 overflow-hidden">
+                      {item.productImageUrl || item.imageUrl ? (
+                        <img 
+                          src={item.productImageUrl || item.imageUrl} 
+                          alt={item.productName} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FiPackage size={24} className="text-gray-400" />
+                      )}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg uppercase mb-1">{item.productName}</h3>

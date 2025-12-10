@@ -14,6 +14,7 @@ import { toast } from 'react-hot-toast';
 import useCartStore from '@store/use-cart-store';
 import useWishlistStore from '@store/use-wishlist-store';
 import authService from '@services/auth-service';
+import productService from '@services/product-service';
 import logo from '../../assets/images/d4k-logo.png';
 
 /**
@@ -98,6 +99,68 @@ const Header = () => {
     });
   };
 
+  /* Suggestions Logic */
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery.trim().length >= 1) {
+        const fetchSuggestions = async () => {
+          try {
+            console.log('Fetching suggestions for:', searchQuery); // Debug log
+            const response = await productService.searchProducts(searchQuery, { size: 5 });
+            console.log('Suggestions response:', response); // Debug log
+            setSuggestions(response.data?.content || []);
+            setShowSuggestions(true);
+          } catch (error) {
+            console.error('Error fetching suggestions:', error);
+          }
+        };
+        fetchSuggestions();
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  const handleSuggestionClick = (productId) => {
+    setSearchQuery('');
+    setShowSuggestions(false);
+    navigate(`/product/${productId}`);
+  };
+
+  const renderSuggestions = () => {
+    if (!showSuggestions || suggestions.length === 0) return null;
+    return (
+      <div className="absolute top-full left-0 w-full bg-light-50 border-2 border-dark-950 mt-1 shadow-street z-[60]">
+        {suggestions.map((product) => (
+          <div 
+            key={product.id}
+            onMouseDown={() => handleSuggestionClick(product.id)}
+            className="flex items-center justify-between p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0 transition-colors"
+          >
+            <div className="flex items-center flex-1 min-w-0 mr-4">
+              <img 
+                src={product.imageUrl || 'https://placehold.co/48x48?text=No+Img'} 
+                alt={product.name}
+                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/48x48?text=No+Img'; }}
+                className="w-12 h-12 object-cover border border-dark-950 mr-4 shrink-0"
+              />
+              <p className="text-base font-bold text-dark-950 truncate uppercase">{product.name}</p>
+            </div>
+            <p className="text-sm text-street-red font-bold whitespace-nowrap flex-shrink-0">
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-light-50 border-b-4 border-dark-950">
       <div className="container-street">
@@ -141,12 +204,14 @@ const Header = () => {
           </nav>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
+          <div className="hidden lg:flex items-center flex-1 max-w-md mx-8 relative">
             <form onSubmit={handleSearch} className="w-full relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery.length >= 1 && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 placeholder="SEARCH..."
                 className="w-full px-4 py-2 pr-10 bg-light-100 border-2 border-dark-950 
                          text-dark-950 placeholder-gray-500 focus:outline-none focus:border-street-red 
@@ -159,6 +224,7 @@ const Header = () => {
                 <FiSearch size={20} />
               </button>
             </form>
+            {renderSuggestions()}
           </div>
 
           {/* Icons - Desktop */}
@@ -310,12 +376,14 @@ const Header = () => {
         </div>
 
         {/* Mobile Search Bar */}
-        <div className="lg:hidden pb-4">
+        <div className="lg:hidden pb-4 relative">
           <form onSubmit={handleSearch} className="w-full relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchQuery.length >= 1 && setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               placeholder="SEARCH..."
               className="w-full px-4 py-2 pr-10 bg-light-100 border-2 border-dark-950 
                        text-dark-950 placeholder-gray-500 focus:outline-none focus:border-street-red 
@@ -328,6 +396,7 @@ const Header = () => {
               <FiSearch size={20} />
             </button>
           </form>
+          { renderSuggestions() }
         </div>
       </div>
 
