@@ -13,6 +13,8 @@ import CheckoutPage from '@pages/CheckoutPage';
 import OrderSuccessPage from '@pages/OrderSuccessPage';
 import LoginPage from '@pages/LoginPage';
 import RegisterPage from '@pages/RegisterPage';
+import ForgotPasswordPage from '@pages/ForgotPasswordPage';
+import ResetPasswordPage from '@pages/ResetPasswordPage';
 import PaymentCallbackPage from '@pages/PaymentCallbackPage';
 import AboutPage from '@pages/AboutPage';
 
@@ -71,11 +73,12 @@ function App() {
           <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/addresses" element={<AddressesPage />} />
           <Route path="/profile/password" element={<ChangePasswordPage />} />
           <Route path="/profile/orders" element={<OrdersPage />} />
-          <Route path="/profile/orders/:id" element={<OrderDetailPage />} />
           <Route path="/profile/orders/:id" element={<OrderDetailPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/about" element={<AboutPage />} />

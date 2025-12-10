@@ -62,5 +62,27 @@ public class AuthController {
         
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * Quên mật khẩu
+     * POST /api/v1/auth/forgot-password
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody com.d4k.ecommerce.modules.auth.dto.request.ForgotPasswordRequest request) {
+        authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success(null, "Password reset link sent to your email"));
+    }
+
+    /**
+     * Đặt lại mật khẩu
+     * POST /api/v1/auth/reset-password
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody com.d4k.ecommerce.modules.auth.dto.request.ResetPasswordRequest request) {
+        authService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.success(null, "Password successfully reset"));
+    }
 }
 

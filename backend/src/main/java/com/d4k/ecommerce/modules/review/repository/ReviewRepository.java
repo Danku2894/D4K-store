@@ -46,6 +46,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     /**
      * Đếm số lượng reviews của product
      */
+    /**
+     * Đếm số lượng reviews của product
+     */
     Long countByProductId(Long productId);
+
+    /**
+     * Lấy review mới nhất của user (để check rate limit)
+     */
+    Optional<Review> findTopByUserIdOrderByCreatedAtDesc(Long userId);
 }
 

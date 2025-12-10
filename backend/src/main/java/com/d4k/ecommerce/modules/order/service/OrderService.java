@@ -74,5 +74,11 @@ public interface OrderService {
      * @return danh sách orders
      */
     Page<OrderResponse> searchOrders(String keyword, Pageable pageable);
+    /**
+     * Update order status after payment (System)
+     * @param orderId order ID
+     * @param success payment success status
+     */
+    void updateOrderAfterPayment(Long orderId, boolean success);
 }
 

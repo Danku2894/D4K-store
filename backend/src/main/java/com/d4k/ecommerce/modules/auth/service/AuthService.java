@@ -24,5 +24,9 @@ public interface AuthService {
      * @return token và thông tin user
      */
     LoginResponse login(LoginRequest request);
+
+    void forgotPassword(String email);
+
+    void resetPassword(String token, String newPassword);
 }
 

@@ -24,7 +24,11 @@ public class UpdateUserRequest {
     
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
+    
+    private String phoneNumber;
     
     private RoleType role;
     

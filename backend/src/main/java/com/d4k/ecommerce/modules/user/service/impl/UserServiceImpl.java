@@ -88,6 +88,10 @@ public class UserServiceImpl implements UserService {
         if (request.getRole() != null) {
             user.setRole(request.getRole());
         }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
         
         if (request.getIsActive() != null) {
             user.setIsActive(request.getIsActive());

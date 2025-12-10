@@ -415,6 +415,60 @@ public class OrderServiceImpl implements OrderService {
         return orders.map(orderMapper::toResponse);
     }
     
+    /**
+     * Update order status after payment
+     */
+    @Override
+    @Transactional
+    public void updateOrderAfterPayment(Long orderId, boolean success) {
+        log.info("Updating order {} after payment. Success: {}", orderId, success);
+        
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+        
+        if (success) {
+            if (order.getStatus() == OrderStatus.PENDING) {
+                order.setStatus(OrderStatus.CONFIRMED);
+                order.setPaymentStatus(PaymentStatus.PAID);
+                orderRepository.save(order);
+                log.info("Order {} confirmed and paid", orderId);
+            }
+        } else {
+            // Payment failed -> Cancel order and restore stock
+            if (order.getStatus() != OrderStatus.CANCELLED && order.getStatus() != OrderStatus.DELIVERED) {
+                order.setStatus(OrderStatus.CANCELLED);
+                order.setPaymentStatus(PaymentStatus.FAILED);
+                order.setCancelledAt(LocalDateTime.now());
+                order.setCancelReason("Payment Failed / Cancelled by User");
+                
+                // Restore stock
+                for (OrderItem item : order.getOrderItems()) {
+                    Product product = item.getProduct();
+                    if (item.getSize() != null) {
+                        ProductVariant variant = product.getVariants().stream()
+                            .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
+                            .filter(v -> item.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(item.getColor())))
+                            .findFirst()
+                            .orElse(null);
+                        
+                        if (variant != null) {
+                            variant.setStock(variant.getStock() + item.getQuantity());
+                        }
+                    } else {
+                         if (!product.getVariants().isEmpty()) {
+                              ProductVariant variant = product.getVariants().get(0);
+                              variant.setStock(variant.getStock() + item.getQuantity());
+                         }
+                    }
+                    productRepository.save(product);
+                }
+                
+                orderRepository.save(order);
+                log.info("Order {} cancelled due to payment failure", orderId);
+            }
+        }
+    }
+    
     // ============== PRIVATE HELPER METHODS ==============
     
     /**

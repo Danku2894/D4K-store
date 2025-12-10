@@ -73,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
                 .id(savedUser.getId())
                 .fullName(savedUser.getFullName())
                 .email(savedUser.getEmail())
+                .phoneNumber(savedUser.getPhoneNumber())
                 .role(savedUser.getRole())
                 .createdAt(savedUser.getCreatedAt())
                 .build();
@@ -113,6 +114,7 @@ public class AuthServiceImpl implements AuthService {
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
                 .role(user.getRole())
                 .build();
         
@@ -121,6 +123,45 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .user(userResponse)
                 .build();
+    }
+    
+    private final com.d4k.ecommerce.common.service.EmailService emailService;
+
+    @Override
+    @Transactional
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException("User not found", ErrorCodes.USER_NOT_FOUND));
+
+        String token = java.util.UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15)); // Token valid for 15 mins
+        
+        userRepository.save(user);
+
+        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+        String emailBody = "<h3>Password Reset Request</h3>" +
+                "<p>Click the link below to reset your password:</p>" +
+                "<a href=\"" + resetLink + "\">Reset Password</a>" +
+                "<p>This link will expire in 15 minutes.</p>";
+
+        emailService.sendEmail(email, "Password Reset Request", emailBody);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        User user = userRepository.findByResetPasswordToken(token)
+                .orElseThrow(() -> new BusinessException("Invalid token", ErrorCodes.INVALID_TOKEN));
+
+        if (user.getResetPasswordTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new BusinessException("Token expired", ErrorCodes.TOKEN_EXPIRED);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        userRepository.save(user);
     }
 }
 

@@ -24,6 +24,35 @@ const authService = {
   },
 
   /**
+   * Request a password reset link
+   * @param {string} email - The user's email address
+   * @returns {Promise}
+   */
+  forgotPassword: async (email) => {
+    try {
+      const response = await apiClient.post('/auth/forgot-password', { email });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Reset user's password
+   * @param {string} token - The reset token received via email
+   * @param {string} newPassword - The new password
+   * @returns {Promise}
+   */
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await apiClient.post('/auth/reset-password', { token, newPassword });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
    * Logout user
    * Clear tokens and user data
    */

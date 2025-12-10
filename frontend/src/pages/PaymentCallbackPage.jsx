@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FiCheckCircle, FiXCircle, FiLoader } from 'react-icons/fi';
 import apiClient from '@services/api-client';
+import useCartStore from '@store/use-cart-store';
 
 const PaymentCallbackPage = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [status, setStatus] = useState('processing');
     const [message, setMessage] = useState('Verifying payment...');
+    const clearCart = useCartStore((state) => state.clearCart);
 
     useEffect(() => {
         const verifyPayment = async () => {
@@ -23,6 +25,7 @@ const PaymentCallbackPage = () => {
                 if (response.success) {
                     setStatus('success');
                     setMessage('Payment Successful!');
+                    clearCart();
                     
                     // Extract Order ID if possible (from vnp_TxnRef or OrderInfo)
                     // vnp_TxnRef in our code is orderId

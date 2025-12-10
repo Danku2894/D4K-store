@@ -45,5 +45,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Đếm số users mới từ một thời điểm
      */
     Long countByCreatedAtAfter(LocalDateTime dateTime);
+    /**
+     * Tìm user theo token reset password
+     */
+    Optional<User> findByResetPasswordToken(String token);
 }
 

@@ -23,6 +23,8 @@ public class UserResponse {
     
     private String email;
     
+    private String phoneNumber;
+    
     private RoleType role;
     
     private LocalDateTime createdAt;

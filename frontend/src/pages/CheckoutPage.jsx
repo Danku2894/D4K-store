@@ -133,9 +133,6 @@ const CheckoutPage = () => {
       const response = await orderService.createOrder(orderData);
 
       if (response.success && response.data) {
-        // Clear cart
-        clearCart();
-
         // Handle VNPAY Redirect
         if (selectedPaymentMethod === 'VNPAY') {
            try {
@@ -164,6 +161,8 @@ const CheckoutPage = () => {
            return;
         }
 
+        // For COD or other methods that don't redirect externally immediately
+        clearCart();
         toast.success('ORDER PLACED SUCCESSFULLY!', {
           icon: '🎉',
           duration: 5000,

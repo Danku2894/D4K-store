@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
     
     private final PaymentService paymentService;
+    private final com.d4k.ecommerce.modules.order.service.OrderService orderService;
 
     @GetMapping("/vn-pay")
     public ResponseEntity<ApiResponse<String>> createPaymentUrl(
@@ -35,12 +36,23 @@ public class PaymentController {
         // For now, we will just return the params as success
         // In real app, we check vnp_ResponseCode
         String responseCode = request.getParameter("vnp_ResponseCode");
-        if ("00".equals(responseCode)) {
-             // Payment successful
-             // TODO: Update order status logic here or in Service
-             return ResponseEntity.ok(ApiResponse.success(null, "Payment successful"));
-        } else {
-             return ResponseEntity.badRequest().body(ApiResponse.error("Payment failed", "VNPAY Response Code: " + responseCode));
+        String txnRef = request.getParameter("vnp_TxnRef");
+        
+        try {
+            Long orderId = Long.parseLong(txnRef);
+            
+            if ("00".equals(responseCode)) {
+                 // Payment successful
+                 orderService.updateOrderAfterPayment(orderId, true);
+                 return ResponseEntity.ok(ApiResponse.success(null, "Payment successful"));
+            } else {
+                 // Payment failed
+                 orderService.updateOrderAfterPayment(orderId, false);
+                 return ResponseEntity.badRequest().body(ApiResponse.error("Payment failed", "VNPAY Response Code: " + responseCode));
+            }
+        } catch (NumberFormatException e) {
+            log.error("Invalid order ID in VNPAY return: {}", txnRef);
+            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid Order ID", e.getMessage()));
         }
     }
 }

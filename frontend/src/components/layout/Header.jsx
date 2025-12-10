@@ -14,6 +14,7 @@ import { toast } from 'react-hot-toast';
 import useCartStore from '@store/use-cart-store';
 import useWishlistStore from '@store/use-wishlist-store';
 import authService from '@services/auth-service';
+import logo from '../../assets/images/d4k-logo.png';
 
 /**
  * Header Component - Y2K Style
@@ -105,7 +106,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <img 
-              src="/src/assets/images/Black White Grunge Typographic  Handwritten Apparel Logo (1).png" 
+              src={logo} 
               alt="D4K Logo" 
               className="h-10 md:h-14 object-contain scale-[1.75] origin-center hover:scale-[1.85] transition-transform"
             />

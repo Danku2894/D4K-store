@@ -34,6 +34,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final com.d4k.ecommerce.modules.order.repository.OrderRepository orderRepository;
     private final ReviewMapper reviewMapper;
+    private final com.d4k.ecommerce.common.service.ContentModerationService contentModerationService;
     
     /**
      * Tạo review mới
@@ -55,6 +56,19 @@ public class ReviewServiceImpl implements ReviewService {
         if (reviewRepository.existsByUserIdAndProductId(userId, request.getProductId())) {
             log.error("User {} already reviewed product {}", userId, request.getProductId());
             throw new BusinessException("You have already reviewed this product", "REVIEW_ALREADY_EXISTS");
+        }
+
+        // 1. RATE LIMITING: Check last review time (Limit: 1 review per 60 seconds)
+        reviewRepository.findTopByUserIdOrderByCreatedAtDesc(userId).ifPresent(lastReview -> {
+            long secondsSinceLastReview = java.time.Duration.between(lastReview.getCreatedAt(), java.time.LocalDateTime.now()).getSeconds();
+            if (secondsSinceLastReview < 60) {
+                throw new BusinessException("You are reviewing too fast. Please wait " + (60 - secondsSinceLastReview) + " seconds.", "RATE_LIMIT_EXCEEDED");
+            }
+        });
+
+        // 2. CONTENT MODERATION
+        if (!contentModerationService.isClean(request.getComment())) {
+            throw new BusinessException("Your review contains inappropriate language.", "CONTENT_VIOLATION");
         }
         
         // Validate user đã mua sản phẩm này chưa
