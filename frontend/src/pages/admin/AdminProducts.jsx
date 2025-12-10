@@ -44,6 +44,10 @@ const AdminProducts = () => {
   
   const [uploading, setUploading] = useState(false);
 
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+
   useEffect(() => {
     document.title = 'Products - D4K Admin';
     fetchProducts();
@@ -136,8 +140,41 @@ const AdminProducts = () => {
   };
 
   const removeAdditionalImage = (index) => {
-    setAdditionalFiles(prev => prev.filter((_, i) => i !== index));
-    setAdditionalPreviews(prev => prev.filter((_, i) => i !== index));
+    // If it's a file, remove it from files array
+    // If it's a URL (existing image), we need to handle it differently
+    // For simplicity, we just rebuild arrays
+    
+    // Note: This logic assumes additionalPreviews and additionalFiles/URLs match by index visually
+    // In edit mode, we might have URLs mixed with Files. 
+    // Ideally we should separate "existingImages" and "newImages" but let's try to handle in one list for UI
+    
+    // Better strategy:
+    // When removing, we check if it's a URL or DataURL (preview)
+    // Actually, simple way: remove from both valid lists
+    
+    // If index < existing images count -> remove from existing images list
+    // Else -> remove from new files list
+    
+    // Wait, let's keep it simple: just remove from previews and handle logic in submit
+    // BUT we need to know WHICH one to remove.
+    
+    // REFACTOR:
+    // Let's rely on newProduct.additionalImages (URLs) and additionalFiles (Files)
+    // Previews will be combined: [...urls, ...filePreviews]
+    
+    // Determine if we are removing an existing URL or a new File
+    const existingCount = newProduct.additionalImages.length;
+    
+    if (index < existingCount) {
+        // Removing existing URL
+        const updatedUrls = newProduct.additionalImages.filter((_, i) => i !== index);
+        setNewProduct(prev => ({ ...prev, additionalImages: updatedUrls }));
+    } else {
+        // Removing new file
+        const fileIndex = index - existingCount;
+        setAdditionalFiles(prev => prev.filter((_, i) => i !== fileIndex));
+        setAdditionalPreviews(prev => prev.filter((_, i) => i !== fileIndex));
+    }
   };
 
   // Variant Handlers
@@ -170,20 +207,75 @@ const AdminProducts = () => {
     return newProduct.variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
   };
 
-  const handleCreateProduct = async (e) => {
+  const resetForm = () => {
+    setNewProduct({
+        name: '',
+        description: '',
+        price: '',
+        categoryId: '',
+        imageUrl: '',
+        additionalImages: [],
+        isActive: true,
+        variants: [{ size: 'M', color: 'BLACK', stock: 10, priceAdjustment: 0 }]
+      });
+      setImageFile(null);
+      setImagePreview(null);
+      setAdditionalFiles([]);
+      setAdditionalPreviews([]);
+      setIsEditing(false);
+      setEditId(null);
+  };
+
+  const handleEdit = async (product) => {
+    try {
+        setLoading(true);
+        // Fetch full details (variants might not be in list view)
+        const response = await productService.getProductById(product.id);
+        if (response.success) {
+            const data = response.data;
+            setIsEditing(true);
+            setEditId(data.id);
+            setNewProduct({
+                name: data.name,
+                description: data.description || '',
+                price: data.price,
+                categoryId: data.categoryId || (data.category ? data.category.id : ''),
+                imageUrl: data.imageUrl || '',
+                additionalImages: data.additionalImages || [],
+                isActive: data.isActive,
+                variants: data.variants && data.variants.length > 0 ? data.variants : [{ size: 'M', color: 'BLACK', stock: 10, priceAdjustment: 0 }]
+            });
+            setImagePreview(data.imageUrl);
+            setAdditionalPreviews([]); // Clear file previews, existing URLs are shown from newProduct.additionalImages
+            setShowModal(true);
+        }
+    } catch (err) {
+        toast.error('FAILED TO FETCH PRODUCT DETAILS');
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const handleCreateOrUpdateProduct = async (e) => {
     e.preventDefault();
     try {
-      // Validation
-      if (newProduct.variants.some(v => !v.size || !v.stock)) {
+      // Frontend Validation
+      if (!newProduct.categoryId) {
+        toast.error('PLEASE SELECT A CATEGORY');
+        return;
+      }
+      
+      // Stock validation: strictly check for empty string or null/undefined, allow 0
+      if (newProduct.variants.some(v => !v.size || v.stock === '' || v.stock === null || v.stock === undefined)) {
         toast.error('PLEASE FILL ALL VARIANT FIELDS (SIZE & STOCK)');
         return;
       }
 
       setUploading(true);
-      let mainImageUrl = '';
-      let additionalImageUrls = [];
+      let mainImageUrl = newProduct.imageUrl;
+      let additionalImageUrls = [...newProduct.additionalImages]; 
       
-      // Upload Main Image
+      // Upload Main Image if changed
       if (imageFile) {
         toast.loading('UPLOADING MAIN IMAGE...');
         const uploadResponse = await uploadService.uploadFile(imageFile);
@@ -192,7 +284,7 @@ const AdminProducts = () => {
         }
       }
 
-      // Upload Additional Images
+      // Upload Additional Images (New Files)
       if (additionalFiles.length > 0) {
         toast.loading(`UPLOADING ${additionalFiles.length} ADDITIONAL IMAGES...`);
         for (const file of additionalFiles) {
@@ -210,7 +302,7 @@ const AdminProducts = () => {
         description: newProduct.description,
         price: parseFloat(newProduct.price),
         categoryId: parseInt(newProduct.categoryId),
-        imageUrl: mainImageUrl || newProduct.imageUrl || null,
+        imageUrl: mainImageUrl || null,
         additionalImages: additionalImageUrls,
         isActive: newProduct.isActive,
         variants: newProduct.variants.map(v => ({
@@ -221,29 +313,35 @@ const AdminProducts = () => {
         }))
       };
       
-      await productService.createProduct(productData);
-      toast.success('PRODUCT CREATED!');
+      if (isEditing) {
+          await productService.updateProduct(editId, productData);
+          toast.success('PRODUCT UPDATED!');
+      } else {
+          await productService.createProduct(productData);
+          toast.success('PRODUCT CREATED!');
+      }
+
       setShowModal(false);
       fetchProducts();
-      
-      // Reset form
-      setNewProduct({
-        name: '',
-        description: '',
-        price: '',
-        categoryId: '',
-        imageUrl: '',
-        additionalImages: [],
-        isActive: true,
-        variants: [{ size: 'M', color: 'BLACK', stock: 10, priceAdjustment: 0 }]
-      });
-      setImageFile(null);
-      setImagePreview(null);
-      setAdditionalFiles([]);
-      setAdditionalPreviews([]);
+      resetForm();
     } catch (err) {
-      console.error('Error creating product:', err);
-      const errorMsg = err.response?.data?.message || 'FAILED TO CREATE PRODUCT';
+      console.error('Error saving product:', err);
+      // Improve Error Message Extraction
+      let errorMsg = 'FAILED TO SAVE PRODUCT';
+      
+      if (err.response?.data) {
+          if (err.response.data.message) {
+              errorMsg = err.response.data.message;
+          }
+          // Handle Spring Validation Errors
+          if (err.response.data.errors && Array.isArray(err.response.data.errors)) {
+              const firstError = err.response.data.errors[0];
+              if (firstError.defaultMessage) {
+                  errorMsg = firstError.defaultMessage;
+              }
+          }
+      }
+      
       toast.error(errorMsg.toUpperCase());
     } finally {
       setUploading(false);
@@ -375,6 +473,13 @@ const AdminProducts = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center space-x-2">
                           <button
+                            onClick={() => handleEdit(product)}
+                            className="p-2 border-2 border-dark-950 hover:bg-dark-950 hover:text-light-50 transition-all"
+                            title="Edit"
+                          >
+                            <FiEdit size={16} />
+                          </button>
+                          <button
                             onClick={() => handleDelete(product.id)}
                             className="p-2 border-2 border-street-red text-street-red hover:bg-street-red hover:text-light-50 transition-all"
                             title="Delete"
@@ -432,18 +537,18 @@ const AdminProducts = () => {
           </div>
         )}
 
-        {/* Create Product Modal */}
+        {/* Create/Edit Product Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/80 backdrop-blur-sm">
             <div className="bg-light-50 w-full max-w-3xl border-4 border-dark-950 max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b-4 border-dark-950 flex justify-between items-center bg-street-red text-light-50">
-                <h2 className="text-2xl font-display font-black uppercase tracking-tight">ADD NEW PRODUCT</h2>
-                <button onClick={() => setShowModal(false)} className="p-1 hover:bg-dark-950 transition-colors">
+                <h2 className="text-2xl font-display font-black uppercase tracking-tight">{isEditing ? 'EDIT PRODUCT' : 'ADD NEW PRODUCT'}</h2>
+                <button onClick={() => { setShowModal(false); resetForm(); }} className="p-1 hover:bg-dark-950 transition-colors">
                   <FiX size={24} />
                 </button>
               </div>
               
-              <form onSubmit={handleCreateProduct} className="p-6 space-y-6">
+              <form onSubmit={handleCreateOrUpdateProduct} className="p-6 space-y-6">
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -564,6 +669,7 @@ const AdminProducts = () => {
                           onClick={() => {
                             setImageFile(null);
                             setImagePreview(null);
+                            setNewProduct(prev => ({ ...prev, imageUrl: '' })); // Clear url if removed
                           }}
                           className="w-full px-4 py-2 border-2 border-street-red text-street-red font-bold uppercase hover:bg-street-red hover:text-light-50 transition-colors"
                         >
@@ -591,24 +697,43 @@ const AdminProducts = () => {
                   <label className="text-sm font-black uppercase tracking-wide">Additional Images (Max 5)</label>
                   <div className="border-2 border-dashed border-dark-950 p-4">
                     <div className="grid grid-cols-3 gap-2 mb-2">
-                      {additionalPreviews.map((preview, index) => (
-                        <div key={index} className="relative group">
-                          <img 
-                            src={preview} 
-                            alt={`Preview ${index}`} 
-                            className="w-full h-24 object-cover border-2 border-dark-950"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeAdditionalImage(index)}
-                            className="absolute top-1 right-1 p-1 bg-street-red text-light-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <FiX size={12} />
-                          </button>
-                        </div>
-                      ))}
+                        {/* Show Existing URLs */}
+                        {newProduct.additionalImages.map((url, index) => (
+                             <div key={`url-${index}`} className="relative group">
+                              <img 
+                                src={url} 
+                                alt={`Existing ${index}`} 
+                                className="w-full h-24 object-cover border-2 border-dark-950"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeAdditionalImage(index)}
+                                className="absolute top-1 right-1 p-1 bg-street-red text-light-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <FiX size={12} />
+                              </button>
+                            </div>
+                        ))}
+
+                        {/* Show New File Previews */}
+                        {additionalPreviews.map((preview, index) => (
+                            <div key={`preview-${index}`} className="relative group">
+                            <img 
+                                src={preview} 
+                                alt={`Preview ${index}`} 
+                                className="w-full h-24 object-cover border-2 border-dark-950"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => removeAdditionalImage(newProduct.additionalImages.length + index)}
+                                className="absolute top-1 right-1 p-1 bg-street-red text-light-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <FiX size={12} />
+                            </button>
+                            </div>
+                        ))}
                       
-                      {additionalPreviews.length < 5 && (
+                      {newProduct.additionalImages.length + additionalPreviews.length < 5 && (
                         <label className="flex flex-col items-center justify-center h-24 border-2 border-dark-950 cursor-pointer hover:bg-gray-100 transition-colors">
                           <FiPlus size={24} className="text-gray-400" />
                           <span className="text-xs font-bold uppercase text-gray-600 mt-1">ADD MORE</span>
@@ -652,7 +777,7 @@ const AdminProducts = () => {
                 <div className="pt-4 flex justify-end space-x-4">
                   <button
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => { setShowModal(false); resetForm(); }}
                     className="px-6 py-3 border-2 border-dark-950 font-bold uppercase hover:bg-gray-200 transition-colors"
                   >
                     CANCEL
@@ -662,7 +787,7 @@ const AdminProducts = () => {
                     disabled={uploading}
                     className="px-6 py-3 border-2 border-dark-950 bg-dark-950 text-light-50 font-bold uppercase hover:bg-street-red hover:border-street-red transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {uploading ? 'UPLOADING...' : 'CREATE PRODUCT'}
+                    {uploading ? 'SAVING...' : (isEditing ? 'UPDATE PRODUCT' : 'CREATE PRODUCT')}
                   </button>
                 </div>
               </form>

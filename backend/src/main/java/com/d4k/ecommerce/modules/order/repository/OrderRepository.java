@@ -49,23 +49,26 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Tính tổng doanh thu (chỉ orders DELIVERED)
      */
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'DELIVERED'")
+    /**
+     * Tính tổng doanh thu (bao gồm CONFIRMED, SHIPPED, DELIVERED)
+     */
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED')")
     BigDecimal sumTotalRevenue();
     
     /**
-     * Tính doanh thu theo tháng
+     * Tính doanh thu theo tháng (createdAt)
      */
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o " +
-           "WHERE o.status = 'DELIVERED' " +
-           "AND YEAR(o.completedAt) = :year AND MONTH(o.completedAt) = :month")
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "AND YEAR(o.createdAt) = :year AND MONTH(o.createdAt) = :month")
     BigDecimal sumRevenueByMonth(@Param("year") int year, @Param("month") int month);
     
     /**
-     * Tính doanh thu theo năm
+     * Tính doanh thu theo năm (createdAt)
      */
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o " +
-           "WHERE o.status = 'DELIVERED' " +
-           "AND YEAR(o.completedAt) = :year")
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "AND YEAR(o.createdAt) = :year")
     BigDecimal sumRevenueByYear(@Param("year") int year);
     
     /**
@@ -100,23 +103,23 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "LOWER(o.receiverName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(o.receiverPhone) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Order> searchOrders(@Param("keyword") String keyword, Pageable pageable);
+
     /**
      * Tìm order number mới nhất theo prefix (để generate order number tiếp theo)
      */
-
     Optional<Order> findTopByOrderNumberStartingWithOrderByOrderNumberDesc(String prefix);
 
     // ================= ANALYTICS QUERIES =================
 
     /**
-     * Thống kê doanh thu theo ngày
+     * Thống kê doanh thu theo ngày (dựa trên createdAt)
      * Return: [Date(backend-dependent), BigDecimal(revenue), Long(count)]
      */
-    @Query("SELECT DATE(o.completedAt) as date, SUM(o.totalAmount), COUNT(o) " +
+    @Query("SELECT DATE(o.createdAt) as date, SUM(o.totalAmount), COUNT(o) " +
            "FROM Order o " +
-           "WHERE o.status = 'DELIVERED' " +
-           "AND o.completedAt BETWEEN :startDate AND :endDate " +
-           "GROUP BY DATE(o.completedAt) " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "AND o.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY DATE(o.createdAt) " +
            "ORDER BY date")
     List<Object[]> getSalesByDay(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
@@ -124,11 +127,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Thống kê doanh thu theo tháng
      * Return: [Integer(year), Integer(month), BigDecimal(revenue), Long(count)]
      */
-    @Query("SELECT YEAR(o.completedAt) as y, MONTH(o.completedAt) as m, SUM(o.totalAmount), COUNT(o) " +
+    @Query("SELECT YEAR(o.createdAt) as y, MONTH(o.createdAt) as m, SUM(o.totalAmount), COUNT(o) " +
            "FROM Order o " +
-           "WHERE o.status = 'DELIVERED' " +
-           "AND o.completedAt BETWEEN :startDate AND :endDate " +
-           "GROUP BY YEAR(o.completedAt), MONTH(o.completedAt) " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "AND o.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY YEAR(o.createdAt), MONTH(o.createdAt) " +
            "ORDER BY y, m")
     List<Object[]> getSalesByMonth(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
@@ -136,11 +139,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Thống kê doanh thu theo năm
      * Return: [Integer(year), BigDecimal(revenue), Long(count)]
      */
-    @Query("SELECT YEAR(o.completedAt) as y, SUM(o.totalAmount), COUNT(o) " +
+    @Query("SELECT YEAR(o.createdAt) as y, SUM(o.totalAmount), COUNT(o) " +
            "FROM Order o " +
-           "WHERE o.status = 'DELIVERED' " +
-           "AND o.completedAt BETWEEN :startDate AND :endDate " +
-           "GROUP BY YEAR(o.completedAt) " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "AND o.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY YEAR(o.createdAt) " +
            "ORDER BY y")
     List<Object[]> getSalesByYear(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
@@ -148,10 +151,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Top selling products
      * Return: [Product, Long(totalSold), BigDecimal(totalRevenue)]
      */
+    /**
+     * Top selling products
+     * Return: [Product, Long(totalSold), BigDecimal(totalRevenue)]
+     */
     @Query("SELECT oi.product, SUM(oi.quantity) as totalSold, SUM(oi.subtotal) as totalRevenue " +
            "FROM OrderItem oi " +
            "JOIN oi.order o " +
-           "WHERE o.status = 'DELIVERED' " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
            "GROUP BY oi.product " +
            "ORDER BY totalSold DESC")
     Page<Object[]> findTopSellingProducts(Pageable pageable);

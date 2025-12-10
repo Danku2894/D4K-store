@@ -26,6 +26,10 @@ const AdminCategories = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+
   useEffect(() => {
     document.title = 'Categories - D4K Admin';
     fetchCategories();
@@ -41,15 +45,12 @@ const AdminCategories = () => {
       }
     } catch (err) {
       console.error('Error fetching categories:', err);
-      
-      // Mock data
+      // Mock data if fails
       setCategories([
         { id: 1, name: 'T-Shirts', description: 'Streetwear Tees', productCount: 15 },
         { id: 2, name: 'Hoodies', description: 'Oversized Hoodies', productCount: 8 },
         { id: 3, name: 'Pants', description: 'Cargo & Joggers', productCount: 12 },
       ]);
-      
-      toast('USING MOCK DATA', { icon: 'ℹ️', duration: 2000 });
     } finally {
       setLoading(false);
     }
@@ -58,21 +59,15 @@ const AdminCategories = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         toast.error('PLEASE SELECT AN IMAGE FILE');
         return;
       }
-      
-      // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
         toast.error('IMAGE SIZE MUST BE LESS THAN 10MB');
         return;
       }
-      
       setImageFile(file);
-      
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -81,13 +76,39 @@ const AdminCategories = () => {
     }
   };
 
-  const handleCreateCategory = async (e) => {
+  const resetForm = () => {
+    setNewCategory({ name: '', description: '', parentId: '', imageUrl: '' });
+    setImageFile(null);
+    setImagePreview(null);
+    setIsEditing(false);
+    setEditId(null);
+  };
+
+  const handleEdit = (category) => {
+    setIsEditing(true);
+    setEditId(category.id);
+    setNewCategory({
+      name: category.name,
+      description: category.description || '',
+      parentId: category.parentId || '',
+      imageUrl: category.imageUrl || ''
+    });
+    // If has existing image, show it
+    if (category.imageUrl) {
+      setImagePreview(category.imageUrl);
+    } else {
+      setImagePreview(null);
+    }
+    setShowModal(true);
+  };
+
+  const handleCreateOrUpdateCategory = async (e) => {
     e.preventDefault();
     try {
       setUploading(true);
-      let imageUrl = '';
+      let imageUrl = newCategory.imageUrl;
       
-      // Upload image if selected
+      // Upload NEW image if selected
       if (imageFile) {
         toast.loading('UPLOADING IMAGE...');
         const uploadResponse = await uploadService.uploadFile(imageFile);
@@ -105,16 +126,20 @@ const AdminCategories = () => {
         imageUrl: imageUrl || null
       };
       
-      await categoryService.createCategory(data);
-      toast.success('CATEGORY CREATED!');
+      if (isEditing) {
+        await categoryService.updateCategory(editId, data);
+        toast.success('CATEGORY UPDATED!');
+      } else {
+        await categoryService.createCategory(data);
+        toast.success('CATEGORY CREATED!');
+      }
+      
       setShowModal(false);
       fetchCategories();
-      setNewCategory({ name: '', description: '', parentId: '', imageUrl: '' });
-      setImageFile(null);
-      setImagePreview(null);
+      resetForm();
     } catch (err) {
-      console.error('Error creating category:', err);
-      toast.error('FAILED TO CREATE CATEGORY');
+      console.error('Error saving category:', err);
+      toast.error(isEditing ? 'FAILED TO UPDATE' : 'FAILED TO CREATE');
     } finally {
       setUploading(false);
     }
@@ -222,7 +247,7 @@ const AdminCategories = () => {
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center space-x-2">
                           <button
-                            onClick={() => toast('EDIT CATEGORY - COMING SOON')}
+                            onClick={() => handleEdit(category)}
                             className="p-2 border-2 border-dark-950 hover:bg-dark-950 
                                      hover:text-light-50 transition-all"
                             title="Edit"
@@ -256,23 +281,23 @@ const AdminCategories = () => {
           </div>
         </div>
 
-        {/* Create Category Modal */}
+        {/* Create/Edit Category Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/80 backdrop-blur-sm">
             <div className="bg-light-50 w-full max-w-lg border-4 border-dark-950">
               <div className="p-6 border-b-4 border-dark-950 flex justify-between items-center bg-street-red text-light-50">
                 <h2 className="text-2xl font-display font-black uppercase tracking-tight">
-                  ADD NEW CATEGORY
+                  {isEditing ? 'EDIT CATEGORY' : 'ADD NEW CATEGORY'}
                 </h2>
                 <button 
-                  onClick={() => setShowModal(false)}
+                  onClick={() => { setShowModal(false); resetForm(); }}
                   className="p-1 hover:bg-dark-950 transition-colors"
                 >
                   <FiX size={24} />
                 </button>
               </div>
               
-              <form onSubmit={handleCreateCategory} className="p-6 space-y-4">
+              <form onSubmit={handleCreateOrUpdateCategory} className="p-6 space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-black uppercase tracking-wide">Category Name</label>
                   <input
@@ -360,7 +385,7 @@ const AdminCategories = () => {
                     disabled={uploading}
                     className="px-6 py-3 border-2 border-dark-950 bg-dark-950 text-light-50 font-bold uppercase hover:bg-street-red hover:border-street-red transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {uploading ? 'UPLOADING...' : 'CREATE CATEGORY'}
+                    {uploading ? 'SAVING...' : (isEditing ? 'UPDATE CATEGORY' : 'CREATE CATEGORY')}
                   </button>
                 </div>
               </form>
