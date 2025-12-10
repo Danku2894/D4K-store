@@ -256,15 +256,7 @@ const ProductDetailPage = () => {
             )}
 
             {/* Stock Status */}
-            <div className="flex items-center space-x-3 py-3">
-              <div className={`w-3 h-3 ${product.stock > 0 ? 'bg-street-neon' : 'bg-street-red'}`}></div>
-              <span className="text-sm font-bold uppercase tracking-wider">
-                {product.stock > 0 
-                  ? `IN STOCK (${product.stock} AVAILABLE)` 
-                  : 'OUT OF STOCK'
-                }
-              </span>
-            </div>
+
 
             {/* Add to Cart Section */}
             <AddToCartSection product={product} />
@@ -314,7 +306,7 @@ const ProductDetailPage = () => {
           <div className="py-12 border-t-2 border-dark-950">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-3xl font-display font-black uppercase tracking-tight">
-                SẢN PHẨM TƯƠNG TỰ
+                YOU MIGHT ALSO LIKE
               </h2>
               <Link
                 to="/products"

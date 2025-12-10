@@ -160,14 +160,13 @@ const OrderSuccessPage = () => {
                 </p>
                 <div className="p-4 border-2 border-dark-950 bg-light-100">
                   <p className="font-black uppercase mb-1">
-                    {order.address?.fullName}
+                    {order.receiverName}
                   </p>
                   <p className="text-sm font-bold text-gray-700 mb-1">
-                    {order.address?.phoneNumber}
+                    {order.receiverPhone}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {order.address?.street}, {order.address?.ward}, {' '}
-                    {order.address?.district}, {order.address?.city}
+                    {order.shippingAddress}, {order.shippingDistrict}, {order.shippingCity}
                   </p>
                 </div>
               </div>

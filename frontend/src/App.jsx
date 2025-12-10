@@ -14,6 +14,7 @@ import OrderSuccessPage from '@pages/OrderSuccessPage';
 import LoginPage from '@pages/LoginPage';
 import RegisterPage from '@pages/RegisterPage';
 import PaymentCallbackPage from '@pages/PaymentCallbackPage';
+import AboutPage from '@pages/AboutPage';
 
 import ProfilePage from '@pages/ProfilePage';
 import WishlistPage from '@pages/WishlistPage';
@@ -77,7 +78,7 @@ function App() {
           <Route path="/profile/orders/:id" element={<OrderDetailPage />} />
           <Route path="/profile/orders/:id" element={<OrderDetailPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/about" element={<div className="container-street py-20 text-dark-950 text-center font-bold">About Page (Coming Soon)</div>} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={
             <div className="container-street py-20 text-center">
               <h1 className="text-9xl font-display font-black text-dark-950 mb-4">404</h1>
