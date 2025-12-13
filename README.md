@@ -1,4 +1,5 @@
-# 🚀 D4K Store - Next-Gen E-Commerce Platform
+# D4K Store - Next-Gen E-Commerce Platform
+
 
 ![D4K Store Banner](https://img.shields.io/badge/D4K%20Store-Premium%20E--Commerce-red?style=for-the-badge&logo=shopping-cart)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3-green?style=for-the-badge&logo=spring)
@@ -7,15 +8,17 @@
 ![VNPAY](https://img.shields.io/badge/Payment-VNPAY-blueviolet?style=for-the-badge&logo=credit-card)
 ![JWT](https://img.shields.io/badge/Security-JWT-black?style=for-the-badge&logo=json-web-tokens)
 
+<img src="frontend/public/logo_about.png" alt="Logo"/>
+
 **D4K Store** là nền tảng thương mại điện tử hiện đại, mang phong cách **Streetwear / Brutalist Design** độc đáo. Hệ thống được xây dựng với kiến trúc Full-stack mạnh mẽ, tích hợp thanh toán trực tuyến, quản lý đơn hàng theo thời gian thực và các tính năng bảo mật thông minh.
 
-🔗 **Live Demo:** [https://d4-k-store.vercel.app/](https://d4-k-store.vercel.app/)
+**Live Demo:** [https://d4-k-store.vercel.app/](https://d4-k-store.vercel.app/)
 
 ---
 
-## ✨ Tính Năng Nổi Bật (Highlight Features)
+## Tính Năng Nổi Bật (Highlight Features)
 
-### 🛍️ Trải Nghiệm Mua Sắm (Customer Experience)
+### Trải Nghiệm Mua Sắm (Customer Experience)
 *   **Giao diện Brutalist Street Style**: Thiết kế độc quyền với hiệu ứng Glitch, tương phản cao, tối ưu cho mobile-first.
 *   **Tìm kiếm & Lọc thông minh**: Tìm sản phẩm theo từ khóa, lọc theo danh mục, khoảng giá và thương hiệu với tốc độ phản hồi tức thì.
 *   **Giỏ hàng & Checkout**:
@@ -23,23 +26,23 @@
     *   Tích hợp mã giảm giá (Coupon System).
     *   Tính phí vận chuyển tự động.
 *   **Thanh toán đa dạng**:
-    *   💳 **VNPAY QR**: Tích hợp cổng thanh toán VNPAY chính thức (Support IPN callback & checksum security).
-    *   💵 **COD**: Thanh toán khi nhận hàng.
+    *   **VNPAY QR**: Tích hợp cổng thanh toán VNPAY chính thức (Support IPN callback & checksum security).
+    *   **COD**: Thanh toán khi nhận hàng.
 
-### 🛡️ Hệ Thống Bảo Mật (Security)
+### Hệ Thống Bảo Mật (Security)
 *   **Review Spam Protection**:
-    *   🛡️ **Rate Limiting**: Giới hạn tần suất đánh giá để chống spam.
-    *   🤬 **Content Moderation**: Tự động lọc từ ngữ không phù hợp (Bad word filter).
-    *   ✅ **Verified Purchase**: Chỉ cho phép đánh giá khi đã mua và nhận hàng thành công.
+    *   **Rate Limiting**: Giới hạn tần suất đánh giá để chống spam.
+    *   **Content Moderation**: Tự động lọc từ ngữ không phù hợp (Bad word filter).
+    *   **Verified Purchase**: Chỉ cho phép đánh giá khi đã mua và nhận hàng thành công.
 *   **Authentication**: Hệ thống đăng nhập/đăng ký bảo mật với **Spring Security + JWT (Access Token & Refresh Token)**.
 *   **Forgot Password**: Quy trình quên mật khẩu an toàn qua Email OTP.
 
-### 📊 Quản Trị Hệ Thống (Admin Dashboard)
+### Quản Trị Hệ Thống (Admin Dashboard)
 Một trang quản trị (Admin Panel) quyền lực dành cho chủ cửa hàng:
 *   **Real-time Analytics**:
-    *   📈 Biểu đồ doanh thu trực quan (Sales Chart) cập nhật theo thời gian thực (tính theo ngày đặt hàng).
-    *   🏆 Top sản phẩm bán chạy nhất.
-    *   💰 Thống kê tổng quan đơn hàng, người dùng mới.
+    *   Biểu đồ doanh thu trực quan (Sales Chart) cập nhật theo thời gian thực (tính theo ngày đặt hàng).
+    *   Top sản phẩm bán chạy nhất.
+    *   Thống kê tổng quan đơn hàng, người dùng mới.
 *   **Quản Lý Sản Phẩm (Product Management)**:
     *   Thêm/Sửa/Xóa sản phẩm với **Multi-image Upload**.
     *   Quản lý biến thể (Size/Color) và tồn kho (Stock) chi tiết.
@@ -49,7 +52,7 @@ Một trang quản trị (Admin Panel) quyền lực dành cho chủ cửa hàng
 
 ---
 
-## 🏗️ Kiến Trúc Hệ Thống (Architecture)
+## Kiến Trúc Hệ Thống (Architecture)
 
 ### Backend (Spring Boot 3)
 *   **Core**: Spring Boot 3.3, Java 17.
@@ -68,7 +71,7 @@ Một trang quản trị (Admin Panel) quyền lực dành cho chủ cửa hàng
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt (Installation)
+## Hướng Dẫn Cài Đặt (Installation)
 
 ### Yêu cầu hệ thống
 *   Java JDK 17+
@@ -96,7 +99,7 @@ npm run dev
 
 ---
 
-## 👨‍💻 Author
+## Author
 **Danku** - *Fullstack Developer*
 *   Contact: [Danku2894](https://github.com/Danku2894)
 
