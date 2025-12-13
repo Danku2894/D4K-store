@@ -11,7 +11,7 @@ import NewArrivals from '@components/home/NewArrivals';
 const HomePage = () => {
   useEffect(() => {
     // Set page title
-    document.title = 'D4K Store - Y2K Fashion';
+    document.title = 'D4K Store';
     
     // Scroll to top
     window.scrollTo(0, 0);

@@ -107,7 +107,7 @@ const CategoriesSection = () => {
               return (
                 <Link
                   key={category.id}
-                  to={`/category/${category.id}`}
+                  to={`/products?category=${category.id}`}
                   className="glass-street p-6 text-center group hover:scale-105 
                            transition-all duration-300 hover:shadow-street animate-slide-up"
                   style={{ animationDelay: `${index * 0.1}s` }}

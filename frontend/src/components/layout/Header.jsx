@@ -108,7 +108,9 @@ const Header = () => {
       if (searchQuery.trim().length >= 1) {
         const fetchSuggestions = async () => {
           try {
+            console.log('Fetching suggestions for:', searchQuery); // Debug log
             const response = await productService.searchProducts(searchQuery, { size: 5 });
+            console.log('Suggestions response:', response); // Debug log
             setSuggestions(response.data?.content || []);
             setShowSuggestions(true);
           } catch (error) {

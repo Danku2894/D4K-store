@@ -19,8 +19,7 @@ const Footer = () => {
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
     // TODO: Implement newsletter subscription
-    toast.success('Subscribed to newsletter!');
-    setEmail('');
+    console.log('Newsletter subscription');
   };
 
   return (

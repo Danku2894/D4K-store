@@ -142,6 +142,7 @@ const CheckoutPage = () => {
               
               // Note: paymentService needs to be imported
               const paymentUrlRes = await import('@services/payment-service').then(m => m.default.createVnPayUrl(total, `Thanh toan don hang #${orderId}`, orderId));
+              console.log('Payment URL Response:', paymentUrlRes);
               
               if (paymentUrlRes.success && paymentUrlRes.data) {
                   window.location.href = paymentUrlRes.data;
