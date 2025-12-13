@@ -6,6 +6,7 @@ import FilterSidebar from '@components/category/FilterSidebar';
 import ProductCard from '@components/product/ProductCard';
 import Pagination from '@components/common/Pagination';
 import productService from '@services/product-service';
+import categoryService from '@services/category-service';
 
 /**
  * ProductsPage Component - Street Style
@@ -24,6 +25,9 @@ const ProductsPage = () => {
   const [totalItems, setTotalItems] = useState(0);
   const pageSize = 12;
 
+  // Additional State for Breadcrumb
+  const [categoryName, setCategoryName] = useState(null);
+
   // Filter state
   const [filters, setFilters] = useState({
     categoryId: searchParams.get('category') || '',
@@ -41,7 +45,7 @@ const ProductsPage = () => {
 
   useEffect(() => {
     // Sync filters from URL params when they change
-    setFilters({
+    const newFilters = {
       categoryId: searchParams.get('category') || '',
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
@@ -49,9 +53,28 @@ const ProductsPage = () => {
       color: searchParams.get('color') || '',
       sort: searchParams.get('sort') || 'createdAt,desc',
       search: searchParams.get('search') || '',
-    });
+    };
+    setFilters(newFilters);
     setCurrentPage(1);
+
+    // Fetch category info if categoryId exists
+    if (newFilters.categoryId) {
+      fetchCategoryInfo(newFilters.categoryId);
+    } else {
+      setCategoryName(null);
+    }
   }, [searchParams]);
+
+  const fetchCategoryInfo = async (id) => {
+    try {
+      const response = await categoryService.getCategoryById(id);
+      if (response.success && response.data) {
+        setCategoryName(response.data.name);
+      }
+    } catch (error) {
+      console.error('Error fetching category info:', error);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -124,8 +147,12 @@ const ProductsPage = () => {
 
   // Breadcrumb items
   const breadcrumbItems = [
-    { label: 'All Products', path: null },
+    { label: 'All Products', path: categoryName ? '/products' : null },
   ];
+
+  if (categoryName) {
+    breadcrumbItems.push({ label: categoryName, path: null });
+  }
 
   return (
     <div className="min-h-screen bg-light-50">
@@ -138,7 +165,7 @@ const ProductsPage = () => {
           <div className="flex items-center space-x-4 mb-4">
             <FiPackage size={48} className="text-dark-950" />
             <h1 className="text-4xl md:text-6xl font-display font-black uppercase tracking-tight glitch-street">
-              ALL PRODUCTS
+              {categoryName || 'ALL PRODUCTS'}
             </h1>
           </div>
           <p className="text-gray-600 font-bold uppercase tracking-wide">
