@@ -12,7 +12,7 @@
 
 **D4K Store** là nền tảng thương mại điện tử hiện đại, mang phong cách **Streetwear / Brutalist Design** độc đáo. Hệ thống được xây dựng với kiến trúc Full-stack mạnh mẽ, tích hợp thanh toán trực tuyến, quản lý đơn hàng theo thời gian thực và các tính năng bảo mật thông minh.
 
-**Live Demo:** [https://d4-k-store.vercel.app/](https://d4-k-store.vercel.app/)
+**Live Demo:** [https://www.web-apps.live/](https://www.web-apps.live/)
 
 ---
 
