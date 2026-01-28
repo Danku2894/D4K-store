@@ -41,6 +41,7 @@ const HomePage = () => {
 
   return (
     <div ref={mainRef} className="min-h-screen">
+      <h1 className="sr-only">D4K Store - Streetwear &amp; Street Culture</h1>
       {/* Hero Banner - Full height with parallax */}
       <HeroBanner />
 

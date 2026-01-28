@@ -148,14 +148,14 @@ const HeroBanner = () => {
           </p>
 
           {/* Main Title */}
-          <h1
+          <h2
             ref={titleRef}
             className="text-6xl md:text-8xl lg:text-[10rem] font-display font-black 
                        leading-[0.85] uppercase tracking-tight text-light-50"
           >
             <span className="block">Street</span>
             <span className="block text-street-red">Culture</span>
-          </h1>
+          </h2>
 
           {/* Description */}
           <p
