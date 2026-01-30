@@ -340,6 +340,7 @@ const CategoryPage = () => {
             onClose={toggleFilter}
           />
         </div>
+        </div>
       </div>
     </>
   );
