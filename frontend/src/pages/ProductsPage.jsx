@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FiPackage } from 'react-icons/fi';
+import { FiPackage, FiFilter } from 'react-icons/fi';
+import SEOHelmet from '@components/common/SEOHelmet';
 import Breadcrumb from '@components/common/Breadcrumb';
 import FilterSidebar from '@components/category/FilterSidebar';
 import ProductCard from '@components/product/ProductCard';
@@ -28,6 +29,9 @@ const ProductsPage = () => {
   // Additional State for Breadcrumb
   const [categoryName, setCategoryName] = useState(null);
 
+  // Mobile filter state
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   // Filter state
   const [filters, setFilters] = useState({
     categoryId: searchParams.get('category') || '',
@@ -39,9 +43,7 @@ const ProductsPage = () => {
     search: searchParams.get('search') || '',
   });
 
-  useEffect(() => {
-    document.title = 'All Products - D4K Store';
-  }, []);
+  // Page title is now handled by SEOHelmet component
 
   useEffect(() => {
     // Sync filters from URL params when they change
@@ -145,6 +147,25 @@ const ProductsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const toggleFilter = () => {
+    setIsFilterOpen(!isFilterOpen);
+  };
+
+  const handleResetFilters = () => {
+    const emptyFilters = {
+      categoryId: '',
+      minPrice: '',
+      maxPrice: '',
+      size: '',
+      color: '',
+      sort: 'createdAt,desc',
+      search: '',
+    };
+    setFilters(emptyFilters);
+    setSearchParams({});
+    setCurrentPage(1);
+  };
+
   // Breadcrumb items
   const breadcrumbItems = [
     { label: 'All Products', path: categoryName ? '/products' : null },
@@ -155,10 +176,37 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-light-50">
-      <div className="container-street py-6">
-        {/* Breadcrumb */}
-        <Breadcrumb items={breadcrumbItems} />
+    <>
+      {/* SEO Meta Tags - Dynamic based on filters */}
+      <SEOHelmet 
+        title={
+          filters.search 
+            ? `Tìm kiếm: "${filters.search}" - Sản phẩm Streetwear | D4K Store`
+            : categoryName 
+            ? `${categoryName} - Thời trang Streetwear chính hãng | D4K Store`
+            : 'Tất cả sản phẩm Streetwear - D4K Store | Shop thời trang đường phố'
+        }
+        description={
+          filters.search
+            ? `Kết quả tìm kiếm cho "${filters.search}". ${totalItems} sản phẩm streetwear chính hãng tại D4K Store. Áo hoodie, áo thun, quần baggy và nhiều hơn nữa.`
+            : categoryName
+            ? `Mua ${categoryName} streetwear chính hãng tại D4K Store. ${totalItems} sản phẩm đa dạng, giá tốt, chất lượng đảm bảo. Giao hàng toàn quốc, freeship từ 500k.`
+            : `Khám phá ${totalItems}+ sản phẩm streetwear, Y2K fashion chính hãng tại D4K Store. Áo hoodie, áo thun oversized, quần baggy, phụ kiện street culture. Giá tốt nhất, chất lượng cao, giao hàng toàn quốc.`
+        }
+        keywords={
+          categoryName
+            ? `${categoryName}, mua ${categoryName}, ${categoryName} streetwear, ${categoryName} y2k, ${categoryName} giá rẻ, shop ${categoryName}, d4k store`
+            : 'sản phẩm streetwear, áo hoodie giá rẻ, áo thun oversized, quần baggy, phụ kiện streetwear, thời trang y2k, shop streetwear việt nam, d4k store'
+        }
+        image="/logo.png"
+        url={filters.categoryId ? `/category/${filters.categoryId}` : '/products'}
+        type="website"
+      />
+      
+      <div className="min-h-screen bg-light-50">
+        <div className="container-street py-6">
+          {/* Breadcrumb */}
+          <Breadcrumb items={breadcrumbItems} />
 
         {/* Page Header */}
         <div className="py-8 border-b-4 border-dark-950 mb-8">
@@ -175,16 +223,29 @@ const ProductsPage = () => {
 
         {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filter Sidebar */}
-          <aside className="lg:w-1/4">
+          {/* Filter Sidebar - Desktop */}
+          <aside className="hidden lg:block lg:w-1/4">
             <FilterSidebar
               filters={filters}
               onFilterChange={handleFilterChange}
+              onReset={handleResetFilters}
             />
           </aside>
 
           {/* Products Grid */}
           <main className="flex-1">
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-6 pb-4 border-b-2 border-dark-950">
+              <button
+                onClick={toggleFilter}
+                className="flex items-center space-x-2 px-4 py-2 border-2 border-dark-950 
+                         bg-transparent text-dark-950 hover:bg-dark-950 hover:text-light-50 
+                         font-bold uppercase text-sm tracking-wide transition-all"
+              >
+                <FiFilter size={18} />
+                <span>FILTERS</span>
+              </button>
+            </div>
             {/* Loading State */}
             {loading && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -276,8 +337,20 @@ const ProductsPage = () => {
             )}
           </main>
         </div>
+
+        {/* Mobile Filter Sidebar */}
+        <div className="lg:hidden">
+          <FilterSidebar
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onReset={handleResetFilters}
+            isOpen={isFilterOpen}
+            onClose={toggleFilter}
+          />
+        </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

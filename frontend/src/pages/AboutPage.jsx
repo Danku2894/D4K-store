@@ -2,6 +2,7 @@ import { useEffect, useRef, useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap, ScrollTrigger } from '@/hooks/useGSAP';
 import { FiArrowRight, FiTarget, FiBox, FiUsers } from 'react-icons/fi';
+import SEOHelmet from '@components/common/SEOHelmet';
 import whyChooseUsImage from '@assets/images/fda553a2e84a3680bdd9063f3d73e3a4.jpg';
 import logoAbout from '@assets/images/logo_about.png';
 import aboutImage from '@assets/images/dccf730e0555604dd558bbb431f241ba.jpg';
@@ -38,7 +39,6 @@ const AboutPage = () => {
   const ctaRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'About Us | D4K Store';
     window.scrollTo(0, 0);
   }, []);
 
@@ -296,8 +296,18 @@ const AboutPage = () => {
   }, []);
 
   return (
-    <div ref={pageRef} className="min-h-screen bg-light-50 overflow-hidden">
-      {/* Hero Section - Pure Black Background */}
+    <>
+      <SEOHelmet 
+        title="Về D4K Store - Câu chuyện thương hiệu Streetwear Việt Nam"
+        description="D4K Store - Thương hiệu thời trang streetwear uy tín tại Việt Nam. Chúng tôi mang đến những sản phẩm streetwear, Y2K fashion chất lượng cao với phong cách street culture độc đáo. Khám phá câu chuyện, sứ mệnh và giá trị cốt lõi của D4K."
+        keywords="về d4k store, thương hiệu streetwear việt nam, d4k story, street culture, thời trang đường phố, giới thiệu d4k, về chúng tôi"
+        image={logoAbout}
+        url="/about"
+        type="website"
+      />
+      
+      <div ref={pageRef} className="min-h-screen bg-light-50 overflow-hidden">
+        {/* Hero Section - Pure Black Background */}
       <div
         ref={heroRef}
         className="relative text-light-50 py-32 md:py-40 px-4 overflow-hidden"
@@ -550,7 +560,8 @@ const AboutPage = () => {
           </Link>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

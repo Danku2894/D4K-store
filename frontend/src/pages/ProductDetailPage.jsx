@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiChevronRight } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import SEOHelmet from '@components/common/SEOHelmet';
 import Breadcrumb from '@components/common/Breadcrumb';
 import ImageGallery from '@components/product/ImageGallery';
 import AddToCartSection from '@components/product/AddToCartSection';
@@ -36,12 +37,7 @@ const ProductDetailPage = () => {
     }
   }, [id]);
 
-  // Update page title
-  useEffect(() => {
-    if (product) {
-      document.title = `${product.name} - D4K Store`;
-    }
-  }, [product]);
+  // Page title is now handled by SEOHelmet component
 
   const fetchProductDetails = async () => {
     try {
@@ -170,10 +166,26 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-light-50">
-      <div className="container-street py-6">
-        {/* Breadcrumb */}
-        <Breadcrumb items={breadcrumbItems} />
+    <>
+      {/* SEO Meta Tags - Dynamic */}
+      {product && (
+        <SEOHelmet 
+          title={`${product.name} - ${formatPrice(product.salePrice || product.price)} | D4K Store`}
+          description={`Mua ${product.name} chính hãng tại D4K Store. ${product.description || `${product.name} - Thời trang streetwear chất lượng cao`}. Giá: ${formatPrice(product.salePrice || product.price)}. Giao hàng nhanh toàn quốc. Đổi trả dễ dàng trong 7 ngày. ${reviews.length > 0 ? `⭐ ${averageRating.toFixed(1)}/5 từ ${reviews.length} đánh giá` : ''}`}
+          keywords={`${product.name}, mua ${product.name}, ${product.categoryName}, ${product.categoryName} streetwear, ${product.name} giá rẻ, ${product.name} chính hãng, d4k store, thời trang streetwear, y2k fashion`}
+          image={product.imageUrl}
+          url={`/product/${product.id}`}
+          type="product"
+          price={product.salePrice || product.price}
+          currency="VND"
+          availability={product.stockQuantity > 0 ? "in stock" : "out of stock"}
+        />
+      )}
+      
+      <div className="min-h-screen bg-light-50">
+        <div className="container-street py-6">
+          {/* Breadcrumb */}
+          <Breadcrumb items={breadcrumbItems} />
 
         {/* Main Product Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 py-8">
@@ -325,8 +337,9 @@ const ProductDetailPage = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

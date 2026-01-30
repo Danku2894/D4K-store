@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiGrid } from 'react-icons/fi';
+import SEOHelmet from '@components/common/SEOHelmet';
 import Breadcrumb from '@components/common/Breadcrumb';
 import CategoryCard from '@components/categories/CategoryCard';
 import categoryService from '@services/category-service';
@@ -14,7 +15,6 @@ const CategoriesPage = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    document.title = 'Categories - D4K Store';
     fetchCategories();
   }, []);
 
@@ -42,10 +42,20 @@ const CategoriesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-light-50">
-      <div className="container-street py-6">
-        {/* Breadcrumb */}
-        <Breadcrumb items={breadcrumbItems} />
+    <>
+      <SEOHelmet 
+        title="Danh mục sản phẩm Streetwear - Tất cả Categories | D4K Store"
+        description={`Khám phá ${categories.length} danh mục sản phẩm streetwear tại D4K Store. Áo hoodie, áo thun, quần baggy, phụ kiện và nhiều hơn nữa. Phong cách street culture đa dạng, chất lượng cao, giá tốt nhất.`}
+        keywords="danh mục streetwear, categories streetwear, phân loại sản phẩm, các loại áo streetwear, thể loại thời trang đường phố, d4k categories"
+        image="/logo.png"
+        url="/categories"
+        type="website"
+      />
+      
+      <div className="min-h-screen bg-light-50">
+        <div className="container-street py-6">
+          {/* Breadcrumb */}
+          <Breadcrumb items={breadcrumbItems} />
 
         {/* Page Header */}
         <div className="py-8 border-b-4 border-dark-950 mb-8">
@@ -142,8 +152,9 @@ const CategoriesPage = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

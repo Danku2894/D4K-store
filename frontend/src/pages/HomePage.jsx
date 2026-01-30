@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/hooks/useGSAP';
+import SEOHelmet from '@components/common/SEOHelmet';
 import HeroBanner from '@components/home/HeroBanner';
 import CategoriesSection from '@components/home/CategoriesSection';
 import FeaturedProducts from '@components/home/FeaturedProducts';
@@ -14,9 +15,6 @@ const HomePage = () => {
   const mainRef = useRef(null);
 
   useEffect(() => {
-    // Set page title
-    document.title = 'D4K Store | Street Culture';
-    
     // Scroll to top
     window.scrollTo(0, 0);
   }, []);
@@ -40,10 +38,20 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div ref={mainRef} className="min-h-screen">
-      <h1 className="sr-only">D4K Store - Streetwear &amp; Street Culture</h1>
-      {/* Hero Banner - Full height with parallax */}
-      <HeroBanner />
+    <>
+      <SEOHelmet 
+        title="D4K Store - Thời trang Streetwear, Y2K Fashion chính hãng Việt Nam"
+        description="D4K Store - Shop thời trang streetwear, Y2K style chính hãng tại Việt Nam. Áo hoodie, áo thun, quần baggy, phụ kiện street culture. Giao hàng toàn quốc, giá tốt nhất. Free ship đơn từ 500k."
+        keywords="streetwear vietnam, y2k fashion vietnam, áo hoodie streetwear, áo thun oversized, quần baggy, thời trang đường phố, d4k store, street culture, urban fashion, mua áo hoodie, shop streetwear hà nội, shop streetwear sài gòn"
+        image="/logo.png"
+        url="/"
+        type="website"
+      />
+      
+      <div ref={mainRef} className="min-h-screen">
+        <h1 className="sr-only">D4K Store - Thời trang Streetwear &amp; Y2K Fashion chính hãng Việt Nam</h1>
+        {/* Hero Banner - Full height with parallax */}
+        <HeroBanner />
 
       {/* Categories Section - Scroll-triggered stagger */}
       <CategoriesSection />
@@ -57,9 +65,10 @@ const HomePage = () => {
       {/* New Arrivals - 3D perspective reveal */}
       <NewArrivals />
 
-      {/* Footer spacer for ScrollTrigger */}
-      <div className="h-1" />
-    </div>
+        {/* Footer spacer for ScrollTrigger */}
+        <div className="h-1" />
+      </div>
+    </>
   );
 };
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { FiFilter, FiGrid, FiList } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import SEOHelmet from '@components/common/SEOHelmet';
 import Breadcrumb from '@components/common/Breadcrumb';
 import FilterSidebar from '@components/category/FilterSidebar';
 import ProductCard from '@components/product/ProductCard';
@@ -47,12 +48,7 @@ const CategoryPage = () => {
     fetchProducts();
   }, [categoryId, currentPage, filters]);
 
-  // Update page title
-  useEffect(() => {
-    if (category) {
-      document.title = `${category.name} - D4K Store`;
-    }
-  }, [category]);
+  // Page title is now handled by SEOHelmet component
 
   const fetchCategoryDetails = async () => {
     try {
@@ -146,10 +142,23 @@ const CategoryPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-light-50">
-      <div className="container-street py-6">
-        {/* Breadcrumb */}
-        <Breadcrumb items={breadcrumbItems} />
+    <>
+      {/* SEO Meta Tags - Dynamic based on category */}
+      {category && (
+        <SEOHelmet 
+          title={`${category.name} Streetwear chính hãng - ${totalElements} sản phẩm | D4K Store`}
+          description={`Mua ${category.name} streetwear chính hãng tại D4K Store. ${category.description || `Bộ sưu tập ${category.name} đa dạng, phong cách street culture độc đáo`}. ${totalElements} sản phẩm chất lượng cao, giá tốt nhất. Giao hàng toàn quốc, freeship từ 500k. Đổi trả dễ dàng trong 7 ngày.`}
+          keywords={`${category.name}, mua ${category.name}, ${category.name} streetwear, ${category.name} y2k, ${category.name} giá rẻ, ${category.name} chính hãng, shop ${category.name}, thời trang ${category.name}, d4k store`}
+          image={category.imageUrl || '/logo.png'}
+          url={`/category/${categoryId}`}
+          type="website"
+        />
+      )}
+      
+      <div className="min-h-screen bg-light-50">
+        <div className="container-street py-6">
+          {/* Breadcrumb */}
+          <Breadcrumb items={breadcrumbItems} />
 
         {/* Category Header */}
         <div className="py-8 border-b-4 border-dark-950 mb-8">
@@ -332,7 +341,7 @@ const CategoryPage = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,23 +1,111 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon-zoomed.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>D4K Store - Streetwear Fashion</title>
     
-    <!-- Google Fonts for Streetwear Style -->
+    <!-- Viewport & Mobile Optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="/favicon-zoomed.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    
+    <!-- Default Meta Tags (will be overridden by React Helmet) -->
+    <title>D4K Store - Thời trang Streetwear, Y2K Fashion chính hãng Việt Nam</title>
+    <meta name="description" content="D4K Store - Shop thời trang streetwear, Y2K style chính hãng tại Việt Nam. Áo hoodie, áo thun, quần baggy, phụ kiện street culture. Giao hàng toàn quốc, giá tốt nhất." />
+    <meta name="keywords" content="streetwear vietnam, y2k fashion, áo hoodie, áo thun streetwear, quần baggy, thời trang đường phố, d4k store, street culture" />
+    <meta name="author" content="D4K Store" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.web-apps.live/" />
+    <meta property="og:title" content="D4K Store - Thời trang Streetwear, Y2K Fashion chính hãng" />
+    <meta property="og:description" content="Shop thời trang streetwear, Y2K style chính hãng tại Việt Nam. Giao hàng toàn quốc." />
+    <meta property="og:image" content="https://www.web-apps.live/logo.png" />
+    <meta property="og:site_name" content="D4K Store" />
+    <meta property="og:locale" content="vi_VN" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.web-apps.live/" />
+    <meta name="twitter:title" content="D4K Store - Streetwear Fashion" />
+    <meta name="twitter:description" content="Shop thời trang streetwear chính hãng tại Việt Nam" />
+    <meta name="twitter:image" content="https://www.web-apps.live/logo.png" />
+    
+    <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    
+    <!-- Google Fonts for Streetwear Style -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <meta name="description" content="D4K Fashion Store - Streetwear & Street Culture, urban fashion for the bold" />
+    <!-- Preload Critical Assets -->
+    <link rel="preload" href="/logo.png" as="image" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.web-apps.live/" />
+    
+    <!-- Language Alternates (nếu có multi-language) -->
+    <link rel="alternate" hreflang="vi" href="https://www.web-apps.live/" />
+    <link rel="alternate" hreflang="x-default" href="https://www.web-apps.live/" />
+    
+    <!-- Sitemap & Search Console -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    
+    <!-- Structured Data - Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "D4K Store",
+      "url": "https://www.web-apps.live",
+      "logo": "https://www.web-apps.live/logo.png",
+      "description": "Thời trang Streetwear & Y2K Fashion chính hãng tại Việt Nam",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "VN"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "availableLanguage": ["Vietnamese"]
+      }
+    }
+    </script>
+    
+    <!-- Structured Data - Website Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "D4K Store",
+      "url": "https://www.web-apps.live",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.web-apps.live/products?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
-    <h1 style="position:absolute;left:-9999px;">
-    D4K Store – Streetwear & Urban Fashion
+    <!-- Hidden H1 for SEO -->
+    <h1 style="position:absolute;left:-9999px;top:-9999px;">
+      D4K Store – Thời trang Streetwear & Y2K Fashion chính hãng Việt Nam
     </h1>
-   <div id="root"></div>
+    
+    <!-- Main App Container -->
+    <div id="root"></div>
+    
+    <!-- Main Script -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

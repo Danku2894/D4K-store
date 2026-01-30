@@ -68,7 +68,7 @@ const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, o
       {/* Mobile Overlay */}
       {isOpen && onClose && (
         <div 
-          className="fixed inset-0 bg-dark-950/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-dark-950/50 z-[55] lg:hidden"
           onClick={onClose}
         />
       )}
@@ -78,7 +78,7 @@ const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, o
         className={`
           fixed lg:sticky top-0 left-0 h-screen lg:h-auto
           w-80 lg:w-full bg-light-50 border-r-4 lg:border-r-0 lg:border-2 border-dark-950
-          overflow-y-auto z-50 lg:z-0
+          overflow-y-auto z-[60] lg:z-0
           transition-transform duration-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}

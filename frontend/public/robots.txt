@@ -1,0 +1,38 @@
+# D4K Store - Robots.txt
+# Hướng dẫn cho search engines crawl website
+
+User-agent: *
+
+# Cho phép crawl các trang công khai
+Allow: /
+Allow: /products
+Allow: /product/*
+Allow: /categories
+Allow: /category/*
+Allow: /about
+
+# Không cho crawl các trang private/admin
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /cart
+Disallow: /checkout
+Disallow: /profile
+Disallow: /profile/*
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /wishlist
+Disallow: /order-success
+Disallow: /order-success/*
+
+# Không cho crawl các file không cần thiết
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /src/
+
+# Sitemap location
+Sitemap: https://www.web-apps.live/sitemap.xml
+
+# Crawl delay (optional - giảm tải server)
+Crawl-delay: 1
