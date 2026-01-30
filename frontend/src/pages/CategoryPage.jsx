@@ -3,6 +3,8 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { FiFilter, FiGrid, FiList } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import SEOHelmet from '@components/common/SEOHelmet';
+import BreadcrumbSchema from '@components/seo/BreadcrumbSchema';
+import WebPageSchema from '@components/seo/WebPageSchema';
 import Breadcrumb from '@components/common/Breadcrumb';
 import FilterSidebar from '@components/category/FilterSidebar';
 import ProductCard from '@components/product/ProductCard';
@@ -145,14 +147,25 @@ const CategoryPage = () => {
     <>
       {/* SEO Meta Tags - Dynamic based on category */}
       {category && (
-        <SEOHelmet 
-          title={`${category.name} Streetwear chính hãng - ${totalElements} sản phẩm | D4K Store`}
-          description={`Mua ${category.name} streetwear chính hãng tại D4K Store. ${category.description || `Bộ sưu tập ${category.name} đa dạng, phong cách street culture độc đáo`}. ${totalElements} sản phẩm chất lượng cao, giá tốt nhất. Giao hàng toàn quốc, freeship từ 500k. Đổi trả dễ dàng trong 7 ngày.`}
-          keywords={`${category.name}, mua ${category.name}, ${category.name} streetwear, ${category.name} y2k, ${category.name} giá rẻ, ${category.name} chính hãng, shop ${category.name}, thời trang ${category.name}, d4k store`}
-          image={category.imageUrl || '/logo.png'}
-          url={`/category/${categoryId}`}
-          type="website"
-        />
+        <>
+          <SEOHelmet 
+            title={`${category.name} Streetwear chính hãng - ${totalElements} sản phẩm | D4K Store`}
+            description={`Mua ${category.name} streetwear chính hãng tại D4K Store. ${category.description || `Bộ sưu tập ${category.name} đa dạng, phong cách street culture độc đáo`}. ${totalElements} sản phẩm chất lượng cao, giá tốt nhất. Giao hàng toàn quốc, freeship từ 500k. Đổi trả dễ dàng trong 7 ngày.`}
+            keywords={`${category.name}, mua ${category.name}, ${category.name} streetwear, ${category.name} y2k, ${category.name} giá rẻ, ${category.name} chính hãng, shop ${category.name}, thời trang ${category.name}, d4k store`}
+            image={category.imageUrl || '/logo.png'}
+            url={`/category/${categoryId}`}
+            type="website"
+          />
+          
+          {/* Structured Data */}
+          <BreadcrumbSchema items={breadcrumbItems} />
+          <WebPageSchema 
+            name={`${category.name} Streetwear chính hãng - ${totalElements} sản phẩm | D4K Store`}
+            description={`Mua ${category.name} streetwear chính hãng tại D4K Store. ${category.description || `Bộ sưu tập ${category.name} đa dạng`}. ${totalElements} sản phẩm chất lượng cao.`}
+            url={`/category/${categoryId}`}
+            breadcrumbItems={breadcrumbItems}
+          />
+        </>
       )}
       
       <div className="min-h-screen bg-light-50">

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FiPackage, FiFilter } from 'react-icons/fi';
 import SEOHelmet from '@components/common/SEOHelmet';
+import BreadcrumbSchema from '@components/seo/BreadcrumbSchema';
+import WebPageSchema from '@components/seo/WebPageSchema';
 import Breadcrumb from '@components/common/Breadcrumb';
 import FilterSidebar from '@components/category/FilterSidebar';
 import ProductCard from '@components/product/ProductCard';
@@ -175,24 +177,24 @@ const ProductsPage = () => {
     breadcrumbItems.push({ label: categoryName, path: null });
   }
 
+  const pageTitle = filters.search 
+    ? `Tìm kiếm: "${filters.search}" - Sản phẩm Streetwear | D4K Store`
+    : categoryName 
+    ? `${categoryName} - Thời trang Streetwear chính hãng | D4K Store`
+    : 'Tất cả sản phẩm Streetwear - D4K Store | Shop thời trang đường phố';
+
+  const pageDescription = filters.search
+    ? `Kết quả tìm kiếm cho "${filters.search}". ${totalItems} sản phẩm streetwear chính hãng tại D4K Store. Áo hoodie, áo thun, quần baggy và nhiều hơn nữa.`
+    : categoryName
+    ? `Mua ${categoryName} streetwear chính hãng tại D4K Store. ${totalItems} sản phẩm đa dạng, giá tốt, chất lượng đảm bảo. Giao hàng toàn quốc, freeship từ 500k.`
+    : `Khám phá ${totalItems}+ sản phẩm streetwear, Y2K fashion chính hãng tại D4K Store. Áo hoodie, áo thun oversized, quần baggy, phụ kiện street culture. Giá tốt nhất, chất lượng cao, giao hàng toàn quốc.`;
+
   return (
     <>
       {/* SEO Meta Tags - Dynamic based on filters */}
       <SEOHelmet 
-        title={
-          filters.search 
-            ? `Tìm kiếm: "${filters.search}" - Sản phẩm Streetwear | D4K Store`
-            : categoryName 
-            ? `${categoryName} - Thời trang Streetwear chính hãng | D4K Store`
-            : 'Tất cả sản phẩm Streetwear - D4K Store | Shop thời trang đường phố'
-        }
-        description={
-          filters.search
-            ? `Kết quả tìm kiếm cho "${filters.search}". ${totalItems} sản phẩm streetwear chính hãng tại D4K Store. Áo hoodie, áo thun, quần baggy và nhiều hơn nữa.`
-            : categoryName
-            ? `Mua ${categoryName} streetwear chính hãng tại D4K Store. ${totalItems} sản phẩm đa dạng, giá tốt, chất lượng đảm bảo. Giao hàng toàn quốc, freeship từ 500k.`
-            : `Khám phá ${totalItems}+ sản phẩm streetwear, Y2K fashion chính hãng tại D4K Store. Áo hoodie, áo thun oversized, quần baggy, phụ kiện street culture. Giá tốt nhất, chất lượng cao, giao hàng toàn quốc.`
-        }
+        title={pageTitle}
+        description={pageDescription}
         keywords={
           categoryName
             ? `${categoryName}, mua ${categoryName}, ${categoryName} streetwear, ${categoryName} y2k, ${categoryName} giá rẻ, shop ${categoryName}, d4k store`
@@ -201,6 +203,15 @@ const ProductsPage = () => {
         image="/logo.png"
         url={filters.categoryId ? `/category/${filters.categoryId}` : '/products'}
         type="website"
+      />
+      
+      {/* Structured Data */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      <WebPageSchema 
+        name={pageTitle}
+        description={pageDescription}
+        url={filters.categoryId ? `/category/${filters.categoryId}` : '/products'}
+        breadcrumbItems={breadcrumbItems}
       />
       
       <div className="min-h-screen bg-light-50">

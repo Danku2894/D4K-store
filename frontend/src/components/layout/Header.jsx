@@ -11,6 +11,7 @@ import {
   FiSettings
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import OrganizationSchema from '@components/seo/OrganizationSchema';
 import useCartStore from '@store/use-cart-store';
 import useWishlistStore from '@store/use-wishlist-store';
 import authService from '@services/auth-service';
@@ -162,7 +163,11 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-light-50 border-b-4 border-dark-950">
+    <>
+      {/* Structured Data - Organization Schema */}
+      <OrganizationSchema />
+      
+      <header className="sticky top-0 z-50 bg-light-50 border-b-4 border-dark-950">
       <div className="container-street">
         {/* Main Header */}
         <div className="flex items-center justify-between py-2">
@@ -463,7 +468,8 @@ const Header = () => {
           </nav>
         </div>
       )}
-    </header>
+      </header>
+    </>
   );
 };
 

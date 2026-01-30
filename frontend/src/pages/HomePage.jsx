@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/hooks/useGSAP';
 import SEOHelmet from '@components/common/SEOHelmet';
+import WebPageSchema from '@components/seo/WebPageSchema';
 import HeroBanner from '@components/home/HeroBanner';
 import CategoriesSection from '@components/home/CategoriesSection';
 import FeaturedProducts from '@components/home/FeaturedProducts';
@@ -46,6 +47,12 @@ const HomePage = () => {
         image="/logo.png"
         url="/"
         type="website"
+      />
+      
+      <WebPageSchema 
+        name="D4K Store - Thời trang Streetwear, Y2K Fashion chính hãng Việt Nam"
+        description="D4K Store - Shop thời trang streetwear, Y2K style chính hãng tại Việt Nam. Áo hoodie, áo thun, quần baggy, phụ kiện street culture."
+        url="/"
       />
       
       <div ref={mainRef} className="min-h-screen">

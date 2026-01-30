@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FiGrid } from 'react-icons/fi';
 import SEOHelmet from '@components/common/SEOHelmet';
+import BreadcrumbSchema from '@components/seo/BreadcrumbSchema';
+import WebPageSchema from '@components/seo/WebPageSchema';
 import Breadcrumb from '@components/common/Breadcrumb';
 import CategoryCard from '@components/categories/CategoryCard';
 import categoryService from '@services/category-service';
@@ -50,6 +52,15 @@ const CategoriesPage = () => {
         image="/logo.png"
         url="/categories"
         type="website"
+      />
+      
+      {/* Structured Data */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      <WebPageSchema 
+        name="Danh mục sản phẩm Streetwear - Tất cả Categories | D4K Store"
+        description={`Khám phá ${categories.length} danh mục sản phẩm streetwear tại D4K Store. Áo hoodie, áo thun, quần baggy, phụ kiện và nhiều hơn nữa.`}
+        url="/categories"
+        breadcrumbItems={breadcrumbItems}
       />
       
       <div className="min-h-screen bg-light-50">

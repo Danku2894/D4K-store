@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { FiChevronRight } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import SEOHelmet from '@components/common/SEOHelmet';
+import ProductSchema from '@components/seo/ProductSchema';
+import BreadcrumbSchema from '@components/seo/BreadcrumbSchema';
 import Breadcrumb from '@components/common/Breadcrumb';
 import ImageGallery from '@components/product/ImageGallery';
 import AddToCartSection from '@components/product/AddToCartSection';
@@ -169,17 +171,30 @@ const ProductDetailPage = () => {
     <>
       {/* SEO Meta Tags - Dynamic */}
       {product && (
-        <SEOHelmet 
-          title={`${product.name} - ${formatPrice(product.salePrice || product.price)} | D4K Store`}
-          description={`Mua ${product.name} chính hãng tại D4K Store. ${product.description || `${product.name} - Thời trang streetwear chất lượng cao`}. Giá: ${formatPrice(product.salePrice || product.price)}. Giao hàng nhanh toàn quốc. Đổi trả dễ dàng trong 7 ngày. ${reviews.length > 0 ? `⭐ ${averageRating.toFixed(1)}/5 từ ${reviews.length} đánh giá` : ''}`}
-          keywords={`${product.name}, mua ${product.name}, ${product.categoryName}, ${product.categoryName} streetwear, ${product.name} giá rẻ, ${product.name} chính hãng, d4k store, thời trang streetwear, y2k fashion`}
-          image={product.imageUrl}
-          url={`/product/${product.id}`}
-          type="product"
-          price={product.salePrice || product.price}
-          currency="VND"
-          availability={product.stockQuantity > 0 ? "in stock" : "out of stock"}
-        />
+        <>
+          <SEOHelmet 
+            title={`${product.name} - ${formatPrice(product.salePrice || product.price)} | D4K Store`}
+            description={`Mua ${product.name} chính hãng tại D4K Store. ${product.description || `${product.name} - Thời trang streetwear chất lượng cao`}. Giá: ${formatPrice(product.salePrice || product.price)}. Giao hàng nhanh toàn quốc. Đổi trả dễ dàng trong 7 ngày. ${reviews.length > 0 ? `⭐ ${averageRating.toFixed(1)}/5 từ ${reviews.length} đánh giá` : ''}`}
+            keywords={`${product.name}, mua ${product.name}, ${product.categoryName}, ${product.categoryName} streetwear, ${product.name} giá rẻ, ${product.name} chính hãng, d4k store, thời trang streetwear, y2k fashion`}
+            image={product.imageUrl}
+            url={`/product/${product.id}`}
+            type="product"
+            price={product.salePrice || product.price}
+            currency="VND"
+            availability={product.stockQuantity > 0 ? "in stock" : "out of stock"}
+          />
+          
+          {/* Structured Data - Product Schema */}
+          <ProductSchema 
+            product={product}
+            reviews={reviews}
+            averageRating={averageRating}
+            currency="VND"
+          />
+          
+          {/* Structured Data - Breadcrumb Schema */}
+          <BreadcrumbSchema items={breadcrumbItems} />
+        </>
       )}
       
       <div className="min-h-screen bg-light-50">
