@@ -20,6 +20,9 @@ public class AdminSeeder {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @org.springframework.beans.factory.annotation.Value("${admin.default.password:admin123}")
+    private String adminDefaultPassword;
+
     @Bean
     public CommandLineRunner createAdminUser() {
         return args -> {
@@ -29,7 +32,7 @@ public class AdminSeeder {
                 
                 User admin = User.builder()
                         .email(adminEmail)
-                        .password(passwordEncoder.encode("admin123")) // Default password
+                        .password(passwordEncoder.encode(adminDefaultPassword)) // Đọc từ config
                         .fullName("Super Admin")
                         .phoneNumber("0123456789")
                         .role(RoleType.ADMIN)

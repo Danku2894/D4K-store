@@ -37,6 +37,7 @@ const ProductsPage = () => {
   // Filter state
   const [filters, setFilters] = useState({
     categoryId: searchParams.get('category') || '',
+    isSale: searchParams.get('isSale') === 'true',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
     size: searchParams.get('size') || '',
@@ -51,6 +52,7 @@ const ProductsPage = () => {
     // Sync filters from URL params when they change
     const newFilters = {
       categoryId: searchParams.get('category') || '',
+      isSale: searchParams.get('isSale') === 'true',
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
       size: searchParams.get('size') || '',
@@ -105,6 +107,8 @@ const ProductsPage = () => {
       if (filters.search) {
         // If search keyword is present, use search endpoint
         response = await productService.searchProducts(filters.search, params);
+      } else if (filters.isSale) {
+        response = await productService.getProductsBySale(params);
       } else if (filters.categoryId) {
         // If category is selected, use the category specific endpoint
         // Don't send categoryId in params since it's already in the URL
@@ -132,6 +136,7 @@ const ProductsPage = () => {
     // Update URL query params
     const params = new URLSearchParams();
     if (newFilters.categoryId) params.set('category', newFilters.categoryId);
+    if (newFilters.isSale) params.set('isSale', 'true');
     if (newFilters.minPrice) params.set('minPrice', newFilters.minPrice);
     if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
     if (newFilters.size) params.set('size', newFilters.size);
@@ -156,6 +161,7 @@ const ProductsPage = () => {
   const handleResetFilters = () => {
     const emptyFilters = {
       categoryId: '',
+      isSale: false,
       minPrice: '',
       maxPrice: '',
       size: '',
@@ -331,6 +337,7 @@ const ProductsPage = () => {
                     onClick={() => {
                       setFilters({
                         categoryId: '',
+                        isSale: false,
                         minPrice: '',
                         maxPrice: '',
                         size: '',

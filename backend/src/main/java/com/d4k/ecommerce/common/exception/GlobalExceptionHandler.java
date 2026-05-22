@@ -83,6 +83,21 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * Handle Access Denied Exception (Spring Security)
+     */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(
+            org.springframework.security.access.AccessDeniedException ex, WebRequest request) {
+        log.error("Access Denied: {}", ex.getMessage());
+        
+        ApiResponse<Void> response = ApiResponse.error(
+                "Forbidden - You don't have permission to access this resource",
+                "FORBIDDEN"
+        );
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+    
+    /**
      * Handle tất cả exception khác
      */
     @ExceptionHandler(Exception.class)

@@ -54,7 +54,7 @@ const AdminOrderDetailPage = () => {
     switch (status) {
       case 'PENDING': return 'bg-yellow-400 text-dark-950';
       case 'CONFIRMED': return 'bg-blue-400 text-white';
-      case 'SHIPPED': return 'bg-purple-500 text-white';
+      case 'SHIPPING': return 'bg-purple-500 text-white';
       case 'DELIVERED': return 'bg-green-500 text-white';
       case 'CANCELLED': return 'bg-red-500 text-white';
       default: return 'bg-gray-200 text-gray-800';
@@ -111,7 +111,7 @@ const AdminOrderDetailPage = () => {
               >
                 <option value="PENDING">PENDING</option>
                 <option value="CONFIRMED">CONFIRMED</option>
-                <option value="SHIPPED">SHIPPED</option>
+                <option value="SHIPPING">SHIPPING</option>
                 <option value="DELIVERED">DELIVERED</option>
                 <option value="CANCELLED">CANCELLED</option>
               </select>

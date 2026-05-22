@@ -21,9 +21,9 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     Optional<Cart> findByUserId(Long userId);
     
     /**
-     * Tìm cart theo user ID với eager loading items
+     * Tìm cart theo user ID với eager loading items, product và category (tránh N+1)
      */
-    @Query("SELECT c FROM Cart c LEFT JOIN FETCH c.items WHERE c.user.id = :userId")
+    @Query("SELECT c FROM Cart c LEFT JOIN FETCH c.items i LEFT JOIN FETCH i.product p LEFT JOIN FETCH p.category WHERE c.user.id = :userId")
     Optional<Cart> findByUserIdWithItems(@Param("userId") Long userId);
     
     /**

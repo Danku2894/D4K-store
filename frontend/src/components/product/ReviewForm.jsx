@@ -63,7 +63,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, hasExistingReview = false })
     } catch (err) {
       console.error('Error submitting review:', err);
       const errorMessage = err.message || 'CANNOT SUBMIT REVIEW';
-      toast.error(errorMessage.toUpperCase());
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

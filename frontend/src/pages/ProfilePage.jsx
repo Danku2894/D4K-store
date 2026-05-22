@@ -8,6 +8,7 @@ import ProfileForm from '@components/profile/ProfileForm';
 import authService from '@services/auth-service';
 import userService from '@services/user-service';
 import useCartStore from '@store/use-cart-store';
+import useWishlistStore from '@store/use-wishlist-store';
 
 /**
  * ProfilePage Component - Street Style
@@ -44,7 +45,7 @@ const ProfilePage = () => {
       console.error('Error fetching profile:', err);
       
       // If unauthorized, redirect to login
-      if (err.status === 401) {
+      if (err?.status === 401 || err?.response?.status === 401) {
         authService.logout();
         clearCart();
         navigate('/login');
@@ -96,7 +97,7 @@ const ProfilePage = () => {
     } catch (err) {
       console.error('Error updating profile:', err);
       const errorMessage = err.message || 'FAILED TO UPDATE PROFILE';
-      toast.error(errorMessage.toUpperCase());
+      toast.error(errorMessage);
     } finally {
       setUpdating(false);
     }
@@ -108,6 +109,7 @@ const ProfilePage = () => {
       // Use try-catch for cart clearing in case of store issues
       try {
         if (clearCart) clearCart();
+        useWishlistStore.getState().clearWishlist();
       } catch (e) {
         console.warn('Error clearing cart:', e);
       }

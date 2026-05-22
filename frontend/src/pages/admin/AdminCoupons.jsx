@@ -31,6 +31,7 @@ const AdminCoupons = () => {
     usageLimit: '',
     isActive: true
   });
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     document.title = 'Coupons - D4K Admin';
@@ -67,30 +68,58 @@ const AdminCoupons = () => {
     }
   };
 
-  const handleCreateCoupon = async (e) => {
+  const handleSubmitCoupon = async (e) => {
     e.preventDefault();
     try {
-      await couponService.createCoupon(newCoupon);
-      toast.success('COUPON CREATED!');
+      if (editingId) {
+        await couponService.updateCoupon(editingId, newCoupon);
+        toast.success('COUPON UPDATED!');
+      } else {
+        await couponService.createCoupon(newCoupon);
+        toast.success('COUPON CREATED!');
+      }
       setShowModal(false);
       fetchCoupons();
-      setNewCoupon({
-        code: '',
-        name: '',
-        description: '',
-        discountType: 'PERCENTAGE',
-        discountValue: '',
-        minOrderAmount: '',
-        maxDiscount: '',
-        startDate: '',
-        endDate: '',
-        usageLimit: '',
-        isActive: true
-      });
+      resetForm();
     } catch (err) {
-      console.error('Error creating coupon:', err);
-      toast.error('FAILED TO CREATE COUPON');
+      console.error('Error saving coupon:', err);
+      toast.error(editingId ? 'FAILED TO UPDATE' : 'FAILED TO CREATE');
     }
+  };
+
+  const resetForm = () => {
+    setEditingId(null);
+    setNewCoupon({
+      code: '',
+      name: '',
+      description: '',
+      discountType: 'PERCENTAGE',
+      discountValue: '',
+      minOrderAmount: '',
+      maxDiscount: '',
+      startDate: '',
+      endDate: '',
+      usageLimit: '',
+      isActive: true
+    });
+  };
+
+  const handleEditClick = (coupon) => {
+    setEditingId(coupon.id);
+    setNewCoupon({
+      code: coupon.code || '',
+      name: coupon.name || '',
+      description: coupon.description || '',
+      discountType: coupon.discountType || 'PERCENTAGE',
+      discountValue: coupon.discountValue || '',
+      minOrderAmount: coupon.minOrderAmount || '',
+      maxDiscount: coupon.maxDiscount || '',
+      startDate: coupon.startDate ? String(coupon.startDate).slice(0, 16) : '',
+      endDate: coupon.endDate ? String(coupon.endDate).slice(0, 16) : '',
+      usageLimit: coupon.usageLimit || '',
+      isActive: coupon.isActive !== undefined ? coupon.isActive : (coupon.status === 'ACTIVE')
+    });
+    setShowModal(true);
   };
 
   const handleDelete = async (id) => {
@@ -136,7 +165,7 @@ const AdminCoupons = () => {
 
           <button
             className="btn-street inline-flex items-center space-x-2"
-            onClick={() => setShowModal(true)}
+            onClick={() => { resetForm(); setShowModal(true); }}
           >
             <FiPlus size={20} />
             <span>ADD COUPON</span>
@@ -217,20 +246,20 @@ const AdminCoupons = () => {
                         {formatValue(coupon.discountType, coupon.discountValue)}
                       </td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-600">
-                        {new Date(coupon.expiryDate).toLocaleDateString()}
+                        {coupon.endDate ? new Date(coupon.endDate).toLocaleDateString() : (coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'NO EXPIRY')}
                       </td>
                       <td className="px-4 py-3 text-sm font-bold">
                         <span className={`
                           px-2 py-1 text-xs uppercase
-                          ${coupon.status === 'ACTIVE' ? 'bg-street-neon text-dark-950' : 'bg-gray-300 text-gray-600'}
+                          ${(coupon.isActive || coupon.status === 'ACTIVE') ? 'bg-street-neon text-dark-950' : 'bg-gray-300 text-gray-600'}
                         `}>
-                          {coupon.status}
+                          {(coupon.isActive || coupon.status === 'ACTIVE') ? 'ACTIVE' : 'INACTIVE'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center space-x-2">
                           <button
-                            onClick={() => toast('EDIT COUPON - COMING SOON')}
+                            onClick={() => handleEditClick(coupon)}
                             className="p-2 border-2 border-dark-950 hover:bg-dark-950 
                                      hover:text-light-50 transition-all"
                             title="Edit"
@@ -309,7 +338,7 @@ const AdminCoupons = () => {
             <div className="bg-light-50 w-full max-w-2xl border-4 border-dark-950 max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b-4 border-dark-950 flex justify-between items-center bg-street-red text-light-50">
                 <h2 className="text-2xl font-display font-black uppercase tracking-tight">
-                  ADD NEW COUPON
+                  {editingId ? 'EDIT COUPON' : 'ADD NEW COUPON'}
                 </h2>
                 <button 
                   onClick={() => setShowModal(false)}
@@ -319,7 +348,7 @@ const AdminCoupons = () => {
                 </button>
               </div>
               
-              <form onSubmit={handleCreateCoupon} className="p-6 space-y-4">
+              <form onSubmit={handleSubmitCoupon} className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-black uppercase tracking-wide">Coupon Code</label>
@@ -327,7 +356,7 @@ const AdminCoupons = () => {
                       type="text"
                       required
                       value={newCoupon.code}
-                      onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
+                      onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value})}
                       className="w-full p-3 border-2 border-dark-950 font-bold focus:outline-none focus:border-street-red"
                       placeholder="E.G. SUMMER2024"
                     />
@@ -459,7 +488,7 @@ const AdminCoupons = () => {
                     type="submit"
                     className="px-6 py-3 border-2 border-dark-950 bg-dark-950 text-light-50 font-bold uppercase hover:bg-street-red hover:border-street-red transition-colors"
                   >
-                    CREATE COUPON
+                    {editingId ? 'UPDATE COUPON' : 'CREATE COUPON'}
                   </button>
                 </div>
               </form>

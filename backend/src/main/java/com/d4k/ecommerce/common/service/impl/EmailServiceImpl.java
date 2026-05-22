@@ -103,7 +103,7 @@ public class EmailServiceImpl implements EmailService {
         
         sb.append("<h1 style='color: #e63946;'>").append(order.getStatus()).append("</h1>");
         
-        if ("SHIPPED".equals(order.getStatus().name())) {
+        if ("SHIPPING".equals(order.getStatus().name())) {
             sb.append("<p>Your package is on its way!</p>");
         } else if ("DELIVERED".equals(order.getStatus().name())) {
             sb.append("<p>Your package has been delivered. We hope you enjoy your purchase!</p>");

@@ -14,6 +14,7 @@ import com.d4k.ecommerce.modules.user.entity.User;
 import com.d4k.ecommerce.modules.user.enums.RoleType;
 import com.d4k.ecommerce.modules.user.repository.UserRepository;
 import com.d4k.ecommerce.security.jwt.JwtTokenProvider;
+import com.d4k.ecommerce.security.jwt.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,11 @@ public class AuthServiceImpl implements AuthService {
     private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final com.d4k.ecommerce.common.service.EmailService emailService;
+    
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
     
     /**
      * Đăng ký tài khoản mới
@@ -125,21 +131,24 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
     
-    private final com.d4k.ecommerce.common.service.EmailService emailService;
-
     @Override
     @Transactional
     public void forgotPassword(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException("User not found", ErrorCodes.USER_NOT_FOUND));
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        // Tránh leak thông tin user: luôn trả về success dù email có tồn tại hay không
+        if (user == null) {
+            log.info("Password reset requested for non-existent email: {}", email);
+            return;
+        }
 
         String token = java.util.UUID.randomUUID().toString();
-        user.setResetPasswordToken(token);
+        user.setResetPasswordToken(token); // Lý tưởng nên hash bằng SHA-256
         user.setResetPasswordTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15)); // Token valid for 15 mins
         
         userRepository.save(user);
 
-        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
         String emailBody = "<h3>Password Reset Request</h3>" +
                 "<p>Click the link below to reset your password:</p>" +
                 "<a href=\"" + resetLink + "\">Reset Password</a>" +
@@ -162,6 +171,17 @@ public class AuthServiceImpl implements AuthService {
         user.setResetPasswordToken(null);
         user.setResetPasswordTokenExpiry(null);
         userRepository.save(user);
+    }
+
+    @Override
+    public void logout(String token) {
+        if (jwtTokenProvider.validateToken(token)) {
+            java.util.Date expiration = jwtTokenProvider.getExpirationDateFromToken(token);
+            if (expiration != null) {
+                tokenBlacklistService.blacklistToken(token, expiration.toInstant());
+                log.info("Token blacklisted successfully");
+            }
+        }
     }
 }
 

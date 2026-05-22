@@ -20,17 +20,31 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     /**
      * Tìm products theo category ID
      */
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"category"})
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
+    
+    /**
+     * Kiểm tra xem có product nào thuộc category này không
+     */
+    boolean existsByCategoryId(Long categoryId);
     
     /**
      * Tìm products theo category ID và isActive
      */
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"category"})
     Page<Product> findByCategoryIdAndIsActive(Long categoryId, Boolean isActive, Pageable pageable);
     
     /**
      * Tìm products active (public)
      */
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"category"})
     Page<Product> findByIsActive(Boolean isActive, Pageable pageable);
+    
+    /**
+     * Tìm products đang sale và active
+     */
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"category"})
+    Page<Product> findByIsSaleAndIsActive(Boolean isSale, Boolean isActive, Pageable pageable);
     
     /**
      * Tìm kiếm products theo keyword trong name hoặc description
@@ -42,6 +56,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "p.isActive = :isActive")
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"category"})
     Page<Product> searchByKeyword(@Param("keyword") String keyword, 
                                    @Param("isActive") Boolean isActive, 
                                    Pageable pageable);
@@ -77,6 +92,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     /**
      * Lấy sản phẩm active sắp xếp theo ngày tạo (fallback cho Popular Products)
      */
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"category"})
     Page<Product> findByIsActiveTrueOrderByCreatedAtDesc(Pageable pageable);
 }
 

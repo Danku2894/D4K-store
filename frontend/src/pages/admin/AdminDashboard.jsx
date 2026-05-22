@@ -245,7 +245,7 @@ const AdminDashboard = () => {
                               px-2 py-0.5 text-[10px] font-black uppercase
                               ${order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
                                 order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' : 
-                                order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' : 
+                                order.status === 'SHIPPING' ? 'bg-blue-100 text-blue-800' : 
                                 order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
                                 'bg-gray-100 text-gray-800'}
                             `}>

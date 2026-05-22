@@ -109,6 +109,11 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, updating = false }) => {
           <span className="text-lg font-black">
             {formatPrice(price)}
           </span>
+          {item.isSale && (
+            <span className="text-xs font-black uppercase tracking-wider text-street-red ml-2">
+              SALE {item.saleDiscountPercentage}%
+            </span>
+          )}
         </div>
 
         {/* Stock warning */}

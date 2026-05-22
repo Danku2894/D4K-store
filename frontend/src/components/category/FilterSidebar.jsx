@@ -125,10 +125,10 @@ const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, o
                 <label className="flex items-center space-x-3 cursor-pointer group">
                   <input
                     type="radio"
-                    name="category"
+                    name={onClose ? "category-mobile" : "category-desktop"}
                     value=""
-                    checked={!filters.categoryId}
-                    onChange={() => handleCategoryChange('')}
+                    checked={!filters.categoryId && !filters.isSale}
+                    onChange={() => onFilterChange({ ...filters, categoryId: '', isSale: false })}
                     className="w-4 h-4 border-2 border-dark-950 checked:bg-dark-950"
                   />
                   <span className="text-sm font-medium group-hover:text-street-red transition-colors">
@@ -139,24 +139,43 @@ const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, o
                 {loadingCategories ? (
                   <div className="text-sm text-gray-500">Loading...</div>
                 ) : (
-                  categories.map((category) => (
-                    <label
-                      key={category.id}
-                      className="flex items-center space-x-3 cursor-pointer group"
-                    >
+                  <>
+                    <label className="flex items-center space-x-3 cursor-pointer group">
                       <input
                         type="radio"
-                        name="category"
-                        value={category.id}
-                        checked={filters.categoryId === String(category.id)}
-                        onChange={() => handleCategoryChange(String(category.id))}
-                        className="w-4 h-4 border-2 border-dark-950 checked:bg-dark-950"
+                        name={onClose ? "category-mobile" : "category-desktop"}
+                        value="sale"
+                        checked={filters.isSale}
+                        onChange={() => {
+                          onFilterChange({ ...filters, categoryId: '', isSale: true });
+                        }}
+                        className="w-4 h-4 border-2 border-dark-950 checked:bg-street-red text-street-red accent-street-red"
                       />
-                      <span className="text-sm font-medium group-hover:text-street-red transition-colors">
-                        {category.name}
+                      <span className="text-sm font-black text-street-red group-hover:text-dark-950 transition-colors uppercase tracking-wider">
+                        SALE OFF
                       </span>
                     </label>
-                  ))
+                    {categories.map((category) => (
+                      <label
+                        key={category.id}
+                        className="flex items-center space-x-3 cursor-pointer group"
+                      >
+                        <input
+                          type="radio"
+                          name={onClose ? "category-mobile" : "category-desktop"}
+                          value={category.id}
+                          checked={filters.categoryId === String(category.id) && !filters.isSale}
+                          onChange={() => {
+                            onFilterChange({ ...filters, categoryId: String(category.id), isSale: false });
+                          }}
+                          className="w-4 h-4 border-2 border-dark-950 checked:bg-dark-950"
+                        />
+                        <span className="text-sm font-medium group-hover:text-street-red transition-colors">
+                          {category.name}
+                        </span>
+                      </label>
+                    ))}
+                  </>
                 )}
               </div>
             )}
@@ -184,7 +203,7 @@ const FilterSidebar = ({ filters = {}, onFilterChange, onReset, isOpen = true, o
                   >
                     <input
                       type="radio"
-                      name="sort"
+                      name={onClose ? "sort-mobile" : "sort-desktop"}
                       value={option.value}
                       checked={filters.sort === option.value}
                       onChange={() => handleSortChange(option.value)}

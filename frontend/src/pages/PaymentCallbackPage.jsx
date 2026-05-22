@@ -25,7 +25,7 @@ const PaymentCallbackPage = () => {
                 if (response.success) {
                     setStatus('success');
                     setMessage('Payment Successful!');
-                    clearCart();
+                    await clearCart();
                     
                     // Extract Order ID if possible (from vnp_TxnRef or OrderInfo)
                     // vnp_TxnRef in our code is orderId

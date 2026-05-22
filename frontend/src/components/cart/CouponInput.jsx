@@ -12,7 +12,7 @@ import couponService from '@services/coupon-service';
  * @param {Object} appliedCoupon - Coupon đã apply
  * @param {Function} onRemoveCoupon - Callback khi remove coupon
  */
-const CouponInput = ({ orderAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon }) => {
+const CouponInput = ({ orderAmount, nonSaleAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon }) => {
   const [code, setCode] = useState('');
   const [isApplying, setIsApplying] = useState(false);
 
@@ -28,8 +28,9 @@ const CouponInput = ({ orderAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon
       setIsApplying(true);
 
       const response = await couponService.applyCoupon({
-        code: code.trim().toUpperCase(),
+        code: code.trim(),
         orderAmount: orderAmount,
+        nonSaleAmount: nonSaleAmount,
       });
 
       if (response.success && response.data) {
@@ -50,7 +51,7 @@ const CouponInput = ({ orderAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon
     } catch (err) {
       console.error('Error applying coupon:', err);
       const errorMessage = err.message || 'INVALID COUPON CODE';
-      toast.error(errorMessage.toUpperCase());
+      toast.error(errorMessage);
     } finally {
       setIsApplying(false);
     }
@@ -121,7 +122,7 @@ const CouponInput = ({ orderAmount, onApplyCoupon, appliedCoupon, onRemoveCoupon
           <input
             type="text"
             value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            onChange={(e) => setCode(e.target.value)}
             placeholder="ENTER CODE"
             className="flex-1 min-w-0 px-3 py-3 border-2 border-dark-950 
                      text-dark-950 placeholder-gray-400 uppercase font-bold

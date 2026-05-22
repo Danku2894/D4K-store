@@ -3,10 +3,11 @@ import { FiUploadCloud, FiImage, FiCopy, FiCheck } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '@components/admin/AdminLayout';
 import uploadService from '@services/upload-service';
+import apiClient from '@services/api-client';
 
 /**
- * AdminMedia Component - Street Style
- * Upload và quản lý file media
+ * AdminHeroBanner Component - Thay thế AdminMedia
+ * Upload và quản lý ảnh Hero Banner
  */
 const AdminMedia = () => {
   const [uploading, setUploading] = useState(false);
@@ -60,7 +61,15 @@ const AdminMedia = () => {
       
       if (response.success && response.data) {
         setUploadedFile(response.data);
-        toast.success('UPLOAD SUCCESSFUL!');
+        
+        // Cập nhật Banner vào Backend
+        try {
+          await apiClient.post('/banners', { imageUrl: response.data.url });
+          toast.success('HERO BANNER UPDATED SUCCESSFULLY');
+        } catch (bannerErr) {
+          console.error('Banner update error:', bannerErr);
+          toast.error('UPLOADED BUT FAILED TO SET AS BANNER');
+        }
       }
     } catch (err) {
       console.error('Upload error:', err);
@@ -81,10 +90,10 @@ const AdminMedia = () => {
         {/* Page Header */}
         <div>
           <h1 className="text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-dark-950 mb-2 glitch-street">
-            MEDIA LIBRARY
+            HERO BANNER MANAGER
           </h1>
           <p className="text-gray-600 font-bold uppercase tracking-wide">
-            UPLOAD & MANAGE ASSETS
+            CHANGE HOME PAGE MAIN BANNER
           </p>
         </div>
 

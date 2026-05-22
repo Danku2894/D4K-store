@@ -19,7 +19,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('d4k_access_token');
-    if (token) {
+    if (token && token !== 'null' && token !== 'undefined') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -49,7 +49,14 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('d4k_access_token');
         localStorage.removeItem('d4k_refresh_token');
         localStorage.removeItem('d4k_user');
-        window.location.href = '/login';
+        
+        // Prevent infinite loop if already on login page or if the request is to login API
+        const isLoginPage = window.location.pathname.includes('/login');
+        const isLoginApi = error.config && error.config.url && error.config.url.includes('/login');
+        
+        if (!isLoginPage && !isLoginApi) {
+          window.location.href = '/login';
+        }
       }
       
       // Trả về error message từ API

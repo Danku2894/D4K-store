@@ -22,6 +22,13 @@ const CartPage = () => {
   const [updating, setUpdating] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
 
+  const nonSaleAmount = cartItems.reduce((sum, item) => {
+    if (!item.isSale) {
+      return sum + (item.price * item.quantity);
+    }
+    return sum;
+  }, 0);
+
   // Update page title
   useEffect(() => {
     document.title = `Cart (${totalItems}) - D4K Store`;
@@ -207,6 +214,7 @@ const CartPage = () => {
           <div className="lg:col-span-1">
             <CartSummary
               subtotal={totalPrice}
+              nonSaleAmount={nonSaleAmount}
               totalItems={totalItems}
               appliedCoupon={appliedCoupon}
               onApplyCoupon={handleApplyCoupon}

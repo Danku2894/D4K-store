@@ -31,6 +31,8 @@ const AdminProducts = () => {
     imageUrl: '',
     additionalImages: [], // Array of URLs
     isActive: true,
+    isSale: false,
+    saleDiscountPercentage: '',
     variants: [
       { size: 'M', color: 'BLACK', stock: 10, priceAdjustment: 0 }
     ]
@@ -216,6 +218,8 @@ const AdminProducts = () => {
         imageUrl: '',
         additionalImages: [],
         isActive: true,
+        isSale: false,
+        saleDiscountPercentage: '',
         variants: [{ size: 'M', color: 'BLACK', stock: 10, priceAdjustment: 0 }]
       });
       setImageFile(null);
@@ -243,6 +247,8 @@ const AdminProducts = () => {
                 imageUrl: data.imageUrl || '',
                 additionalImages: data.additionalImages || [],
                 isActive: data.isActive,
+                isSale: data.isSale || false,
+                saleDiscountPercentage: data.saleDiscountPercentage || '',
                 variants: data.variants && data.variants.length > 0 ? data.variants : [{ size: 'M', color: 'BLACK', stock: 10, priceAdjustment: 0 }]
             });
             setImagePreview(data.imageUrl);
@@ -272,26 +278,48 @@ const AdminProducts = () => {
       }
 
       setUploading(true);
+      toast.loading('UPLOADING IMAGES...');
+
       let mainImageUrl = newProduct.imageUrl;
       let additionalImageUrls = [...newProduct.additionalImages]; 
-      
-      // Upload Main Image if changed
-      if (imageFile) {
-        toast.loading('UPLOADING MAIN IMAGE...');
-        const uploadResponse = await uploadService.uploadFile(imageFile);
-        if (uploadResponse.success && uploadResponse.data) {
-          mainImageUrl = uploadResponse.data.url;
-        }
-      }
 
-      // Upload Additional Images (New Files)
-      if (additionalFiles.length > 0) {
-        toast.loading(`UPLOADING ${additionalFiles.length} ADDITIONAL IMAGES...`);
-        for (const file of additionalFiles) {
-          const response = await uploadService.uploadFile(file);
-          if (response.success && response.data) {
-            additionalImageUrls.push(response.data.url);
+      // Prepare upload promises for concurrent uploading
+      const uploadPromises = [];
+      let mainImageIndex = -1;
+      
+      if (imageFile) {
+        mainImageIndex = uploadPromises.length;
+        uploadPromises.push(uploadService.uploadFile(imageFile));
+      }
+      
+      const additionalStartIdx = uploadPromises.length;
+      for (const file of additionalFiles) {
+        uploadPromises.push(uploadService.uploadFile(file));
+      }
+      
+      if (uploadPromises.length > 0) {
+        try {
+          const uploadResults = await Promise.all(uploadPromises);
+          
+          if (mainImageIndex !== -1) {
+            const mainRes = uploadResults[mainImageIndex];
+            if (mainRes.success && mainRes.data) {
+              mainImageUrl = mainRes.data.url;
+            }
           }
+          
+          for (let i = 0; i < additionalFiles.length; i++) {
+            const addRes = uploadResults[additionalStartIdx + i];
+            if (addRes.success && addRes.data) {
+              additionalImageUrls.push(addRes.data.url);
+            }
+          }
+        } catch (error) {
+          console.error("Image upload failed:", error);
+          toast.dismiss();
+          toast.error("FAILED TO UPLOAD IMAGES");
+          setUploading(false);
+          return;
         }
       }
       
@@ -305,9 +333,11 @@ const AdminProducts = () => {
         imageUrl: mainImageUrl || null,
         additionalImages: additionalImageUrls,
         isActive: newProduct.isActive,
+        isSale: newProduct.isSale,
+        saleDiscountPercentage: newProduct.isSale ? parseInt(newProduct.saleDiscountPercentage) : null,
         variants: newProduct.variants.map(v => ({
-          size: v.size.toUpperCase(),
-          color: v.color ? v.color.toUpperCase() : 'DEFAULT',
+          size: v.size,
+          color: v.color ? v.color : 'DEFAULT',
           stock: parseInt(v.stock),
           priceAdjustment: parseFloat(v.priceAdjustment || 0)
         }))
@@ -342,7 +372,7 @@ const AdminProducts = () => {
           }
       }
       
-      toast.error(errorMsg.toUpperCase());
+      toast.error(errorMsg);
     } finally {
       setUploading(false);
     }
@@ -456,7 +486,14 @@ const AdminProducts = () => {
                       <td className="px-4 py-3 text-sm font-medium text-gray-600">
                         {product.categoryName || product.category || 'N/A'}
                       </td>
-                      <td className="px-4 py-3 text-sm font-black">{formatPrice(product.price)}</td>
+                      <td className="px-4 py-3 text-sm font-black">
+                        {formatPrice(product.price)}
+                        {product.isSale && (
+                          <span className="ml-2 text-xs text-street-red font-black uppercase">
+                            SALE {product.saleDiscountPercentage}%
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-sm font-bold">
                         <span className={`
                           px-2 py-1 text-xs uppercase
@@ -761,18 +798,52 @@ const AdminProducts = () => {
                   />
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={newProduct.isActive}
-                    onChange={(e) => setNewProduct({...newProduct, isActive: e.target.checked})}
-                    className="w-5 h-5 border-2 border-dark-950 rounded-none text-street-red focus:ring-0"
-                  />
-                  <label htmlFor="isActive" className="text-sm font-black uppercase tracking-wide">
-                    Active Status
-                  </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      checked={newProduct.isActive}
+                      onChange={(e) => setNewProduct({...newProduct, isActive: e.target.checked})}
+                      className="w-5 h-5 border-2 border-dark-950 rounded-none text-street-red focus:ring-0"
+                    />
+                    <label htmlFor="isActive" className="text-sm font-black uppercase tracking-wide">
+                      Active Status
+                    </label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="isSale"
+                      checked={newProduct.isSale}
+                      onChange={(e) => setNewProduct({...newProduct, isSale: e.target.checked})}
+                      className="w-5 h-5 border-2 border-dark-950 rounded-none text-street-red focus:ring-0"
+                    />
+                    <label htmlFor="isSale" className="text-sm font-black uppercase tracking-wide text-street-red">
+                      On Sale
+                    </label>
+                  </div>
                 </div>
+
+                {newProduct.isSale && (
+                  <div className="space-y-2 p-4 border-2 border-street-red bg-red-50">
+                    <label className="text-sm font-black uppercase tracking-wide text-street-red">Discount Percentage (%) *</label>
+                    <input
+                      type="number"
+                      required={newProduct.isSale}
+                      min="1"
+                      max="100"
+                      value={newProduct.saleDiscountPercentage}
+                      onChange={(e) => setNewProduct({...newProduct, saleDiscountPercentage: e.target.value})}
+                      className="w-full p-3 border-2 border-street-red font-bold focus:outline-none text-street-red"
+                      placeholder="e.g. 20"
+                    />
+                    <p className="text-xs text-street-red font-bold">
+                      Price will be discounted by this percentage.
+                    </p>
+                  </div>
+                )}
 
                 <div className="pt-4 flex justify-end space-x-4">
                   <button

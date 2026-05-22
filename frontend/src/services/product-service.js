@@ -104,6 +104,25 @@ const productService = {
   },
 
   /**
+   * Lấy sản phẩm đang Sale
+   * @param {Object} params - Query parameters
+   * @returns {Promise}
+   */
+  getProductsBySale: (params = {}) => {
+    // Parse sort param into sortBy and direction for backend
+    const { sort, ...otherParams } = params;
+    let queryParams = { ...otherParams };
+    
+    if (sort) {
+      const [sortBy, direction] = sort.split(',');
+      queryParams.sortBy = sortBy || 'createdAt';
+      queryParams.direction = direction || 'desc';
+    }
+    
+    return apiClient.get('/products/sale', { params: queryParams });
+  },
+
+  /**
    * Lấy sản phẩm liên quan
    * @param {Number} productId - Product ID
    * @param {Number} limit - Số lượng sản phẩm (default: 4)

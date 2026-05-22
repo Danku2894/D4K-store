@@ -260,7 +260,7 @@ const OrderSuccessPage = () => {
               </Link>
 
               <Link
-                to="/orders"
+                to="/profile/orders"
                 className="flex items-center justify-center space-x-2 py-4 bg-dark-950 
                          border-2 border-dark-950 text-light-50 font-black uppercase tracking-wider
                          hover:bg-street-red hover:border-street-red hover:scale-[1.02]

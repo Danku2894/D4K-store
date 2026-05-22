@@ -14,6 +14,7 @@ import CouponInput from './CouponInput';
  */
 const CartSummary = ({ 
   subtotal = 0, 
+  nonSaleAmount = 0,
   totalItems = 0,
   appliedCoupon = null,
   onApplyCoupon,
@@ -122,10 +123,10 @@ const CartSummary = ({
           </div>
         </div>
 
-        {/* Coupon Input */}
         <div className="pt-4 border-t-2 border-dark-950">
           <CouponInput
             orderAmount={subtotal}
+            nonSaleAmount={nonSaleAmount}
             onApplyCoupon={onApplyCoupon}
             appliedCoupon={appliedCoupon}
             onRemoveCoupon={onRemoveCoupon}

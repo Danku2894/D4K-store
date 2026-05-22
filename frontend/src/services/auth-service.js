@@ -88,15 +88,16 @@ const authService = {
    */
   saveAuthData: (data) => {
     // TODO: Consider using httpOnly cookies for tokens in production for better security
-    if (data.token) {
+    if (data.token && data.token !== 'null' && data.token !== 'undefined') {
       localStorage.setItem('d4k_access_token', data.token);
     }
-    if (data.refreshToken) {
+    if (data.refreshToken && data.refreshToken !== 'null' && data.refreshToken !== 'undefined') {
       localStorage.setItem('d4k_refresh_token', data.refreshToken);
     }
     if (data.user) {
       localStorage.setItem('d4k_user', JSON.stringify(data.user));
     }
+
 
     // Dispatch custom event to notify components about auth changes
     window.dispatchEvent(new Event('d4k-auth-change'));

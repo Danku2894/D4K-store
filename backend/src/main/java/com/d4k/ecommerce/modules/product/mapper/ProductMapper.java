@@ -22,6 +22,13 @@ public class ProductMapper {
                     .collect(Collectors.toList());
         }
 
+        java.math.BigDecimal salePrice = null;
+        if (Boolean.TRUE.equals(product.getIsSale()) && product.getSaleDiscountPercentage() != null) {
+            java.math.BigDecimal percentage = java.math.BigDecimal.valueOf(product.getSaleDiscountPercentage());
+            java.math.BigDecimal discountAmount = product.getPrice().multiply(percentage).divide(java.math.BigDecimal.valueOf(100), java.math.RoundingMode.HALF_UP);
+            salePrice = product.getPrice().subtract(discountAmount);
+        }
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -35,6 +42,9 @@ public class ProductMapper {
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .isActive(product.getIsActive())
+                .isSale(product.getIsSale())
+                .saleDiscountPercentage(product.getSaleDiscountPercentage())
+                .salePrice(salePrice)
                 .inStock(product.getTotalStock() > 0)
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

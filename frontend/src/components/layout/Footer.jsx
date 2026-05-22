@@ -119,9 +119,9 @@ const Footer = () => {
               <li>
                 <Link 
                   to="/sale" 
-                  className="text-gray-400 hover:text-y2k-pink transition-colors text-sm"
+                  className="text-street-red font-black uppercase tracking-wide hover:text-y2k-pink transition-colors text-sm"
                 >
-                  Sale
+                  SALE OFF
                 </Link>
               </li>
             </ul>

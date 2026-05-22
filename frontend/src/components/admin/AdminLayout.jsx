@@ -61,7 +61,7 @@ const AdminLayout = ({ children }) => {
     {
       path: '/admin/media',
       icon: FiImage,
-      label: 'MEDIA',
+      label: 'HERO BANNER',
     },
   ];
 
@@ -69,7 +69,7 @@ const AdminLayout = ({ children }) => {
     authService.logout();
     clearCart();
     navigate('/');
-    toast.success('LOGGED OUT!', { icon: '👋' });
+    toast.success('LOGGED OUT!');
   };
 
   const isActive = (path) => location.pathname === path;

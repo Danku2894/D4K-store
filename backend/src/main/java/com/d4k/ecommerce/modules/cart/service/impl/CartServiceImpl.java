@@ -179,6 +179,7 @@ public class CartServiceImpl implements CartService {
         if (cartItem.getSize() != null) {
              ProductVariant variant = product.getVariants().stream()
                     .filter(v -> v.getSize().equalsIgnoreCase(cartItem.getSize()))
+                    .filter(v -> cartItem.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(cartItem.getColor())))
                     .findFirst()
                     .orElse(null);
              availableStock = variant != null ? variant.getStock() : 0;

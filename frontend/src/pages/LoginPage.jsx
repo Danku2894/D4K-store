@@ -112,7 +112,7 @@ const LoginPage = () => {
     } catch (err) {
       console.error('Login error:', err);
       const errorMessage = err.message || 'LOGIN FAILED';
-      toast.error(errorMessage.toUpperCase());
+      toast.error(errorMessage);
       
       // Set form errors if specific field errors
       if (err.errors) {

@@ -21,7 +21,7 @@ public enum OrderStatus {
     PROCESSING,
     
     /**
-     * Đang giao hàng
+     * Đang giao hàng / Đã gửi hàng
      */
     SHIPPING,
     

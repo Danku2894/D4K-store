@@ -73,6 +73,11 @@ const CheckoutOrderSummary = ({
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold uppercase text-sm truncate">
                   {name}
+                  {item.isSale && (
+                    <span className="ml-2 text-[10px] text-street-red font-black uppercase tracking-wider">
+                      SALE {item.saleDiscountPercentage}%
+                    </span>
+                  )}
                 </h4>
                 <p className="text-xs text-gray-600 font-bold uppercase">
                   QTY: {item.quantity}

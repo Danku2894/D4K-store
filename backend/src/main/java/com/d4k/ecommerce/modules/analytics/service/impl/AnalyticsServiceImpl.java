@@ -97,12 +97,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .activeProducts(activeProducts)
                 .lowStockProducts(lowStockProducts)
                 .outOfStockProducts(outOfStockProducts)
-                // Orders (TODO)
+                // Orders
                 .totalOrders(totalOrders)
                 .pendingOrders(pendingOrders)
                 .completedOrders(completedOrders)
                 .cancelledOrders(cancelledOrders)
-                // Revenue (TODO)
+                // Revenue
                 .totalRevenue(totalRevenue)
                 .revenueThisMonth(revenueThisMonth)
                 .revenueThisYear(revenueThisYear)

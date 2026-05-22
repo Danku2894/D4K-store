@@ -39,6 +39,12 @@ public class ProductResponse {
     
     private Boolean isActive;
     
+    private Boolean isSale;
+    
+    private Integer saleDiscountPercentage;
+    
+    private BigDecimal salePrice; // Computed field: price - (price * percentage / 100)
+    
     private Boolean inStock; // Computed field: stock > 0
     
     private LocalDateTime createdAt;

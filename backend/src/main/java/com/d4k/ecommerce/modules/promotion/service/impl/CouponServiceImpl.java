@@ -221,8 +221,13 @@ public class CouponServiceImpl implements CouponService {
                     .build();
         }
         
-        // Tính discount amount
-        BigDecimal discountAmount = calculateDiscount(coupon, request.getOrderAmount());
+        // Tính discount amount dựa trên nonSaleAmount (nếu có)
+        BigDecimal amountToDiscount = request.getNonSaleAmount() != null ? request.getNonSaleAmount() : request.getOrderAmount();
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (amountToDiscount.compareTo(BigDecimal.ZERO) > 0) {
+            discountAmount = calculateDiscount(coupon, amountToDiscount);
+        }
+        
         BigDecimal finalAmount = request.getOrderAmount().subtract(discountAmount);
         
         // Ensure final amount không âm

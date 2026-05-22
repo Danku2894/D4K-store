@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { FiHeart, FiTrash2, FiShoppingCart } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiHeart, FiTrash2, FiShoppingCart, FiEye } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import useWishlistStore from '@store/use-wishlist-store';
 import useCartStore from '@store/use-cart-store';
@@ -8,13 +8,14 @@ import Breadcrumb from '@components/common/Breadcrumb';
 const WishlistPage = () => {
   const { items, removeFromWishlist, clearWishlist } = useWishlistStore();
   const addToCart = useCartStore((state) => state.addToCart);
+  const navigate = useNavigate();
 
   const handleMoveToCart = (product) => {
     // Default to first variant if available, or just add product
     // This logic might need refinement based on how addToCart handles products without explicit variant selection
     // For now, we'll redirect to product page if variants are needed, or add directly if simple
     // But safer to just link to product page for selection
-    window.location.href = `/product/${product.id}`;
+    navigate(`/product/${product.id}`);
   };
 
   const breadcrumbItems = [
@@ -120,7 +121,7 @@ const WishlistPage = () => {
                     onClick={() => handleMoveToCart(product)}
                     className="w-full py-3 bg-dark-950 text-white font-black uppercase hover:bg-street-blue transition-colors flex items-center justify-center gap-2"
                   >
-                    <FiShoppingCart /> View Product
+                    <FiEye /> View Product
                   </button>
                 </div>
               </div>

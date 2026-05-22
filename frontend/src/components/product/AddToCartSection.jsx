@@ -114,7 +114,7 @@ const AddToCartSection = ({ product }) => {
     }, quantity);
     
     toast.success(
-      `ADDED ${quantity}x ${product.name.toUpperCase()} TO CART!`,
+      `ADDED ${quantity}x ${product.name} TO CART!`,
       {
         icon: '🛒',
         style: {
@@ -130,9 +130,9 @@ const AddToCartSection = ({ product }) => {
   const handleToggleWishlist = () => {
     const added = toggleWishlist(product);
     if (added) {
-      toast.success('ADDED TO WISHLIST!', { icon: '❤️' });
+      toast.success('ADDED TO WISHLIST!');
     } else {
-      toast.success('REMOVED FROM WISHLIST!', { icon: '💔' });
+      toast.success('REMOVED FROM WISHLIST!');
     }
   };
 

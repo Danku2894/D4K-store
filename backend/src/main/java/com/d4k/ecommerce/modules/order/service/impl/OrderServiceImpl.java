@@ -23,6 +23,7 @@ import com.d4k.ecommerce.modules.order.service.OrderService;
 import com.d4k.ecommerce.modules.product.entity.Product;
 import com.d4k.ecommerce.modules.product.entity.ProductVariant;
 import com.d4k.ecommerce.modules.product.repository.ProductRepository;
+import com.d4k.ecommerce.modules.product.repository.ProductVariantRepository;
 import com.d4k.ecommerce.modules.promotion.entity.Coupon;
 import com.d4k.ecommerce.modules.promotion.repository.CouponRepository;
 import com.d4k.ecommerce.modules.user.entity.User;
@@ -55,12 +56,12 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
     private final CouponRepository couponRepository;
     private final OrderMapper orderMapper;
     private final EmailService emailService;
-    
+
     private static final BigDecimal DEFAULT_SHIPPING_FEE = new BigDecimal("30000.00");
-    // private static final AtomicLong orderCounter = new AtomicLong(1); // Removed in favor of DB check
     
     /**
      * Tạo order từ cart
@@ -99,6 +100,7 @@ public class OrderServiceImpl implements OrderService {
         // 3. Create order items
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal nonSaleSubtotal = BigDecimal.ZERO;
         
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
@@ -126,12 +128,19 @@ public class OrderServiceImpl implements OrderService {
                 );
             }
             
-            BigDecimal itemSubtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            BigDecimal actualPrice = product.getPrice();
+            if (Boolean.TRUE.equals(product.getIsSale()) && product.getSaleDiscountPercentage() != null) {
+                BigDecimal percentage = BigDecimal.valueOf(product.getSaleDiscountPercentage());
+                BigDecimal discountAmount = actualPrice.multiply(percentage).divide(BigDecimal.valueOf(100), java.math.RoundingMode.HALF_UP);
+                actualPrice = actualPrice.subtract(discountAmount);
+            }
+            
+            BigDecimal itemSubtotal = actualPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             
             OrderItem orderItem = OrderItem.builder()
                     .product(product)
                     .productName(product.getName())
-                    .price(product.getPrice())
+                    .price(actualPrice)
                     .quantity(cartItem.getQuantity())
                     .subtotal(itemSubtotal)
                     .imageUrl(product.getImageUrl())
@@ -141,6 +150,9 @@ public class OrderServiceImpl implements OrderService {
             
             orderItems.add(orderItem);
             subtotal = subtotal.add(itemSubtotal);
+            if (!Boolean.TRUE.equals(product.getIsSale())) {
+                nonSaleSubtotal = nonSaleSubtotal.add(itemSubtotal);
+            }
         }
         
         // 4. Apply coupon nếu có
@@ -160,8 +172,13 @@ public class OrderServiceImpl implements OrderService {
                 );
             }
             
-            // Calculate discount
-            discountAmount = calculateDiscount(coupon, subtotal);
+            // Calculate discount on non-sale subtotal only
+            if (nonSaleSubtotal.compareTo(BigDecimal.ZERO) > 0) {
+                discountAmount = calculateDiscount(coupon, nonSaleSubtotal);
+            } else {
+                // Warning or ignore if all items are on sale
+                discountAmount = BigDecimal.ZERO;
+            }
             couponCode = coupon.getCode();
             
             // Increment coupon usage
@@ -211,28 +228,34 @@ public class OrderServiceImpl implements OrderService {
         // 10. Save order
         Order savedOrder = orderRepository.save(order);
         
-        // 11. Deduct stock
+        // 11. Deduct stock (atomic — tránh race condition)
         for (OrderItem item : savedOrder.getOrderItems()) {
-            Product product = item.getProduct();
             if (item.getSize() != null) {
-                ProductVariant variant = product.getVariants().stream()
-                    .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
-                    .filter(v -> item.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(item.getColor())))
-                    .findFirst()
-                    .orElseThrow(() -> new BusinessException(
-                            String.format("Variant not found for stock deduction: %s (Size: %s)", 
-                                    product.getName(), item.getSize()), 
-                            "VARIANT_NOT_FOUND"));
-                
-                variant.setStock(variant.getStock() - item.getQuantity());
+                // Dùng atomic UPDATE để deduct stock, chỉ thành công nếu stock >= qty
+                ProductVariant lockedVariant = productVariantRepository
+                        .findByProductIdAndSizeAndColorWithLock(
+                                item.getProduct().getId(), item.getSize(), item.getColor())
+                        .orElseThrow(() -> new BusinessException(
+                                String.format("Variant not found for stock deduction: %s (Size: %s)",
+                                        item.getProductName(), item.getSize()),
+                                "VARIANT_NOT_FOUND"));
+
+                int updated = productVariantRepository.decrementStock(lockedVariant.getId(), item.getQuantity());
+                if (updated == 0) {
+                    // Stock không đủ (đã bị deduct bởi request khác trước đó)
+                    throw new BusinessException(
+                            String.format("Insufficient stock for '%s' (Size: %s). Stock may have changed during checkout.",
+                                    item.getProductName(), item.getSize()),
+                            ErrorCodes.INSUFFICIENT_STOCK);
+                }
             } else {
-                 // Fallback
-                 if (!product.getVariants().isEmpty()) {
-                      ProductVariant variant = product.getVariants().get(0);
-                      variant.setStock(variant.getStock() - item.getQuantity());
-                 }
+                // Fallback: deduct từ variant đầu tiên
+                Product product = item.getProduct();
+                if (!product.getVariants().isEmpty()) {
+                    productVariantRepository.decrementStock(
+                            product.getVariants().get(0).getId(), item.getQuantity());
+                }
             }
-            productRepository.save(product);
         }
         
         // 12. Clear cart
@@ -304,26 +327,7 @@ public class OrderServiceImpl implements OrderService {
         }
         
         // Restore stock
-        for (OrderItem item : order.getOrderItems()) {
-            Product product = item.getProduct();
-            if (item.getSize() != null) {
-                ProductVariant variant = product.getVariants().stream()
-                    .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
-                    .filter(v -> item.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(item.getColor())))
-                    .findFirst()
-                    .orElse(null);
-                
-                if (variant != null) {
-                    variant.setStock(variant.getStock() + item.getQuantity());
-                }
-            } else {
-                 if (!product.getVariants().isEmpty()) {
-                      ProductVariant variant = product.getVariants().get(0);
-                      variant.setStock(variant.getStock() + item.getQuantity());
-                 }
-            }
-            productRepository.save(product);
-        }
+        restoreStockForOrder(order);
         
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledAt(LocalDateTime.now());
@@ -392,24 +396,7 @@ public class OrderServiceImpl implements OrderService {
             order.setCancelledAt(LocalDateTime.now());
             
             // Restore stock for admin cancellation
-            for (OrderItem item : order.getOrderItems()) {
-                Product product = item.getProduct();
-                if (item.getSize() != null) {
-                    ProductVariant variant = product.getVariants().stream()
-                        .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
-                        .findFirst()
-                        .orElse(null);
-                    if (variant != null) {
-                        variant.setStock(variant.getStock() + item.getQuantity());
-                    }
-                } else {
-                     if (!product.getVariants().isEmpty()) {
-                          ProductVariant variant = product.getVariants().get(0);
-                          variant.setStock(variant.getStock() + item.getQuantity());
-                     }
-                }
-                productRepository.save(product);
-            }
+            restoreStockForOrder(order);
         }
         
         Order updatedOrder = orderRepository.save(order);
@@ -469,26 +456,7 @@ public class OrderServiceImpl implements OrderService {
                 order.setCancelReason("Payment Failed / Cancelled by User");
                 
                 // Restore stock
-                for (OrderItem item : order.getOrderItems()) {
-                    Product product = item.getProduct();
-                    if (item.getSize() != null) {
-                        ProductVariant variant = product.getVariants().stream()
-                            .filter(v -> v.getSize().equalsIgnoreCase(item.getSize()))
-                            .filter(v -> item.getColor() == null || (v.getColor() != null && v.getColor().equalsIgnoreCase(item.getColor())))
-                            .findFirst()
-                            .orElse(null);
-                        
-                        if (variant != null) {
-                            variant.setStock(variant.getStock() + item.getQuantity());
-                        }
-                    } else {
-                         if (!product.getVariants().isEmpty()) {
-                              ProductVariant variant = product.getVariants().get(0);
-                              variant.setStock(variant.getStock() + item.getQuantity());
-                         }
-                    }
-                    productRepository.save(product);
-                }
+                restoreStockForOrder(order);
                 
                 orderRepository.save(order);
                 log.info("Order {} cancelled due to payment failure", orderId);
@@ -528,8 +496,26 @@ public class OrderServiceImpl implements OrderService {
     }
     
     /**
-     * Generate unique order number
+     * Restore stock cho tất cả OrderItems khi order bị cancel.
+     * Dùng atomic incrementStock để tránh data inconsistency.
      */
+    private void restoreStockForOrder(Order order) {
+        for (OrderItem item : order.getOrderItems()) {
+            if (item.getSize() != null) {
+                productVariantRepository
+                        .findByProductIdAndSizeAndColorWithLock(
+                                item.getProduct().getId(), item.getSize(), item.getColor())
+                        .ifPresent(v -> productVariantRepository.incrementStock(v.getId(), item.getQuantity()));
+            } else {
+                Product product = item.getProduct();
+                if (!product.getVariants().isEmpty()) {
+                    productVariantRepository.incrementStock(
+                            product.getVariants().get(0).getId(), item.getQuantity());
+                }
+            }
+        }
+    }
+
     /**
      * Generate unique order number
      */

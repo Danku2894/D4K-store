@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import Breadcrumb from '@components/common/Breadcrumb';
-import AddressSelector from '@components/checkout/AddressSelector';
-import PaymentMethodSelector from '@components/checkout/PaymentMethodSelector';
-import CheckoutOrderSummary from '@components/checkout/CheckoutOrderSummary';
+import ErrorBoundary from '@components/common/ErrorBoundary';
+
+const AddressSelector = lazy(() => import('@components/checkout/AddressSelector'));
+const PaymentMethodSelector = lazy(() => import('@components/checkout/PaymentMethodSelector'));
+const CheckoutOrderSummary = lazy(() => import('@components/checkout/CheckoutOrderSummary'));
 import useCartStore from '@store/use-cart-store';
 import orderService from '@services/order-service';
 import addressService from '@services/address-service';
@@ -180,7 +182,7 @@ const CheckoutPage = () => {
     } catch (err) {
       console.error('Error placing order:', err);
       const errorMessage = err.message || 'FAILED TO PLACE ORDER';
-      toast.error(errorMessage.toUpperCase());
+      toast.error(errorMessage);
     } finally {
       if (selectedPaymentMethod !== 'VNPAY') {
           setIsSubmitting(false);
@@ -316,12 +318,16 @@ const CheckoutPage = () => {
                       ))}
                     </div>
                   ) : (
-                    <AddressSelector
-                      addresses={addresses}
-                      selectedAddressId={selectedAddressId}
-                      onSelectAddress={setSelectedAddressId}
-                      onAddAddress={handleAddAddress}
-                    />
+                    <ErrorBoundary>
+                      <Suspense fallback={<div className="p-4 border-2 border-dark-950 font-bold">LOADING ADDRESSES...</div>}>
+                        <AddressSelector
+                          addresses={addresses}
+                          selectedAddressId={selectedAddressId}
+                          onSelectAddress={setSelectedAddressId}
+                          onAddAddress={handleAddAddress}
+                        />
+                      </Suspense>
+                    </ErrorBoundary>
                   )}
 
                   <div className="mt-6">
@@ -376,10 +382,14 @@ const CheckoutPage = () => {
 
               {currentStep === 2 ? (
                 <>
-                  <PaymentMethodSelector
-                    selectedMethod={selectedPaymentMethod}
-                    onSelectMethod={setSelectedPaymentMethod}
-                  />
+                  <ErrorBoundary>
+                    <Suspense fallback={<div className="p-4 border-2 border-dark-950 font-bold">LOADING PAYMENT METHODS...</div>}>
+                      <PaymentMethodSelector
+                        selectedMethod={selectedPaymentMethod}
+                        onSelectMethod={setSelectedPaymentMethod}
+                      />
+                    </Suspense>
+                  </ErrorBoundary>
 
                   <div className="mt-6 flex space-x-3">
                     <button
@@ -490,14 +500,18 @@ const CheckoutPage = () => {
           {/* Right: Order Summary (Sticky) */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 p-6 border-4 border-dark-950 bg-light-50">
-              <CheckoutOrderSummary
-                items={cartItems}
-                subtotal={totalPrice}
-                discount={discount}
-                shipping={shipping}
-                total={total}
-                appliedCoupon={appliedCoupon}
-              />
+              <ErrorBoundary>
+                <Suspense fallback={<div className="animate-pulse h-64 bg-light-200 border-2 border-gray-300"></div>}>
+                  <CheckoutOrderSummary
+                    items={cartItems}
+                    subtotal={totalPrice}
+                    discount={discount}
+                    shipping={shipping}
+                    total={total}
+                    appliedCoupon={appliedCoupon}
+                  />
+                </Suspense>
+              </ErrorBoundary>
             </div>
           </div>
         </div>

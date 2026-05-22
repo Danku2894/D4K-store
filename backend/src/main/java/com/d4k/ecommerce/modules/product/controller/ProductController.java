@@ -82,6 +82,31 @@ public class ProductController {
     }
     
     /**
+     * Lấy products đang sale
+     * GET /api/v1/products/sale?page=0&size=10
+     */
+    @GetMapping("/sale")
+    public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProductsBySale(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        log.info("Fetching sale products");
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        
+        Page<ProductResponse> products = productService.getProductsBySale(pageable);
+        
+        PageResponse<ProductResponse> pageResponse = PageResponse.from(products);
+        
+        ApiResponse<PageResponse<ProductResponse>> response = ApiResponse.success(
+                pageResponse,
+                "Sale products retrieved successfully"
+        );
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * Tìm kiếm products
      * GET /api/v1/products/search?keyword=shirt&page=0&size=10
      */

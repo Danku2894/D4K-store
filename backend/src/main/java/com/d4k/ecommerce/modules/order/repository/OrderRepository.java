@@ -4,6 +4,7 @@ import com.d4k.ecommerce.modules.order.entity.Order;
 import com.d4k.ecommerce.modules.order.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,7 +25,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Tìm order theo order number
      */
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.product", "orderItems.product.category"})
     Optional<Order> findByOrderNumber(String orderNumber);
+    
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.product", "orderItems.product.category"})
+    Optional<Order> findById(Long id);
     
     /**
      * Tìm orders của user
@@ -52,14 +57,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Tính tổng doanh thu (bao gồm CONFIRMED, SHIPPED, DELIVERED)
      */
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED')")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('CONFIRMED', 'SHIPPING', 'DELIVERED')")
     BigDecimal sumTotalRevenue();
     
     /**
      * Tính doanh thu theo tháng (createdAt)
      */
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o " +
-           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPING', 'DELIVERED') " +
            "AND YEAR(o.createdAt) = :year AND MONTH(o.createdAt) = :month")
     BigDecimal sumRevenueByMonth(@Param("year") int year, @Param("month") int month);
     
@@ -67,7 +72,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Tính doanh thu theo năm (createdAt)
      */
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o " +
-           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPING', 'DELIVERED') " +
            "AND YEAR(o.createdAt) = :year")
     BigDecimal sumRevenueByYear(@Param("year") int year);
     
@@ -117,7 +122,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT DATE(o.createdAt) as date, SUM(o.totalAmount), COUNT(o) " +
            "FROM Order o " +
-           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPING', 'DELIVERED') " +
            "AND o.createdAt BETWEEN :startDate AND :endDate " +
            "GROUP BY DATE(o.createdAt) " +
            "ORDER BY date")
@@ -129,7 +134,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT YEAR(o.createdAt) as y, MONTH(o.createdAt) as m, SUM(o.totalAmount), COUNT(o) " +
            "FROM Order o " +
-           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPING', 'DELIVERED') " +
            "AND o.createdAt BETWEEN :startDate AND :endDate " +
            "GROUP BY YEAR(o.createdAt), MONTH(o.createdAt) " +
            "ORDER BY y, m")
@@ -141,7 +146,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT YEAR(o.createdAt) as y, SUM(o.totalAmount), COUNT(o) " +
            "FROM Order o " +
-           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPING', 'DELIVERED') " +
            "AND o.createdAt BETWEEN :startDate AND :endDate " +
            "GROUP BY YEAR(o.createdAt) " +
            "ORDER BY y")
@@ -158,7 +163,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT oi.product, SUM(oi.quantity) as totalSold, SUM(oi.subtotal) as totalRevenue " +
            "FROM OrderItem oi " +
            "JOIN oi.order o " +
-           "WHERE o.status IN ('CONFIRMED', 'SHIPPED', 'DELIVERED') " +
+           "WHERE o.status IN ('CONFIRMED', 'SHIPPING', 'DELIVERED') " +
            "GROUP BY oi.product " +
            "ORDER BY totalSold DESC")
     Page<Object[]> findTopSellingProducts(Pageable pageable);

@@ -25,7 +25,15 @@ public class CartMapper {
             return null;
         }
         
-        BigDecimal price = cartItem.getProduct().getPrice();
+        BigDecimal originalPrice = cartItem.getProduct().getPrice();
+        BigDecimal price = originalPrice;
+        
+        if (Boolean.TRUE.equals(cartItem.getProduct().getIsSale()) && cartItem.getProduct().getSaleDiscountPercentage() != null) {
+            BigDecimal percentage = BigDecimal.valueOf(cartItem.getProduct().getSaleDiscountPercentage());
+            BigDecimal discountAmount = originalPrice.multiply(percentage).divide(BigDecimal.valueOf(100), java.math.RoundingMode.HALF_UP);
+            price = originalPrice.subtract(discountAmount);
+        }
+        
         Integer quantity = cartItem.getQuantity();
         BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
         
@@ -35,6 +43,9 @@ public class CartMapper {
                 .productName(cartItem.getProduct().getName())
                 .productImageUrl(cartItem.getProduct().getImageUrl())
                 .productPrice(price)
+                .originalPrice(originalPrice)
+                .isSale(cartItem.getProduct().getIsSale())
+                .saleDiscountPercentage(cartItem.getProduct().getSaleDiscountPercentage())
                 .quantity(quantity)
                 .subtotal(subtotal)
                 .stock(cartItem.getProduct().getTotalStock())

@@ -23,7 +23,7 @@ const ForgotPasswordPage = () => {
     } catch (err) {
         console.error("Forgot password error:", err);
         const errorMsg = err.response?.data?.message || err.message || "FAILED TO SEND RESET LINK";
-        toast.error(errorMsg.toUpperCase());
+        toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

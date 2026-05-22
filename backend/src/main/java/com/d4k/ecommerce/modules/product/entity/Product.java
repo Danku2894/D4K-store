@@ -73,6 +73,13 @@ public class Product {
     @Builder.Default
     private Boolean isActive = true;
     
+    @Column(name = "is_sale")
+    @Builder.Default
+    private Boolean isSale = false;
+    
+    @Column(name = "sale_discount_percentage")
+    private Integer saleDiscountPercentage;
+    
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

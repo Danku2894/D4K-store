@@ -52,7 +52,7 @@ const ChangePasswordForm = () => {
     } catch (err) {
       console.error('Error changing password:', err);
       const message = err.response?.data?.message || 'FAILED TO CHANGE PASSWORD';
-      toast.error(message.toUpperCase());
+      toast.error(message);
     } finally {
       setLoading(false);
     }

@@ -43,5 +43,11 @@ public class ProductRequest {
     private Long categoryId;
     
     private Boolean isActive;
+    
+    private Boolean isSale;
+    
+    @Min(value = 1, message = "Discount percentage must be at least 1")
+    @Max(value = 100, message = "Discount percentage cannot exceed 100")
+    private Integer saleDiscountPercentage;
 }
 

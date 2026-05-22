@@ -7,6 +7,7 @@ import com.d4k.ecommerce.modules.product.dto.response.CategoryResponse;
 import com.d4k.ecommerce.modules.product.entity.Category;
 import com.d4k.ecommerce.modules.product.mapper.CategoryMapper;
 import com.d4k.ecommerce.modules.product.repository.CategoryRepository;
+import com.d4k.ecommerce.modules.product.repository.ProductRepository;
 import com.d4k.ecommerce.modules.product.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final CategoryMapper categoryMapper;
     
     /**
@@ -150,7 +152,14 @@ public class CategoryServiceImpl implements CategoryService {
             );
         }
         
-        // TODO: Kiểm tra category có products không (sẽ implement sau)
+        // Kiểm tra category có products không
+        if (productRepository.existsByCategoryId(id)) {
+            log.error("Cannot delete category with products. ID: {}", id);
+            throw new BusinessException(
+                    "Cannot delete category that contains products. Please reassign or delete products first.",
+                    "CATEGORY_HAS_PRODUCTS"
+            );
+        }
         
         // Xóa category
         categoryRepository.deleteById(id);

@@ -33,7 +33,7 @@ const ResetPasswordPage = () => {
     } catch (err) {
         console.error("Reset password error:", err);
         const errorMsg = err.response?.data?.message || err.message || "FAILED TO RESET PASSWORD";
-        toast.error(errorMsg.toUpperCase());
+        toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

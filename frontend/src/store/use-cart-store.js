@@ -41,7 +41,7 @@ const useCartStore = create(
         
         // Identify items by productId + size
         const existingItem = items.find((item) => 
-          item.id === product.id && item.size === product.size
+          item.id === product.id && item.size === product.size && item.color === product.color
         );
 
         let newItems;
@@ -56,13 +56,13 @@ const useCartStore = create(
             }
             
             newItems = items.map((item) =>
-              item.id === product.id && item.size === product.size
+              item.id === product.id && item.size === product.size && item.color === product.color
                 ? { ...item, quantity: item.quantity + quantityToAdd }
                 : item
             );
           } else {
              newItems = items.map((item) =>
-              item.id === product.id && item.size === product.size
+              item.id === product.id && item.size === product.size && item.color === product.color
                 ? { ...item, quantity: item.quantity + quantity }
                 : item
             );
@@ -192,6 +192,9 @@ const useCartStore = create(
                 id: item.productId,
                 name: item.productName,
                 price: item.productPrice,
+                originalPrice: item.originalPrice,
+                isSale: item.isSale,
+                saleDiscountPercentage: item.saleDiscountPercentage,
                 imageUrl: item.productImageUrl,
                 quantity: item.quantity,
                 size: item.size,

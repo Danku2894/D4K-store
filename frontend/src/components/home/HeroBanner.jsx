@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap, ScrollTrigger } from '@/hooks/useGSAP';
-
+import axios from 'axios';
 import hero1 from '../../assets/images/hero1.jpg';
 
 
@@ -19,6 +19,22 @@ const HeroBanner = () => {
   const descRef = useRef(null);
   const ctaRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
+
+  const [bannerUrl, setBannerUrl] = useState(hero1);
+
+  useEffect(() => {
+    const fetchBanner = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/api/v1/banners/active');
+        if (response.data?.success && response.data?.data?.imageUrl) {
+          setBannerUrl(response.data.data.imageUrl);
+        }
+      } catch (err) {
+        console.error('Failed to load active banner:', err);
+      }
+    };
+    fetchBanner();
+  }, []);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -115,9 +131,9 @@ const HeroBanner = () => {
         
         {/* Hero image */}
         <img
-          src={hero1}
+          src={bannerUrl}
           alt="Street Culture"
-          className="w-full h-full object-cover opacity-60"
+          className="w-full h-full object-cover opacity-60 transition-opacity duration-1000"
           style={{ objectPosition: 'center 25%' }}
         />
       </div>

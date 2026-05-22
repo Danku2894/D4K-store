@@ -112,10 +112,10 @@ const ProductCard = ({ product }) => {
         )}
 
         {/* Sale Badge (if applicable) */}
-        {product.salePrice && (
+        {product.isSale && (
           <div className="absolute top-4 right-4 px-3 py-1 bg-street-red 
                         text-light-50 text-xs font-bold border-2 border-dark-950 uppercase tracking-wider">
-            SALE
+            SALE {product.saleDiscountPercentage}%
           </div>
         )}
 

@@ -55,6 +55,13 @@ public interface ProductService {
     Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable);
     
     /**
+     * Lấy danh sách products đang giảm giá (Public - chỉ active)
+     * @param pageable thông tin phân trang
+     * @return danh sách products
+     */
+    Page<ProductResponse> getProductsBySale(Pageable pageable);
+    
+    /**
      * Tìm kiếm products theo keyword (Public - chỉ active)
      * @param keyword từ khóa tìm kiếm
      * @param pageable thông tin phân trang

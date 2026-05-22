@@ -260,7 +260,7 @@ const ProductDetailPage = () => {
                   </div>
                   <div className="inline-block px-3 py-1 bg-street-red text-light-50 
                                 text-xs font-bold uppercase tracking-wider">
-                    SALE
+                    SALE {product.isSale ? product.saleDiscountPercentage + '%' : ''}
                   </div>
                 </div>
               ) : (

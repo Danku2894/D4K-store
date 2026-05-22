@@ -57,6 +57,21 @@ public class JwtTokenProvider {
     }
     
     /**
+     * Lấy ngày hết hạn từ JWT token
+     */
+    public Date getExpirationDateFromToken(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        
+        return claims.getExpiration();
+    }
+    
+    /**
      * Validate JWT token
      */
     public boolean validateToken(String token) {

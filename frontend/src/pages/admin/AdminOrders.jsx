@@ -38,15 +38,7 @@ const AdminOrders = () => {
     } catch (err) {
       console.error('Error fetching orders:', err);
       
-      // Mock data
-      setOrders([
-        { id: 101, userName: 'John Doe', totalAmount: 1250000, status: 'PENDING', createdAt: '2023-11-20' },
-        { id: 102, userName: 'Jane Smith', totalAmount: 890000, status: 'SHIPPED', createdAt: '2023-11-19' },
-        { id: 103, userName: 'Mike Ross', totalAmount: 450000, status: 'DELIVERED', createdAt: '2023-11-18' },
-      ]);
-      setTotalPages(1);
-      
-      toast('USING MOCK DATA', { icon: 'ℹ️', duration: 2000 });
+      toast.error('FAILED TO FETCH ORDERS');
     } finally {
       setLoading(false);
     }
@@ -174,14 +166,14 @@ const AdminOrders = () => {
                           className={`
                             px-2 py-1 text-xs uppercase border-2 border-dark-950 font-bold cursor-pointer
                             ${order.status === 'PENDING' ? 'bg-yellow-400' : 
-                              order.status === 'SHIPPED' ? 'bg-blue-400' :
+                              order.status === 'SHIPPING' ? 'bg-blue-400' :
                               order.status === 'DELIVERED' ? 'bg-street-neon' :
                               'bg-street-red text-light-50'}
                           `}
                         >
                           <option value="PENDING">PENDING</option>
                           <option value="CONFIRMED">CONFIRMED</option>
-                          <option value="SHIPPED">SHIPPED</option>
+                          <option value="SHIPPING">SHIPPING</option>
                           <option value="DELIVERED">DELIVERED</option>
                           <option value="CANCELLED">CANCELLED</option>
                         </select>

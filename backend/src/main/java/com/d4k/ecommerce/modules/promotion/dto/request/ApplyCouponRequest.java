@@ -23,5 +23,8 @@ public class ApplyCouponRequest {
     
     @NotNull(message = "Order amount is required")
     private BigDecimal orderAmount;
+    
+    // So tiền của các sản phẩm KHÔNG sale
+    private BigDecimal nonSaleAmount;
 }
 

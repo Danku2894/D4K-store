@@ -61,6 +61,8 @@ public class ProductServiceImpl implements ProductService {
                 .imageUrl(request.getImageUrl())
                 .category(category)
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .isSale(request.getIsSale() != null ? request.getIsSale() : false)
+                .saleDiscountPercentage(request.getSaleDiscountPercentage())
                 .stock(0) // Will be updated based on variants
                 .build();
         
@@ -156,6 +158,8 @@ public class ProductServiceImpl implements ProductService {
         }
         
         if (request.getIsActive() != null) product.setIsActive(request.getIsActive());
+        if (request.getIsSale() != null) product.setIsSale(request.getIsSale());
+        if (request.getSaleDiscountPercentage() != null) product.setSaleDiscountPercentage(request.getSaleDiscountPercentage());
         if (request.getStock() != null) product.setStock(request.getStock());
         
         // Update Variants
@@ -251,6 +255,17 @@ public class ProductServiceImpl implements ProductService {
         }
         
         return productRepository.findByCategoryIdAndIsActive(categoryId, true, pageable)
+                .map(productMapper::toResponse);
+    }
+    
+    /**
+     * Lấy products đang sale (Public - chỉ active)
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getProductsBySale(Pageable pageable) {
+        log.info("Fetching sale products");
+        return productRepository.findByIsSaleAndIsActive(true, true, pageable)
                 .map(productMapper::toResponse);
     }
     

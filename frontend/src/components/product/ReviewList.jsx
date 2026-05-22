@@ -96,7 +96,7 @@ const ReviewList = ({ reviews = [], averageRating = 0, onReviewDeleted, currentU
                 <div className="flex items-center space-x-3 mb-2">
                   {/* User Name */}
                   <p className="font-black text-lg uppercase">
-                    {review.userFullName || 'Anonymous'}
+                    {review.userName || review.userFullName || 'Anonymous'}
                   </p>
                   
                   {/* Rating Stars */}

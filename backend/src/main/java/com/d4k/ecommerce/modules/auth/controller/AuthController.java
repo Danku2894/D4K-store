@@ -84,5 +84,20 @@ public class AuthController {
         authService.resetPassword(request.getToken(), request.getNewPassword());
         return ResponseEntity.ok(ApiResponse.success(null, "Password successfully reset"));
     }
+
+    /**
+     * Đăng xuất
+     * POST /api/v1/auth/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestHeader(value = "Authorization", required = false) String bearerToken) {
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            String token = bearerToken.substring(7);
+            // Blacklist service will handle it
+            authService.logout(token);
+        }
+        return ResponseEntity.ok(ApiResponse.success(null, "Logged out successfully"));
+    }
 }
 
