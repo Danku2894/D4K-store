@@ -41,9 +41,7 @@ const CartPage = () => {
       
       // Update in Zustand store
       updateQuantity(itemId, newQuantity);
-      
-
-      
+      setAppliedCoupon(null); // Reset coupon when cart changes
       toast.success('QUANTITY UPDATED!');
     } catch (err) {
       console.error('Error updating quantity:', err);
@@ -58,9 +56,7 @@ const CartPage = () => {
     try {
       // Remove from Zustand store
       removeFromCart(itemId);
-      
-
-      
+      setAppliedCoupon(null); // Reset coupon when cart changes
       toast.success('ITEM REMOVED FROM CART!', {
         icon: '🗑️',
         style: {
@@ -198,10 +194,9 @@ const CartPage = () => {
               </div>
             </div>
 
-            {/* Cart Items List */}
             {cartItems.map((item) => (
               <CartItem
-                key={item.id}
+                key={item.cartItemId || `${item.id}-${item.size}-${item.color}`}
                 item={item}
                 onUpdateQuantity={handleUpdateQuantity}
                 onRemove={handleRemoveItem}

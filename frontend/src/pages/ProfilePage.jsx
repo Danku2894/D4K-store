@@ -35,8 +35,6 @@ const ProfilePage = () => {
         setUser(response.data);
         // Update localStorage with latest user data
         const currentAuth = {
-          accessToken: localStorage.getItem('d4k_access_token'),
-          refreshToken: localStorage.getItem('d4k_refresh_token'),
           user: response.data
         };
         authService.saveAuthData(currentAuth);
@@ -78,8 +76,6 @@ const ProfilePage = () => {
         
         // Update localStorage
         const currentAuth = {
-          accessToken: localStorage.getItem('d4k_access_token'),
-          refreshToken: localStorage.getItem('d4k_refresh_token'),
           user: response.data
         };
         authService.saveAuthData(currentAuth);

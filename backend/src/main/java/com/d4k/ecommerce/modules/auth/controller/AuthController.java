@@ -9,9 +9,12 @@ import com.d4k.ecommerce.modules.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Auth Controller
@@ -50,10 +53,21 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
-            @Valid @RequestBody LoginRequest request) {
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse httpServletResponse) {
         log.info("Received login request for email: {}", request.getEmail());
         
         LoginResponse loginResponse = authService.login(request);
+        
+        // Create HttpOnly cookie
+        ResponseCookie cookie = ResponseCookie.from("accessToken", loginResponse.getToken())
+                .httpOnly(true)
+                .secure(false) // Set to false for localhost without https
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60) // 7 days
+                .sameSite("Lax")
+                .build();
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         
         ApiResponse<LoginResponse> response = ApiResponse.success(
                 loginResponse,
@@ -91,12 +105,32 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
-            @RequestHeader(value = "Authorization", required = false) String bearerToken) {
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            String token = bearerToken.substring(7);
+            @CookieValue(name = "accessToken", required = false) String cookieToken,
+            @RequestHeader(value = "Authorization", required = false) String bearerToken,
+            HttpServletResponse httpServletResponse) {
+            
+        String token = null;
+        if (cookieToken != null && !cookieToken.isEmpty()) {
+            token = cookieToken;
+        } else if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            token = bearerToken.substring(7);
+        }
+        
+        if (token != null) {
             // Blacklist service will handle it
             authService.logout(token);
         }
+        
+        // Clear cookie
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        
         return ResponseEntity.ok(ApiResponse.success(null, "Logged out successfully"));
     }
 }

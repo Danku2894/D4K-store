@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 
 // Configuration
 const BASE_URL = 'https://www.web-apps.live';
-const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
 const OUTPUT_PATH = path.join(__dirname, '../public/sitemap.xml');
 
 /**

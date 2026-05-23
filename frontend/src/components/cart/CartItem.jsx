@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { FiMinus, FiPlus, FiTrash2, FiX } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 
+import { optimizeCloudinaryUrl } from '@utils/image-optimizer';
+
 /**
  * CartItem Component - Street Style
  * Item trong giỏ hàng
@@ -36,13 +38,13 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, updating = false }) => {
     }
 
     setQuantity(newQuantity);
-    await onUpdateQuantity(item.id, newQuantity);
+    await onUpdateQuantity(item.cartItemId || item.id, newQuantity);
   };
 
   // Handle remove
   const handleRemove = async () => {
     setIsRemoving(true);
-    await onRemove(item.id);
+    await onRemove(item.cartItemId || item.id);
   };
 
   // Support both flat structure (from store/sync) and nested structure (legacy/initial add)
@@ -68,7 +70,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, updating = false }) => {
         <Link to={`/product/${item.id}`}>
           <div className="aspect-square border-2 border-dark-950 overflow-hidden group">
             <img
-              src={imageUrl}
+              src={optimizeCloudinaryUrl(imageUrl, 150, 150)}
               alt={name}
               className="w-full h-full object-cover filter-grayscale-80 
                        group-hover:filter-grayscale-0 group-hover:scale-110 

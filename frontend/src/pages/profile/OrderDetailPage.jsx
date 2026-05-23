@@ -118,7 +118,7 @@ const OrderDetailPage = () => {
                 <FiPackage /> Order Items
               </h2>
               <div className="space-y-6">
-                {order.orderItems?.map((item) => (
+                {order.items?.map((item) => (
                   <div key={item.id} className="flex gap-4 pb-6 border-b-2 border-gray-100 last:border-0 last:pb-0">
                     <div className="w-20 h-20 bg-gray-200 border-2 border-dark-950 flex items-center justify-center shrink-0 overflow-hidden">
                       {item.productImageUrl || item.imageUrl ? (

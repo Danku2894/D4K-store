@@ -38,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = {"products", "categories"}, allEntries = true)
     public ProductResponse createProduct(ProductRequest request) {
         log.info("Creating new product: {}", request.getName());
         
@@ -118,6 +119,7 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = {"products", "categories"}, allEntries = true)
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         log.info("Updating product with ID: {}", id);
         
@@ -202,10 +204,11 @@ public class ProductServiceImpl implements ProductService {
     }
     
     /**
-     * Xóa product
+     * Xóa product (Soft delete)
      */
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = {"products", "categories"}, allEntries = true)
     public void deleteProduct(Long id) {
         log.info("Deleting product with ID: {}", id);
         
@@ -218,10 +221,11 @@ public class ProductServiceImpl implements ProductService {
     }
     
     /**
-     * Lấy chi tiết product
+     * Lấy chi tiết product theo ID
      */
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "products", key = "'product_' + #id")
     public ProductResponse getProductById(Long id) {
         log.info("Fetching product with ID: {}", id);
         
@@ -232,10 +236,11 @@ public class ProductServiceImpl implements ProductService {
     }
     
     /**
-     * Lấy danh sách products (Public - chỉ active)
+     * Lấy tất cả active products có phân trang
      */
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "products", key = "'all_' + #pageable.pageNumber + '_' + #pageable.pageSize + '_' + #pageable.sort")
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
         log.info("Fetching all active products");
         return productRepository.findByIsActive(true, pageable)
@@ -243,10 +248,11 @@ public class ProductServiceImpl implements ProductService {
     }
     
     /**
-     * Lấy products theo category (Public - chỉ active)
+     * Lấy products theo category
      */
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "products", key = "'cat_' + #categoryId + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable) {
         log.info("Fetching products by category ID: {}", categoryId);
         

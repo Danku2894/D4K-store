@@ -34,36 +34,60 @@ const SizeGuideModal = ({ isOpen, onClose, sizeGuideJson }) => {
     const h = parseInt(height);
     const w = parseInt(weight);
 
-    let matchScore = 0;
+    const parseValue = (s) => {
+      if (!s) return 0;
+      s = String(s).trim().toLowerCase();
+      if (s.includes('m')) {
+        const parts = s.split('m');
+        const m = parseInt(parts[0]) || 0;
+        let cm = parts[1] || '';
+        if (cm.length === 1) cm += '0'; // 1m5 -> 1m50
+        return m * 100 + (parseInt(cm) || 0);
+      }
+      return Number(s) || 0;
+    };
+
+    const parseRange = (str) => {
+      if (!str) return [0, 999];
+      str = String(str).trim().toLowerCase();
+      if (str.startsWith('>')) return [parseValue(str.substring(1)), 999];
+      if (str.startsWith('<')) return [0, parseValue(str.substring(1))];
+      const parts = str.split('-');
+      if (parts.length === 2) {
+        return [parseValue(parts[0]), parseValue(parts[1])];
+      }
+      return [0, 999];
+    };
+
+    let matchScore = -9999;
     let bestIndex = 0;
 
     sizes.forEach((size, index) => {
       let score = 0;
       
-      const [hMin, hMax] = size.height ? size.height.split('-').map(Number) : [0, 0];
-      const [wMin, wMax] = size.weight ? size.weight.split('-').map(Number) : [0, 0];
+      const [hMin, hMax] = parseRange(size.height);
+      const [wMin, wMax] = parseRange(size.weight);
 
-      if (hMin && hMax && h >= hMin && h <= hMax) score += 1;
-      if (wMin && wMax && w >= wMin && w <= wMax) score += 1.5;
+      // Trọng số Cân nặng cao hơn Chiều cao vì quần áo chật không thể mặc được
+      if (w >= wMin && w <= wMax) {
+        score += 10;
+      } else {
+        const wDist = Math.min(Math.abs(w - wMin), Math.abs(w - wMax));
+        score -= wDist * 2; // Phạt nặng nếu sai cân nặng
+      }
+
+      if (h >= hMin && h <= hMax) {
+        score += 5;
+      } else {
+        const hDist = Math.min(Math.abs(h - hMin), Math.abs(h - hMax));
+        score -= hDist; // Phạt nhẹ hơn nếu sai chiều cao (có thể cắt bớt hoặc mặc ngắn)
+      }
 
       if (score > matchScore) {
         matchScore = score;
         bestIndex = index;
       }
     });
-
-    if (matchScore === 0) {
-      let minDiff = 999;
-      sizes.forEach((size, index) => {
-        const [wMin, wMax] = size.weight ? size.weight.split('-').map(Number) : [0, 0];
-        const avgW = (wMin + wMax) / 2;
-        const diff = Math.abs(w - avgW);
-        if (diff < minDiff) {
-          minDiff = diff;
-          bestIndex = index;
-        }
-      });
-    }
 
     // Apply Fit Preference Adjustment
     if (fitPreference === 'slim' && bestIndex > 0) {

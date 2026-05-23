@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { optimizeCloudinaryUrl } from '@utils/image-optimizer';
 
 /**
  * ImageGallery Component - Street Style
@@ -37,7 +38,7 @@ const ImageGallery = ({ images = [], productName = 'Product' }) => {
       <div className="relative aspect-[3/4] bg-light-200 border-2 border-dark-950 overflow-hidden group">
         {/* Main Image */}
         <img
-          src={imageList[currentIndex]}
+          src={optimizeCloudinaryUrl(imageList[currentIndex], 800, 1066)}
           alt={`${productName} - Image ${currentIndex + 1}`}
           className={`w-full h-full object-cover transition-all duration-500
                     ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
@@ -101,7 +102,7 @@ const ImageGallery = ({ images = [], productName = 'Product' }) => {
               `}
             >
               <img
-                src={image}
+                src={optimizeCloudinaryUrl(image, 200, 200)}
                 alt={`${productName} thumbnail ${index + 1}`}
                 className="w-full h-full object-cover transition-all"
               />

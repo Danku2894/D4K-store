@@ -30,4 +30,97 @@
     <priority>0.6</priority>
   </url>
 
+  <url>
+    <loc>https://www.web-apps.live/category/4</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/category/5</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/category/7</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/category/8</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/category/2</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/category/3</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/category/6</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/product/5</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/de24tjap6/image/upload/v1779518791/d4k-store/products/fdccc4c6-5f27-4c4d-9f3b-c20e734c8547.webp</image:loc>
+      <image:caption>OUTLAW JACKET</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/product/4</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/de24tjap6/image/upload/v1779516676/d4k-store/products/fbb8c434-ecf3-49c1-adfe-b54f42c4b52f.jpg</image:loc>
+      <image:caption>&quot;10 YEARS BEFORE&quot; PANTS</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/product/3</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/de24tjap6/image/upload/v1779441863/d4k-store/products/f9a72f78-3d1f-4040-aac5-3196a2fd0b72.webp</image:loc>
+      <image:caption>RAF SIMONS TSHIRT</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.web-apps.live/product/2</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://res.cloudinary.com/de24tjap6/image/upload/v1779441752/d4k-store/products/8a52aca1-bf4c-4df9-9577-aedc98134038.webp</image:loc>
+      <image:caption>OPERA COLLAGE TSHIRT</image:caption>
+    </image:image>
+  </url>
+
 </urlset>

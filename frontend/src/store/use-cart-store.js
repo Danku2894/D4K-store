@@ -39,10 +39,9 @@ const useCartStore = create(
         // If not logged in, update local state only
         const { items } = get();
         
-        // Identify items by productId + size
-        const existingItem = items.find((item) => 
-          item.id === product.id && item.size === product.size && item.color === product.color
-        );
+        // Identify items by cartItemId (if logged in, the backend handles this, but for guest we use id-size-color)
+        const uniqueId = `${product.id}-${product.size || 'M'}-${product.color || 'none'}`;
+        const existingItem = items.find((item) => item.cartItemId === uniqueId);
 
         let newItems;
         if (existingItem) {
@@ -56,19 +55,19 @@ const useCartStore = create(
             }
             
             newItems = items.map((item) =>
-              item.id === product.id && item.size === product.size && item.color === product.color
+              item.cartItemId === uniqueId
                 ? { ...item, quantity: item.quantity + quantityToAdd }
                 : item
             );
           } else {
              newItems = items.map((item) =>
-              item.id === product.id && item.size === product.size && item.color === product.color
+              item.cartItemId === uniqueId
                 ? { ...item, quantity: item.quantity + quantity }
                 : item
             );
           }
         } else {
-          newItems = [...items, { ...product, quantity }];
+          newItems = [...items, { ...product, quantity, cartItemId: uniqueId }];
         }
 
         set({
@@ -78,9 +77,10 @@ const useCartStore = create(
         });
       },
 
-      removeFromCart: async (productId) => {
+      removeFromCart: async (cartItemId) => {
         const { items } = get();
-        const newItems = items.filter((item) => item.id !== productId);
+        // Fallback backward compatibility for older carts using id
+        const newItems = items.filter((item) => item.cartItemId !== cartItemId && item.id !== cartItemId);
 
         set({
           items: newItems,
@@ -90,23 +90,18 @@ const useCartStore = create(
 
         if (authService.isAuthenticated()) {
           try {
-             const response = await cartService.getCart();
-             if (response.success && response.data) {
-                 const cartItem = response.data.items.find(item => item.productId === productId);
-                 if (cartItem) {
-                     await cartService.removeCartItem(cartItem.id);
-                 }
-             }
+             // If logged in, cartItemId IS the backend id
+             await cartService.removeCartItem(cartItemId);
           } catch (error) {
             console.error('Failed to sync remove with backend:', error);
           }
         }
       },
 
-      updateQuantity: async (productId, quantity) => {
+      updateQuantity: async (cartItemId, quantity) => {
         const { items } = get();
         const newItems = items.map((item) =>
-          item.id === productId ? { ...item, quantity } : item
+          (item.cartItemId === cartItemId || item.id === cartItemId) ? { ...item, quantity } : item
         );
 
         set({
@@ -117,13 +112,7 @@ const useCartStore = create(
 
         if (authService.isAuthenticated()) {
            try {
-             const response = await cartService.getCart();
-             if (response.success && response.data) {
-                 const cartItem = response.data.items.find(item => item.productId === productId);
-                 if (cartItem) {
-                     await cartService.updateCartItem(cartItem.id, { quantity });
-                 }
-             }
+             await cartService.updateCartItem(cartItemId, { quantity });
           } catch (error) {
             console.error('Failed to sync update with backend:', error);
           }
@@ -190,6 +179,7 @@ const useCartStore = create(
             if (finalResponse.success && finalResponse.data) {
               const finalItems = finalResponse.data.items.map(item => ({
                 id: item.productId,
+                cartItemId: item.id,
                 name: item.productName,
                 price: item.productPrice,
                 originalPrice: item.originalPrice,

@@ -57,7 +57,7 @@ const CheckoutOrderSummary = ({
           
           return (
             <div 
-              key={item.id}
+              key={item.cartItemId || `${item.id}-${item.size}-${item.color}`}
               className="flex items-center space-x-4 p-3 border-2 border-dark-950 bg-light-50"
             >
               {/* Image */}

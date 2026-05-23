@@ -25,11 +25,21 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Tìm order theo order number
      */
-    @EntityGraph(attributePaths = {"orderItems", "orderItems.product", "orderItems.product.category"})
     Optional<Order> findByOrderNumber(String orderNumber);
     
-    @EntityGraph(attributePaths = {"orderItems", "orderItems.product", "orderItems.product.category"})
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user u LEFT JOIN FETCH o.orderItems oi LEFT JOIN FETCH oi.product p LEFT JOIN FETCH p.category WHERE o.orderNumber = :orderNumber")
+    Optional<Order> findByOrderNumberWithDetails(@Param("orderNumber") String orderNumber);
+    
+    // Bỏ @EntityGraph ở findById để tránh bug của Hibernate 6 khi dirty checking, 
+    // và cho phép lazy loading tự nhiên hoạt động trong Transaction.
     Optional<Order> findById(Long id);
+    
+    /**
+     * Dùng JOIN FETCH thay vì EntityGraph để fetch kèm orderItems, tránh bug Hibernate 6 
+     * (Illegal pop() with non-matching JdbcValuesSourceProcessingState)
+     */
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user u LEFT JOIN FETCH o.orderItems oi LEFT JOIN FETCH oi.product p LEFT JOIN FETCH p.category WHERE o.id = :id")
+    Optional<Order> findByIdWithDetails(@Param("id") Long id);
     
     /**
      * Tìm orders của user

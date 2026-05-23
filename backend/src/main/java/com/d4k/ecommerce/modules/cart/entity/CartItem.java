@@ -17,9 +17,7 @@ import java.time.LocalDateTime;
  * Item trong giỏ hàng (product + quantity)
  */
 @Entity
-@Table(name = "cart_items", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_cart_product", columnNames = {"cart_id", "product_id"})
-})
+@Table(name = "cart_items")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @Builder

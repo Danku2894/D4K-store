@@ -295,7 +295,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrderById(Long orderId, Long userId) {
         log.info("Fetching order {} for user {}", orderId, userId);
         
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         // Check ownership
@@ -314,7 +314,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(Long orderId, Long userId, CancelOrderRequest request) {
         log.info("User {} cancelling order {}", userId, orderId);
         
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         // Check ownership
@@ -331,7 +331,7 @@ public class OrderServiceImpl implements OrderService {
         
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledAt(LocalDateTime.now());
-        orderRepository.save(order);
+        orderRepository.saveAndFlush(order);
         log.info("Order {} cancelled successfully", orderId);
         
         try {
@@ -362,7 +362,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrderByIdAdmin(Long orderId) {
         log.info("Admin fetching order {}", orderId);
         
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         return orderMapper.toResponse(order);
@@ -376,7 +376,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse updateOrderStatus(Long orderId, UpdateOrderStatusRequest request) {
         log.info("Admin updating order {} status to {}", orderId, request.getStatus());
         
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         OrderStatus oldStatus = order.getStatus();
@@ -399,7 +399,7 @@ public class OrderServiceImpl implements OrderService {
             restoreStockForOrder(order);
         }
         
-        Order updatedOrder = orderRepository.save(order);
+        Order updatedOrder = orderRepository.saveAndFlush(order);
         
         try {
             emailService.sendOrderStatusUpdate(updatedOrder);
@@ -431,14 +431,14 @@ public class OrderServiceImpl implements OrderService {
     public void updateOrderAfterPayment(Long orderId, boolean success) {
         log.info("Updating order {} after payment. Success: {}", orderId, success);
         
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         if (success) {
             if (order.getStatus() == OrderStatus.PENDING) {
                 order.setStatus(OrderStatus.CONFIRMED);
                 order.setPaymentStatus(PaymentStatus.PAID);
-                orderRepository.save(order);
+                orderRepository.saveAndFlush(order);
                 log.info("Order {} confirmed and paid", orderId);
                 
                 try {
@@ -458,7 +458,7 @@ public class OrderServiceImpl implements OrderService {
                 // Restore stock
                 restoreStockForOrder(order);
                 
-                orderRepository.save(order);
+                orderRepository.saveAndFlush(order);
                 log.info("Order {} cancelled due to payment failure", orderId);
                 
                 try {

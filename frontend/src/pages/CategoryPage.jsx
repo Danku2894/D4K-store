@@ -18,7 +18,6 @@ import categoryService from '@services/category-service';
  */
 const CategoryPage = () => {
   const { categoryId } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
   
   // State
   const [category, setCategory] = useState(null);
@@ -38,8 +37,19 @@ const CategoryPage = () => {
     sort: 'createdAt,desc',
   });
 
-  // Fetch category details
   useEffect(() => {
+    const fetchCategoryDetails = async () => {
+      try {
+        const response = await categoryService.getCategoryById(categoryId);
+        if (response.success && response.data) {
+          setCategory(response.data);
+        }
+      } catch (err) {
+        console.error('Error fetching category:', err);
+        toast.error('Cannot load category details');
+      }
+    };
+
     if (categoryId) {
       fetchCategoryDetails();
     }
@@ -47,71 +57,57 @@ const CategoryPage = () => {
 
   // Fetch products khi filters hoặc page thay đổi
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        
+        // Build params
+        const params = {
+          page: currentPage,
+          size: 12,
+          categoryId: categoryId,
+        };
+
+        // Add sort
+        if (filters.sort) {
+          params.sort = filters.sort;
+        }
+
+        // Add price range
+        if (filters.priceRange) {
+          const [min, max] = filters.priceRange.split('-');
+          params.minPrice = min;
+          params.maxPrice = max;
+        }
+
+        // Add sizes (if API supports)
+        if (filters.sizes?.length > 0) {
+          params.sizes = filters.sizes.join(',');
+        }
+
+        // Add colors (if API supports)
+        if (filters.colors?.length > 0) {
+          params.colors = filters.colors.join(',');
+        }
+
+        const response = await productService.getProducts(params);
+        
+        if (response.success && response.data) {
+          setProducts(response.data.content || []);
+          setTotalPages(response.data.totalPages || 0);
+          setTotalElements(response.data.totalElements || 0);
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        toast.error('Cannot load products');
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProducts();
   }, [categoryId, currentPage, filters]);
-
-  // Page title is now handled by SEOHelmet component
-
-  const fetchCategoryDetails = async () => {
-    try {
-      const response = await categoryService.getCategoryById(categoryId);
-      if (response.success && response.data) {
-        setCategory(response.data);
-      }
-    } catch (err) {
-      console.error('Error fetching category:', err);
-      toast.error('Cannot load category details');
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      
-      // Build params
-      const params = {
-        page: currentPage,
-        size: 12,
-        categoryId: categoryId,
-      };
-
-      // Add sort
-      if (filters.sort) {
-        params.sort = filters.sort;
-      }
-
-      // Add price range
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split('-');
-        params.minPrice = min;
-        params.maxPrice = max;
-      }
-
-      // Add sizes (if API supports)
-      if (filters.sizes?.length > 0) {
-        params.sizes = filters.sizes.join(',');
-      }
-
-      // Add colors (if API supports)
-      if (filters.colors?.length > 0) {
-        params.colors = filters.colors.join(',');
-      }
-
-      const response = await productService.getProducts(params);
-      
-      if (response.success && response.data) {
-        setProducts(response.data.content || []);
-        setTotalPages(response.data.totalPages || 0);
-        setTotalElements(response.data.totalElements || 0);
-      }
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      toast.error('Cannot load products');
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);

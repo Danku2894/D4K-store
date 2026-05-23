@@ -111,8 +111,8 @@ public class CartServiceImpl implements CartService {
         }
         
         // Check existing item
-        Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndProductIdAndSize(
-                cart.getId(), product.getId(), request.getSize());
+        Optional<CartItem> existingItem = cartItemRepository.findExactCartItem(
+                cart.getId(), product.getId(), request.getSize(), request.getColor());
                 
         if (existingItem.isPresent()) {
             // Update quantity

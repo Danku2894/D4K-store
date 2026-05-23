@@ -21,7 +21,14 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
      */
     Optional<CartItem> findByCartIdAndProductId(Long cartId, Long productId);
 
-    Optional<CartItem> findByCartIdAndProductIdAndSize(Long cartId, Long productId, String size);
+    @Query("SELECT ci FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.product.id = :productId AND " +
+           "((ci.size IS NULL AND :size IS NULL) OR ci.size = :size) AND " +
+           "((ci.color IS NULL AND :color IS NULL) OR ci.color = :color)")
+    Optional<CartItem> findExactCartItem(
+            @Param("cartId") Long cartId, 
+            @Param("productId") Long productId, 
+            @Param("size") String size, 
+            @Param("color") String color);
     
     /**
      * Tìm cart item với eager loading product

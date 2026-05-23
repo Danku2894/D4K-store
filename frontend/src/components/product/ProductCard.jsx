@@ -5,6 +5,8 @@ import { toast } from 'react-hot-toast';
 import useCartStore from '@store/use-cart-store';
 import useWishlistStore from '@store/use-wishlist-store';
 
+import { optimizeCloudinaryUrl } from '@utils/image-optimizer';
+
 /**
  * ProductCard Component - Y2K Style
  * Card hiển thị sản phẩm với hover effects
@@ -90,7 +92,7 @@ const ProductCard = ({ product }) => {
       <div className="relative overflow-hidden aspect-[3/4] bg-light-200 shrink-0">
         {/* Product Image */}
         <img
-          src={product.imageUrl || '/placeholder-product.jpg'}
+          src={optimizeCloudinaryUrl(product.imageUrl || '/placeholder-product.jpg', 600, 800)}
           alt={product.name}
           className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 
                     ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}

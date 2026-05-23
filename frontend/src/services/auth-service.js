@@ -29,12 +29,7 @@ const authService = {
    * @returns {Promise}
    */
   forgotPassword: async (email) => {
-    try {
-      const response = await apiClient.post('/auth/forgot-password', { email });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await apiClient.post('/auth/forgot-password', { email });
   },
 
   /**
@@ -44,19 +39,21 @@ const authService = {
    * @returns {Promise}
    */
   resetPassword: async (token, newPassword) => {
-    try {
-      const response = await apiClient.post('/auth/reset-password', { token, newPassword });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await apiClient.post('/auth/reset-password', { token, newPassword });
   },
 
   /**
    * Logout user
-   * Clear tokens and user data
+   * Call backend to clear cookie, then clear user data
    */
-  logout: () => {
+  logout: async () => {
+    try {
+      await apiClient.post('/auth/logout');
+    } catch (e) {
+      console.error('Logout API failed', e);
+    }
+    
+    // Clear legacy tokens if any
     localStorage.removeItem('d4k_access_token');
     localStorage.removeItem('d4k_refresh_token');
     localStorage.removeItem('d4k_user');
@@ -76,10 +73,11 @@ const authService = {
 
   /**
    * Check if user is authenticated
+   * Since token is now HttpOnly cookie, we check if user object exists
    * @returns {Boolean}
    */
   isAuthenticated: () => {
-    return !!localStorage.getItem('d4k_access_token');
+    return !!localStorage.getItem('d4k_user');
   },
 
   /**
@@ -87,17 +85,10 @@ const authService = {
    * @param {Object} data - { data.token, refreshToken, user }
    */
   saveAuthData: (data) => {
-    // TODO: Consider using httpOnly cookies for tokens in production for better security
-    if (data.token && data.token !== 'null' && data.token !== 'undefined') {
-      localStorage.setItem('d4k_access_token', data.token);
-    }
-    if (data.refreshToken && data.refreshToken !== 'null' && data.refreshToken !== 'undefined') {
-      localStorage.setItem('d4k_refresh_token', data.refreshToken);
-    }
+    // Token is now handled by HttpOnly cookie from backend response automatically
     if (data.user) {
       localStorage.setItem('d4k_user', JSON.stringify(data.user));
     }
-
 
     // Dispatch custom event to notify components about auth changes
     window.dispatchEvent(new Event('d4k-auth-change'));

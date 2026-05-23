@@ -76,11 +76,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     
     /**
-     * Extract JWT token từ Authorization header
+     * Extract JWT token từ Cookie hoặc Authorization header
      */
     private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
+        // 1. Try to get from Cookies first
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
         
+        // 2. Fallback to Authorization header
+        String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }

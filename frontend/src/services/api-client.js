@@ -10,16 +10,20 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Auto send HttpOnly cookies
 });
 
 /**
  * Request Interceptor
- * Tự động thêm JWT token vào header nếu có
+ * Cũ: Tự động thêm JWT token vào header.
+ * Mới: Không cần thêm JWT token nữa vì đã dùng HttpOnly Cookie.
  */
 apiClient.interceptors.request.use(
   (config) => {
+    // Optionally we can still check for old token here or just return config
     const token = localStorage.getItem('d4k_access_token');
     if (token && token !== 'null' && token !== 'undefined') {
+      // Keep it for backward compatibility if user hasn't cleared local storage yet
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

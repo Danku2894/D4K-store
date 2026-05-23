@@ -149,10 +149,30 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         String resetLink = frontendUrl + "/reset-password?token=" + token;
-        String emailBody = "<h3>Password Reset Request</h3>" +
-                "<p>Click the link below to reset your password:</p>" +
-                "<a href=\"" + resetLink + "\">Reset Password</a>" +
-                "<p>This link will expire in 15 minutes.</p>";
+        String emailBody = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
+                "<style>" +
+                "body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0a0a0a; margin: 0; padding: 20px; }" +
+                ".container { max-width: 600px; margin: 0 auto; background: #ffffff; border: 4px solid #0a0a0a; padding: 30px; text-align: center; }" +
+                ".header { border-bottom: 4px solid #0a0a0a; padding-bottom: 20px; margin-bottom: 20px; }" +
+                ".header h1 { font-size: 32px; font-weight: 900; text-transform: uppercase; margin: 0; letter-spacing: -1px; }" +
+                ".header h1 span { color: #e63946; }" +
+                "h2 { font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; }" +
+                "p { font-size: 16px; line-height: 1.5; font-weight: 500; }" +
+                ".btn { display: inline-block; background-color: #0a0a0a; color: #ffffff !important; padding: 12px 24px; text-decoration: none; font-weight: bold; text-transform: uppercase; border: 2px solid transparent; margin: 25px 0; font-size: 16px; }" +
+                ".warning { color: #e63946; font-weight: bold; font-size: 14px; text-transform: uppercase; margin-top: 20px; }" +
+                ".footer { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #0a0a0a; font-weight: bold; text-transform: uppercase; font-size: 12px; }" +
+                "</style>" +
+                "</head><body>" +
+                "<div class='container'>" +
+                "<div class='header'><h1>D4K<span>STORE</span></h1></div>" +
+                "<h2>PASSWORD RESET REQUEST</h2>" +
+                "<p>HI <b>" + user.getFullName().toUpperCase() + "</b>,</p>" +
+                "<p>WE RECEIVED A REQUEST TO RESET YOUR PASSWORD. CLICK THE BUTTON BELOW TO SET A NEW ONE.</p>" +
+                "<a href='" + resetLink + "' class='btn'>RESET PASSWORD</a>" +
+                "<p class='warning'>THIS LINK WILL EXPIRE IN 15 MINUTES.</p>" +
+                "<p style='font-size: 12px; color: #64748b; font-weight: bold;'>IF YOU DID NOT REQUEST THIS, PLEASE IGNORE THIS EMAIL OR CONTACT SUPPORT.</p>" +
+                "<div class='footer'>STAY STREET. D4K STORE.</div>" +
+                "</div></body></html>";
 
         emailService.sendEmail(email, "Password Reset Request", emailBody);
     }

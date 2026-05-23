@@ -1,46 +1,61 @@
-
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from '@components/layout/Header';
 import Footer from '@components/layout/Footer';
-import HomePage from '@pages/HomePage';
-import CategoriesPage from '@pages/CategoriesPage';
-import ProductsPage from '@pages/ProductsPage';
-import CategoryPage from '@pages/CategoryPage';
-import ProductDetailPage from '@pages/ProductDetailPage';
-import CartPage from '@pages/CartPage';
-import CheckoutPage from '@pages/CheckoutPage';
-import OrderSuccessPage from '@pages/OrderSuccessPage';
-import LoginPage from '@pages/LoginPage';
-import RegisterPage from '@pages/RegisterPage';
-import ForgotPasswordPage from '@pages/ForgotPasswordPage';
-import ResetPasswordPage from '@pages/ResetPasswordPage';
-import PaymentCallbackPage from '@pages/PaymentCallbackPage';
-import AboutPage from '@pages/AboutPage';
-import ContactPage from '@pages/info/ContactPage';
-import { ShippingPage, ReturnsPage, FAQPage, TermsPage, PrivacyPage } from '@pages/info/StaticPages';
-
-import ProfilePage from '@pages/ProfilePage';
-import WishlistPage from '@pages/WishlistPage';
-// import AdminLoginPage from '@pages/admin/AdminLoginPage';
-import AdminDashboard from '@pages/admin/AdminDashboard';
-
-import AdminProducts from '@pages/admin/AdminProducts';
-import AdminCategories from '@pages/admin/AdminCategories';
-import AdminOrders from '@pages/admin/AdminOrders';
-import AdminOrderDetailPage from '@pages/admin/AdminOrderDetailPage';
-import AdminUsers from '@pages/admin/AdminUsers';
-import AdminCoupons from '@pages/admin/AdminCoupons';
-import AdminMedia from '@pages/admin/AdminMedia';
-
-import AddressesPage from '@pages/profile/AddressesPage';
-import ChangePasswordPage from '@pages/profile/ChangePasswordPage';
-import OrdersPage from '@pages/profile/OrdersPage';
-import OrderDetailPage from '@pages/profile/OrderDetailPage';
-
 import ProtectedRoute from '@components/layout/ProtectedRoute';
 import AdminRoute from '@components/layout/AdminRoute';
+import ScrollToTop from '@components/common/ScrollToTop';
+
+// Lazy load pages for bundle splitting
+const HomePage = React.lazy(() => import('@pages/HomePage'));
+const CategoriesPage = React.lazy(() => import('@pages/CategoriesPage'));
+const ProductsPage = React.lazy(() => import('@pages/ProductsPage'));
+const CategoryPage = React.lazy(() => import('@pages/CategoryPage'));
+const ProductDetailPage = React.lazy(() => import('@pages/ProductDetailPage'));
+const CartPage = React.lazy(() => import('@pages/CartPage'));
+const CheckoutPage = React.lazy(() => import('@pages/CheckoutPage'));
+const OrderSuccessPage = React.lazy(() => import('@pages/OrderSuccessPage'));
+const LoginPage = React.lazy(() => import('@pages/LoginPage'));
+const RegisterPage = React.lazy(() => import('@pages/RegisterPage'));
+const ForgotPasswordPage = React.lazy(() => import('@pages/ForgotPasswordPage'));
+const ResetPasswordPage = React.lazy(() => import('@pages/ResetPasswordPage'));
+const PaymentCallbackPage = React.lazy(() => import('@pages/PaymentCallbackPage'));
+const AboutPage = React.lazy(() => import('@pages/AboutPage'));
+const ContactPage = React.lazy(() => import('@pages/info/ContactPage'));
+const ShippingPage = React.lazy(() => import('@pages/info/StaticPages').then(m => ({ default: m.ShippingPage })));
+const ReturnsPage = React.lazy(() => import('@pages/info/StaticPages').then(m => ({ default: m.ReturnsPage })));
+const FAQPage = React.lazy(() => import('@pages/info/StaticPages').then(m => ({ default: m.FAQPage })));
+const TermsPage = React.lazy(() => import('@pages/info/StaticPages').then(m => ({ default: m.TermsPage })));
+const PrivacyPage = React.lazy(() => import('@pages/info/StaticPages').then(m => ({ default: m.PrivacyPage })));
+
+const ProfilePage = React.lazy(() => import('@pages/ProfilePage'));
+const WishlistPage = React.lazy(() => import('@pages/WishlistPage'));
+const AdminDashboard = React.lazy(() => import('@pages/admin/AdminDashboard'));
+
+const AdminProducts = React.lazy(() => import('@pages/admin/AdminProducts'));
+const AdminCategories = React.lazy(() => import('@pages/admin/AdminCategories'));
+const AdminOrders = React.lazy(() => import('@pages/admin/AdminOrders'));
+const AdminOrderDetailPage = React.lazy(() => import('@pages/admin/AdminOrderDetailPage'));
+const AdminUsers = React.lazy(() => import('@pages/admin/AdminUsers'));
+const AdminCoupons = React.lazy(() => import('@pages/admin/AdminCoupons'));
+const AdminMedia = React.lazy(() => import('@pages/admin/AdminMedia'));
+
+const AddressesPage = React.lazy(() => import('@pages/profile/AddressesPage'));
+const ChangePasswordPage = React.lazy(() => import('@pages/profile/ChangePasswordPage'));
+const OrdersPage = React.lazy(() => import('@pages/profile/OrdersPage'));
+const OrderDetailPage = React.lazy(() => import('@pages/profile/OrderDetailPage'));
+
+// Fallback loader
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-light-50">
+    <div className="flex flex-col items-center">
+      <div className="w-16 h-16 border-4 border-dark-950 border-t-transparent rounded-full animate-spin"></div>
+      <p className="mt-4 font-black uppercase tracking-widest text-dark-950">LOADING...</p>
+    </div>
+  </div>
+);
 
 /**
  * Public Layout Component
@@ -58,12 +73,12 @@ const PublicLayout = () => {
   );
 };
 
-import ScrollToTop from '@components/common/ScrollToTop';
 function App() {
   return (
     <HelmetProvider>
       <Router>
         <ScrollToTop />
+        <Suspense fallback={<PageLoader />}>
         <Routes>
         {/* Public Routes wrapped in PublicLayout */}
         <Route element={<PublicLayout />}>
@@ -126,6 +141,7 @@ function App() {
           <Route path="/admin/media" element={<AdminMedia />} />
         </Route>
       </Routes>
+      </Suspense>
 
       {/* Toast Notifications */}
       <Toaster

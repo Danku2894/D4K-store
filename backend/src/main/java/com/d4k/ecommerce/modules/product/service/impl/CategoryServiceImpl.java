@@ -34,6 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "categories", allEntries = true)
     public CategoryResponse createCategory(CategoryRequest request) {
         log.info("Creating new category with name: {}", request.getName());
         
@@ -73,6 +74,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "categories", allEntries = true)
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         log.info("Updating category with ID: {}", id);
         
@@ -135,6 +137,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(Long id) {
         log.info("Deleting category with ID: {}", id);
         
@@ -173,6 +176,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "categories", key = "'cat_' + #id")
     public CategoryResponse getCategoryById(Long id) {
         log.info("Fetching category with ID: {}", id);
         
@@ -186,10 +190,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     /**
-     * Lấy tất cả categories (flat list)
+     * Lấy tất cả categories (Dạng list phẳng)
      */
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "categories", key = "'all'")
     public List<CategoryResponse> getAllCategories() {
         log.info("Fetching all categories");
         
@@ -203,6 +208,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "categories", key = "'tree'")
     public List<CategoryResponse> getCategoryTree() {
         log.info("Fetching category tree");
         
