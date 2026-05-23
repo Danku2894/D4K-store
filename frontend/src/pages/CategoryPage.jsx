@@ -274,13 +274,13 @@ const CategoryPage = () => {
                 }
               `}>
                 {[...Array(6)].map((_, index) => (
-                  <div key={index} className="product-card-street animate-pulse">
-                    <div className="aspect-[3/4] bg-light-200"></div>
+                  <div key={index} className="product-card-street">
+                    <div className="aspect-[3/4] skeleton-street border-0 border-b-2 border-dark-950"></div>
                     <div className="p-4 space-y-3">
-                      <div className="h-4 bg-light-200 w-1/3"></div>
-                      <div className="h-6 bg-light-200 w-3/4"></div>
-                      <div className="h-4 bg-light-200 w-full"></div>
-                      <div className="h-8 bg-light-200 w-1/2"></div>
+                      <div className="h-4 w-1/3 skeleton-street"></div>
+                      <div className="h-6 w-3/4 skeleton-street"></div>
+                      <div className="h-4 w-full skeleton-street"></div>
+                      <div className="h-8 w-1/2 skeleton-street"></div>
                     </div>
                   </div>
                 ))}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FiDollarSign, 
@@ -20,47 +20,94 @@ import {
   Tooltip, 
   ResponsiveContainer,
   BarChart,
-  Bar
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
 } from 'recharts';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '@components/admin/AdminLayout';
 import StatsCard from '@components/admin/StatsCard';
 import dashboardService from '@services/dashboard-service';
 import orderService from '@services/order-service';
+import productService from '@services/product-service';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+  componentDidCatch(error, errorInfo) {
+    this.setState({ error, errorInfo });
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', background: 'red', color: 'white', zIndex: 9999, position: 'relative' }}>
+          <h2>Something went wrong in AdminDashboard.</h2>
+          <details style={{ whiteSpace: 'pre-wrap' }}>
+            {this.state.error && this.state.error.toString()}
+            <br />
+            {this.state.errorInfo && this.state.errorInfo.componentStack}
+          </details>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const COLORS = ['#FF0000', '#000000', '#666666', '#CCCCCC', '#FFE5B4'];
 
 /**
  * AdminDashboard Component - Street Style Redesign
  */
-const AdminDashboard = () => {
+const AdminDashboardContent = () => {
   const [stats, setStats] = useState(null);
   const [salesData, setSalesData] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [orderStatusData, setOrderStatusData] = useState([]);
+  const [timeRange, setTimeRange] = useState('7_days');
   const [loading, setLoading] = useState(true);
+
+  const handleTimeRangeChange = (e) => {
+    setTimeRange(e.target.value);
+  };
 
   useEffect(() => {
     document.title = 'Dashboard - D4K Admin';
     fetchAllData();
-  }, []);
+  }, [timeRange]);
 
   const fetchAllData = async () => {
     try {
       setLoading(true);
       
-      // Calculate date range for sales data (Last 7 days)
       const endDate = new Date();
       const startDate = new Date();
-      startDate.setDate(endDate.getDate() - 6);
+      if (timeRange === '7_days') startDate.setDate(endDate.getDate() - 6);
+      else if (timeRange === '30_days') startDate.setDate(endDate.getDate() - 29);
+      else if (timeRange === '90_days') startDate.setDate(endDate.getDate() - 89);
+      else startDate.setFullYear(2020); // All time fallback
 
       const startDateStr = startDate.toISOString().split('T')[0];
       const endDateStr = endDate.toISOString().split('T')[0];
 
       // Parallel Fetch
-      const [overviewRes, salesRes, topProductsRes, ordersRes] = await Promise.all([
+      const [overviewRes, salesRes, topProductsRes, ordersRes, lowStockRes, allOrdersRes] = await Promise.all([
         dashboardService.getDashboardOverview().catch(() => null),
         dashboardService.getSalesData('DAILY', startDateStr, endDateStr).catch(() => null),
         dashboardService.getTopProducts(5).catch(() => null),
-        orderService.getAllOrders({ page: 0, size: 5 }).catch(() => null)
+        orderService.getAllOrders({ page: 0, size: 5 }).catch(() => null),
+        productService.getAllProductsAdmin({ sort: 'stockQuantity,asc', size: 5 }).catch(() => null),
+        orderService.getAllOrders({ page: 0, size: 100 }).catch(() => null)
       ]);
 
       // 1. Set Overview Stats
@@ -91,7 +138,26 @@ const AdminDashboard = () => {
 
       // 4. Set Recent Orders
       if (ordersRes && ordersRes.success && ordersRes.data) {
-        setRecentOrders(ordersRes.data.content);
+        setRecentOrders(ordersRes.data.content || (Array.isArray(ordersRes.data) ? ordersRes.data : []));
+      }
+
+      // 5. Set Low Stock Products
+      if (lowStockRes && lowStockRes.success && lowStockRes.data) {
+        setLowStockProducts(lowStockRes.data.content || (Array.isArray(lowStockRes.data) ? lowStockRes.data : []));
+      }
+
+      // 6. Set Order Status Distribution
+      if (allOrdersRes && allOrdersRes.success && allOrdersRes.data) {
+        const content = allOrdersRes.data.content || (Array.isArray(allOrdersRes.data) ? allOrdersRes.data : []);
+        const statusCounts = {};
+        content.forEach(o => {
+          statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+        });
+        const statusChartData = Object.keys(statusCounts).map(key => ({
+          name: key,
+          value: statusCounts[key]
+        }));
+        setOrderStatusData(statusChartData);
       }
 
     } catch (err) {
@@ -116,11 +182,24 @@ const AdminDashboard = () => {
     { path: '/admin/coupons', icon: FiTag, label: 'Create Coupon', color: 'bg-yellow-400 text-dark-950' },
   ];
 
-  if (loading) {
+  if (loading && !stats) {
     return (
       <AdminLayout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="w-16 h-16 border-4 border-dark-950 border-t-transparent rounded-full animate-spin"></div>
+        <div className="space-y-8">
+          <div className="h-16 w-64 skeleton-street"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-32 skeleton-street"></div>)}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <div className="h-96 skeleton-street"></div>
+              <div className="h-80 skeleton-street"></div>
+            </div>
+            <div className="space-y-8">
+              <div className="h-64 skeleton-street"></div>
+              <div className="h-96 skeleton-street"></div>
+            </div>
+          </div>
         </div>
       </AdminLayout>
     );
@@ -139,9 +218,19 @@ const AdminDashboard = () => {
               Welcome back, Admin
             </p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={fetchAllData} className="btn-street-sm bg-white">
-              Refresh Data
+          <div className="flex items-center gap-4">
+            <select 
+              value={timeRange}
+              onChange={handleTimeRangeChange}
+              className="p-3 border-2 border-dark-950 font-bold uppercase focus:outline-none focus:border-street-red bg-light-50"
+            >
+              <option value="7_days">LAST 7 DAYS</option>
+              <option value="30_days">LAST 30 DAYS</option>
+              <option value="90_days">LAST 90 DAYS</option>
+              <option value="all_time">ALL TIME</option>
+            </select>
+            <button onClick={fetchAllData} className="btn-street-sm bg-white border-2 border-dark-950 font-bold px-4 py-3 uppercase hover:bg-dark-950 hover:text-white transition-all">
+              {loading ? 'LOADING...' : 'REFRESH'}
             </button>
           </div>
         </div>
@@ -183,9 +272,9 @@ const AdminDashboard = () => {
           {/* Left Column: Charts */}
           <div className="lg:col-span-2 space-y-8">
             {/* Revenue Chart */}
-            <div className="border-4 border-dark-950 bg-white p-6 relative group">
+            <div className={`border-4 border-dark-950 bg-white p-6 relative group ${loading ? 'opacity-50' : ''}`}>
               <div className="absolute top-0 right-0 p-2 bg-dark-950 text-white font-bold text-xs uppercase">
-                Last 7 Days
+                {timeRange.replace('_', ' ')}
               </div>
               <h3 className="text-xl font-display font-black uppercase mb-6 flex items-center gap-2">
                 <FiTrendingUp /> Revenue Overview
@@ -268,6 +357,41 @@ const AdminDashboard = () => {
                 </table>
               </div>
             </div>
+
+            {/* Order Status Pie Chart */}
+            <div className="border-4 border-dark-950 bg-white p-6">
+              <h3 className="text-xl font-display font-black uppercase mb-6 flex items-center gap-2">
+                <FiPackage /> Order Status Distribution
+              </h3>
+              <div className="h-[300px] w-full flex items-center justify-center">
+                {orderStatusData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={orderStatusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {orderStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{border: '2px solid #000', borderRadius: 0, boxShadow: '4px 4px 0 #000'}}
+                        itemStyle={{fontWeight: 'bold', color: '#000'}}
+                      />
+                      <Legend iconType="square" wrapperStyle={{fontWeight: 'bold', fontSize: '12px'}} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-gray-500 font-bold uppercase text-sm">NO ORDER DATA</div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Right Column: Quick Actions & Top Products */}
@@ -328,10 +452,47 @@ const AdminDashboard = () => {
                 )}
               </div>
             </div>
+
+            {/* Low Stock Alerts */}
+            <div className="border-4 border-street-red bg-white p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-street-red text-white p-2 text-xs font-black uppercase animate-pulse">
+                ALERT
+              </div>
+              <h3 className="text-xl font-display font-black uppercase mb-6 flex items-center gap-2 text-street-red">
+                <FiActivity /> Low Stock Items
+              </h3>
+              <div className="space-y-4">
+                {lowStockProducts?.length > 0 ? (
+                  lowStockProducts.filter(p => (p.stockQuantity || p.stock || 0) <= 10).map((product) => (
+                    <div key={product.id || product.productId} className="flex justify-between items-center border-b-2 border-gray-100 pb-2">
+                      <Link to={`/admin/products/edit/${product.id || product.productId}`} className="font-bold uppercase text-sm truncate hover:text-street-red flex-1">
+                        {product.name || product.productName}
+                      </Link>
+                      <span className={`font-black px-2 py-1 text-xs border-2 ${(product.stockQuantity || product.stock || 0) === 0 ? 'bg-street-red text-white border-street-red' : 'bg-yellow-100 text-yellow-800 border-yellow-800'}`}>
+                        {product.stockQuantity || product.stock || 0} LEFT
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-500 font-bold text-sm uppercase">All stock levels look good.</div>
+                )}
+                {lowStockProducts?.filter(p => (p.stockQuantity || p.stock || 0) <= 10).length === 0 && lowStockProducts?.length > 0 && (
+                  <div className="text-gray-500 font-bold text-sm uppercase">All stock levels look good.</div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </AdminLayout>
+  );
+};
+
+const AdminDashboard = () => {
+  return (
+    <ErrorBoundary>
+      <AdminDashboardContent />
+    </ErrorBoundary>
   );
 };
 

@@ -27,6 +27,8 @@ public class CategoryResponse {
     
     private String imageUrl;
     
+    private String sizeGuide;
+    
     private Long parentId;
     
     private String parentName;

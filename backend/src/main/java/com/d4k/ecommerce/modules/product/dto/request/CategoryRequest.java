@@ -26,6 +26,8 @@ public class CategoryRequest {
     @Size(max = 500, message = "Image URL must not exceed 500 characters")
     private String imageUrl;
     
+    private String sizeGuide;
+    
     /**
      * Parent category ID (null nếu là root category)
      */

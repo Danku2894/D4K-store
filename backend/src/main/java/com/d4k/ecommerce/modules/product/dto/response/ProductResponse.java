@@ -37,6 +37,8 @@ public class ProductResponse {
     
     private String categoryName;
     
+    private String categorySizeGuide;
+    
     private Boolean isActive;
     
     private Boolean isSale;

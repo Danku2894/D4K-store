@@ -3,6 +3,7 @@ import { FiShoppingCart, FiHeart, FiMinus, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import useCartStore from '@store/use-cart-store';
 import useWishlistStore from '@store/use-wishlist-store';
+import SizeGuideModal from './SizeGuideModal';
 
 /**
  * AddToCartSection Component - Street Style
@@ -14,6 +15,7 @@ const AddToCartSection = ({ product }) => {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   
   const addToCart = useCartStore((state) => state.addToCart);
   const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
@@ -177,9 +179,20 @@ const AddToCartSection = ({ product }) => {
       {/* Size Selector (Second - Dependent on Color) */}
       {uniqueSizes.length > 0 && (
         <div className="space-y-3">
-          <label className="block text-sm font-black uppercase tracking-wider">
-            SELECT SIZE
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-black uppercase tracking-wider">
+              SELECT SIZE
+            </label>
+            {product.categorySizeGuide && (
+              <button
+                onClick={() => setIsSizeGuideOpen(true)}
+                className="text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-dark-950 flex items-center space-x-1 underline decoration-2 underline-offset-4"
+              >
+                <FiMinus className="rotate-90" />
+                <span>SIZE GUIDE</span>
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-6 gap-2">
             {uniqueSizes.map((size) => {
               // Only check availability if color is selected
@@ -317,6 +330,15 @@ const AddToCartSection = ({ product }) => {
           ✓ SECURE CHECKOUT
         </p>
       </div>
+
+      {/* Size Guide Modal */}
+      {product.categorySizeGuide && (
+        <SizeGuideModal
+          isOpen={isSizeGuideOpen}
+          onClose={() => setIsSizeGuideOpen(false)}
+          sizeGuideJson={product.categorySizeGuide}
+        />
+      )}
     </div>
   );
 };

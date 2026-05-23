@@ -27,6 +27,7 @@ public class CategoryMapper {
                 .name(category.getName())
                 .description(category.getDescription())
                 .imageUrl(category.getImageUrl())
+                .sizeGuide(category.getSizeGuide())
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .parentName(category.getParent() != null ? category.getParent().getName() : null)
                 .createdAt(category.getCreatedAt())

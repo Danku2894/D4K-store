@@ -100,7 +100,7 @@ const ProductCard = ({ product }) => {
         
         {/* Loading Skeleton */}
         {!isImageLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-r from-dark-800 via-dark-700 to-dark-800 animate-pulse" />
+          <div className="absolute inset-0 skeleton-street-dark" />
         )}
 
         {/* Stock Badge */}
@@ -125,18 +125,16 @@ const ProductCard = ({ product }) => {
                       flex items-center justify-center">
           <div className="flex flex-col space-y-3 px-4 w-full">
             {/* View Details Button (to select size) */}
-            <Link
-              to={`/product/${product.id}`}
-              onClick={(e) => e.stopPropagation()}
+            <span
               className="w-full flex items-center justify-center space-x-2 px-4 py-3 
                        bg-dark-950 text-light-50 font-bold uppercase tracking-wider text-sm
                        border-2 border-dark-950 hover:bg-street-red hover:border-street-red
-                       transition-all duration-300"
+                       transition-all duration-300 cursor-pointer"
               aria-label="View details and select size"
             >
               <FiShoppingCart size={18} />
               <span>Select Size</span>
-            </Link>
+            </span>
 
             {/* Bottom Actions */}
             <div className="flex space-x-2">

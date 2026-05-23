@@ -130,18 +130,18 @@ const ProductDetailPage = () => {
     return (
       <div className="min-h-screen bg-light-50">
         <div className="container-street py-6">
-          <div className="animate-pulse space-y-8">
+          <div className="space-y-8">
             {/* Breadcrumb skeleton */}
-            <div className="h-6 bg-light-200 w-64"></div>
+            <div className="h-6 w-64 skeleton-street"></div>
             
             {/* Main content skeleton */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="aspect-[3/4] bg-light-200"></div>
+              <div className="aspect-[3/4] skeleton-street"></div>
               <div className="space-y-6">
-                <div className="h-12 bg-light-200 w-3/4"></div>
-                <div className="h-8 bg-light-200 w-1/2"></div>
-                <div className="h-32 bg-light-200"></div>
-                <div className="h-48 bg-light-200"></div>
+                <div className="h-12 w-3/4 skeleton-street"></div>
+                <div className="h-8 w-1/2 skeleton-street"></div>
+                <div className="h-32 skeleton-street"></div>
+                <div className="h-48 skeleton-street"></div>
               </div>
             </div>
           </div>
@@ -300,11 +300,11 @@ const ProductDetailPage = () => {
             {/* Review List */}
             <div>
               {reviewsLoading ? (
-                <div className="space-y-4 animate-pulse">
+                <div className="space-y-4">
                   {[...Array(3)].map((_, index) => (
                     <div key={index} className="p-6 border-2 border-dark-950">
-                      <div className="h-6 bg-light-200 w-1/3 mb-3"></div>
-                      <div className="h-20 bg-light-200"></div>
+                      <div className="h-6 w-1/3 mb-3 skeleton-street"></div>
+                      <div className="h-20 skeleton-street"></div>
                     </div>
                   ))}
                 </div>

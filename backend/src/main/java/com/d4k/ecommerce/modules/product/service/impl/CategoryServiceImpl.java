@@ -48,6 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .imageUrl(request.getImageUrl())
+                .sizeGuide(request.getSizeGuide())
                 .build();
         
         // Set parent nếu có
@@ -94,6 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(request.getName());
         category.setDescription(request.getDescription());
         category.setImageUrl(request.getImageUrl());
+        category.setSizeGuide(request.getSizeGuide());
         
         // Cập nhật parent
         if (request.getParentId() != null) {

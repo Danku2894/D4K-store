@@ -41,6 +41,9 @@ public class Category {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
     
+    @Column(name = "size_guide", columnDefinition = "TEXT")
+    private String sizeGuide;
+    
     /**
      * Parent category ID (null nếu là root category)
      */

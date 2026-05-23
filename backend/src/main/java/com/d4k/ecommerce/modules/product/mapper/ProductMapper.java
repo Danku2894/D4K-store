@@ -41,6 +41,7 @@ public class ProductMapper {
                         : null)
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
+                .categorySizeGuide(product.getCategory() != null ? product.getCategory().getSizeGuide() : null)
                 .isActive(product.getIsActive())
                 .isSale(product.getIsSale())
                 .saleDiscountPercentage(product.getSaleDiscountPercentage())

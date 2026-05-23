@@ -156,7 +156,7 @@ const CategoriesSection = () => {
         {loading && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {[...Array(6)].map((_, index) => (
-              <div key={index} className="aspect-[4/5] bg-light-200 animate-pulse" />
+              <div key={index} className="aspect-[4/5] skeleton-street" />
             ))}
           </div>
         )}

@@ -153,6 +153,33 @@
     @apply absolute left-0 right-0 top-1/2 h-0.5 bg-street-red;
     transform: rotate(-5deg);
   }
+
+  /* Street Style Skeleton Loading */
+  .skeleton-street {
+    @apply relative overflow-hidden bg-light-200 border-2 border-dark-950;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(0,0,0,0.05) 10px,
+      rgba(0,0,0,0.05) 20px
+    );
+    background-size: 28px 28px;
+    animation: skeleton-move 1s linear infinite;
+  }
+
+  .skeleton-street-dark {
+    @apply relative overflow-hidden bg-dark-800 border-2 border-dark-950;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(255,255,255,0.05) 10px,
+      rgba(255,255,255,0.05) 20px
+    );
+    background-size: 28px 28px;
+    animation: skeleton-move 1s linear infinite;
+  }
 }
 
 @layer utilities {
@@ -214,6 +241,15 @@
   }
   80% {
     transform: translate(2px, -2px);
+  }
+}
+
+@keyframes skeleton-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 28px 0;
   }
 }
 

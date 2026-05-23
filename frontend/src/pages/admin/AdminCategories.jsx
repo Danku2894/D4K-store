@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiLayers, FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiImage } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '@components/admin/AdminLayout';
+import SizeGuideBuilder from '@components/admin/SizeGuideBuilder';
 import categoryService from '@services/category-service';
 import uploadService from '@services/upload-service';
 
@@ -20,7 +21,8 @@ const AdminCategories = () => {
     name: '',
     description: '',
     parentId: '',
-    imageUrl: ''
+    imageUrl: '',
+    sizeGuide: ''
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -77,7 +79,7 @@ const AdminCategories = () => {
   };
 
   const resetForm = () => {
-    setNewCategory({ name: '', description: '', parentId: '', imageUrl: '' });
+    setNewCategory({ name: '', description: '', parentId: '', imageUrl: '', sizeGuide: '' });
     setImageFile(null);
     setImagePreview(null);
     setIsEditing(false);
@@ -91,7 +93,8 @@ const AdminCategories = () => {
       name: category.name,
       description: category.description || '',
       parentId: category.parentId || '',
-      imageUrl: category.imageUrl || ''
+      imageUrl: category.imageUrl || '',
+      sizeGuide: category.sizeGuide || ''
     });
     // If has existing image, show it
     if (category.imageUrl) {
@@ -123,7 +126,8 @@ const AdminCategories = () => {
       const data = {
         ...newCategory,
         parentId: newCategory.parentId || null,
-        imageUrl: imageUrl || null
+        imageUrl: imageUrl || null,
+        sizeGuide: newCategory.sizeGuide || null
       };
       
       if (isEditing) {
@@ -284,7 +288,7 @@ const AdminCategories = () => {
         {/* Create/Edit Category Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/80 backdrop-blur-sm">
-            <div className="bg-light-50 w-full max-w-lg border-4 border-dark-950">
+            <div className="bg-light-50 w-full max-w-4xl border-4 border-dark-950">
               <div className="p-6 border-b-4 border-dark-950 flex justify-between items-center bg-street-red text-light-50">
                 <h2 className="text-2xl font-display font-black uppercase tracking-tight">
                   {isEditing ? 'EDIT CATEGORY' : 'ADD NEW CATEGORY'}
@@ -336,6 +340,15 @@ const AdminCategories = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <label className="text-sm font-black uppercase tracking-wide">Size Guide Builder</label>
+                  <SizeGuideBuilder
+                    value={newCategory.sizeGuide}
+                    onChange={(newVal) => setNewCategory({...newCategory, sizeGuide: newVal})}
+                  />
+                  <p className="text-xs text-gray-500 font-bold">LEAVE EMPTY IF THIS CATEGORY HAS NO SIZES.</p>
+                </div>
+
+                <div className="space-y-2">
                   <label className="text-sm font-black uppercase tracking-wide">Category Image (Optional)</label>
                   <div className="border-2 border-dashed border-dark-950 p-4">
                     {imagePreview ? (
@@ -343,7 +356,7 @@ const AdminCategories = () => {
                         <img 
                           src={imagePreview} 
                           alt="Preview" 
-                          className="w-full h-48 object-cover border-2 border-dark-950"
+                          className="w-full h-auto max-h-96 object-contain bg-light-200 border-2 border-dark-950"
                         />
                         <button
                           type="button"
