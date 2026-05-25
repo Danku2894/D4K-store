@@ -26,7 +26,7 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT v FROM ProductVariant v WHERE v.product.id = :productId " +
            "AND LOWER(v.size) = LOWER(:size) " +
-           "AND (:color IS NULL OR LOWER(v.color) = LOWER(:color))")
+           "AND ((:color IS NULL AND v.color IS NULL) OR (LOWER(v.color) = LOWER(:color)))")
     Optional<ProductVariant> findByProductIdAndSizeAndColorWithLock(
             @Param("productId") Long productId,
             @Param("size") String size,

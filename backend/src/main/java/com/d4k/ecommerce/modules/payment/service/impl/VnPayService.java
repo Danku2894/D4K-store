@@ -16,12 +16,15 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.d4k.ecommerce.modules.order.service.OrderService;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class VnPayService implements PaymentService {
 
     private final VnPayConfig vnPayConfig;
+    private final OrderService orderService;
 
     @Override
     public String createPaymentUrl(long orderTotal, String orderInfo, String baseUrl) {
@@ -105,13 +108,66 @@ public class VnPayService implements PaymentService {
 
     @Override
     public OrderResponse handleIpn(HttpServletRequest request) {
-        // Implementation for IPN or Return handling
-        // Verify checksum
-        // Update Order Status via OrderService
-        
-        // This is a placeholder for now, usually returns success code
-        // Logic to extract vnp_ResponseCode and vnp_TxnRef
-        return null; 
+        Map<String, String> fields = new HashMap<>();
+        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
+            String fieldName = params.nextElement();
+            String fieldValue = request.getParameter(fieldName);
+            if ((fieldName != null) && (fieldName.length() > 0)) {
+                fields.put(fieldName, fieldValue);
+            }
+        }
+
+        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
+        if (fields.containsKey("vnp_SecureHashType")) {
+            fields.remove("vnp_SecureHashType");
+        }
+        if (fields.containsKey("vnp_SecureHash")) {
+            fields.remove("vnp_SecureHash");
+        }
+
+        // Build hash data
+        List<String> fieldNames = new ArrayList<>(fields.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        Iterator<String> itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = itr.next();
+            String fieldValue = fields.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                // Build hash data
+                hashData.append(fieldName);
+                hashData.append('=');
+                try {
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                } catch (UnsupportedEncodingException e) {
+                    log.error("Error encoding IPN data", e);
+                }
+                if (itr.hasNext()) {
+                    hashData.append('&');
+                }
+            }
+        }
+
+        String signValue = hmacSHA512(vnPayConfig.getSecretKey(), hashData.toString());
+        if (signValue.equals(vnp_SecureHash)) {
+            String vnp_TxnRef = request.getParameter("vnp_TxnRef");
+            String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
+
+            boolean isSuccess = "00".equals(vnp_ResponseCode);
+            try {
+                Long orderId = Long.parseLong(vnp_TxnRef);
+                orderService.updateOrderAfterPayment(orderId, isSuccess);
+                log.info("Processed IPN for order {}. Success: {}", orderId, isSuccess);
+                // In IPN we don't necessarily return OrderResponse, but returning null for now is fine since IPN typically expects a text response like {"RspCode":"00","Message":"Confirm Success"}
+                // We'll return null to fit the existing interface if the controller handles it.
+            } catch (NumberFormatException e) {
+                log.error("Invalid order ID from IPN: {}", vnp_TxnRef);
+            }
+            return null; // Interface expects OrderResponse, controller should map this
+        } else {
+            log.error("Invalid IPN Checksum");
+            return null;
+        }
     }
 
     public static String hmacSHA512(String key, String data) {

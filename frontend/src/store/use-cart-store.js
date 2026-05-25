@@ -159,7 +159,8 @@ const useCartStore = create(
               for (const localItem of localItems) {
                 const backendItem = backendItems.find(bi => 
                   bi.productId === localItem.id && 
-                  (bi.size === localItem.size || (!bi.size && !localItem.size))
+                  (bi.size === localItem.size || (!bi.size && !localItem.size)) &&
+                  (bi.color === localItem.color || (!bi.color && !localItem.color))
                 );
                 
                 // Only add if item doesn't exist in backend
