@@ -59,6 +59,9 @@ logging:
     com.d4k.ecommerce: INFO
 
 app:
+  cookie:
+    secure: true
+    same-site: None
   allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}

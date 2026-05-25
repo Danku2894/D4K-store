@@ -28,6 +28,12 @@ public class AuthController {
     
     private final AuthService authService;
     
+    @org.springframework.beans.factory.annotation.Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @org.springframework.beans.factory.annotation.Value("${app.cookie.same-site:Lax}")
+    private String cookieSameSite;
+    
     /**
      * Đăng ký tài khoản mới
      * POST /api/v1/auth/register
@@ -62,10 +68,10 @@ public class AuthController {
         // Create HttpOnly cookie
         ResponseCookie cookie = ResponseCookie.from("accessToken", loginResponse.getToken())
                 .httpOnly(true)
-                .secure(false) // Set to false for localhost without https
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7 days
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .build();
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         
@@ -124,10 +130,10 @@ public class AuthController {
         // Clear cookie
         ResponseCookie cookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .build();
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         
