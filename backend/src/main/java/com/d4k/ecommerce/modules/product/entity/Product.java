@@ -52,6 +52,7 @@ public class Product {
      * Product Variants (Size/Color/Stock)
      */
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @Builder.Default
     private java.util.List<ProductVariant> variants = new java.util.ArrayList<>();
 
@@ -59,6 +60,7 @@ public class Product {
      * Additional Product Images
      */
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     @Builder.Default
     private java.util.List<ProductImage> images = new java.util.ArrayList<>();
     

@@ -10,10 +10,12 @@ import {
   FiMenu,
   FiX,
   FiLogOut,
-  FiLayers
+  FiLayers,
+  FiLock
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import authService from '@services/auth-service';
+import userService from '@services/user-service';
 import useCartStore from '@store/use-cart-store';
 
 /**
@@ -26,6 +28,15 @@ const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = authService.getCurrentUser();
   const clearCart = useCartStore((state) => state.clearCart);
+
+  // Change Password State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const menuItems = [
     {
@@ -70,6 +81,30 @@ const AdminLayout = ({ children }) => {
     clearCart();
     navigate('/');
     toast.success('LOGGED OUT!');
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      await userService.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+        confirmPassword: passwordForm.confirmPassword
+      });
+      toast.success('Password changed successfully');
+      setShowPasswordModal(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      toast.error(error.message || 'Failed to change password');
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const isActive = (path) => location.pathname === path;
@@ -134,6 +169,16 @@ const AdminLayout = ({ children }) => {
               </p>
             </div>
             <button
+              onClick={() => setShowPasswordModal(true)}
+              className="w-full flex items-center justify-center space-x-2 py-3 mb-2
+                       bg-transparent border-2 border-dark-950 text-light-50
+                       hover:bg-light-50 hover:text-dark-950 transition-all
+                       font-bold uppercase text-sm tracking-wide"
+            >
+              <FiLock size={18} />
+              <span>CHANGE PASSWORD</span>
+            </button>
+            <button
               onClick={handleLogout}
               className="w-full flex items-center justify-center space-x-2 py-3 
                        bg-transparent border-2 border-light-50 text-light-50
@@ -176,6 +221,73 @@ const AdminLayout = ({ children }) => {
           className="fixed inset-0 bg-dark-950/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
+      )}
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/80 backdrop-blur-sm">
+          <div className="bg-light-50 w-full max-w-md border-4 border-dark-950 shadow-[8px_8px_0px_0px_rgba(10,10,10,1)]">
+            <div className="flex justify-between items-center p-4 border-b-4 border-dark-950 bg-light-200">
+              <h2 className="text-xl font-black uppercase text-dark-950">Change Password</h2>
+              <button onClick={() => setShowPasswordModal(false)} className="text-dark-950 hover:text-street-red transition-colors">
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleChangePassword} className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold uppercase text-dark-950 mb-2">Current Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    className="w-full p-3 bg-light-50 border-2 border-dark-950 focus:outline-none focus:ring-0 font-medium"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold uppercase text-dark-950 mb-2">New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full p-3 bg-light-50 border-2 border-dark-950 focus:outline-none focus:ring-0 font-medium"
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold uppercase text-dark-950 mb-2">Confirm New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full p-3 bg-light-50 border-2 border-dark-950 focus:outline-none focus:ring-0 font-medium"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+              <div className="mt-8 flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 py-3 border-2 border-dark-950 font-bold uppercase text-dark-950 hover:bg-light-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isChangingPassword}
+                  className="flex-1 py-3 bg-dark-950 text-light-50 font-bold uppercase border-2 border-dark-950 hover:bg-street-red hover:border-street-red transition-colors disabled:opacity-50"
+                >
+                  {isChangingPassword ? 'Saving...' : 'Save Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

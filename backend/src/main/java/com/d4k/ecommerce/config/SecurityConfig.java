@@ -107,7 +107,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/api/v1/files/**",
                                 "/api/v1/recommendations/**",
-                                "/api/v1/payment/**",
+                                "/api/v1/payment/vn-pay-return",
+                                "/api/v1/payment/vn-pay-ipn",
                                 "/api/v1/reviews/**",
                                 "/api/v1/coupons/**",
                                 "/api/v1/banners/active"
