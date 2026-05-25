@@ -448,24 +448,21 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
         } else {
-            // Payment failed -> Cancel order and restore stock
+            // Payment failed -> Delete order and restore stock/cart
             if (order.getStatus() != OrderStatus.CANCELLED && order.getStatus() != OrderStatus.DELIVERED) {
-                order.setStatus(OrderStatus.CANCELLED);
-                order.setPaymentStatus(PaymentStatus.FAILED);
-                order.setCancelledAt(LocalDateTime.now());
-                order.setCancelReason("Payment Failed / Cancelled by User");
+                log.info("Order {} payment failed. Restoring stock and cart, then deleting order.", orderId);
                 
                 // Restore stock
                 restoreStockForOrder(order);
                 
-                orderRepository.saveAndFlush(order);
-                log.info("Order {} cancelled due to payment failure", orderId);
+                // Restore cart
+                restoreCartForOrder(order);
                 
-                try {
-                    emailService.sendOrderStatusUpdate(order);
-                } catch (Exception e) {
-                    log.error("Failed to send payment failure email", e);
-                }
+                // Hard delete order so it doesn't pollute order history
+                orderRepository.delete(order);
+                log.info("Order {} deleted due to payment failure", orderId);
+                
+                // NOTE: Not sending cancellation email because order is deleted
             }
         }
     }
@@ -532,5 +529,45 @@ public class OrderServiceImpl implements OrderService {
         }
         
         // Add more validation rules as needed
+    }
+    
+    /**
+     * Restore cart items when payment fails and order is deleted
+     */
+    private void restoreCartForOrder(Order order) {
+        Long userId = order.getUser().getId();
+        Cart cart = cartRepository.findByUserIdWithItems(userId)
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder().user(order.getUser()).build();
+                    return cartRepository.save(newCart);
+                });
+
+        List<CartItem> currentItems = cart.getItems();
+
+        for (OrderItem orderItem : order.getOrderItems()) {
+            boolean exists = false;
+            for (CartItem cartItem : currentItems) {
+                if (cartItem.getProduct().getId().equals(orderItem.getProduct().getId()) &&
+                    java.util.Objects.equals(cartItem.getSize(), orderItem.getSize()) &&
+                    java.util.Objects.equals(cartItem.getColor(), orderItem.getColor())) {
+                    
+                    cartItem.setQuantity(cartItem.getQuantity() + orderItem.getQuantity());
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists) {
+                CartItem newItem = CartItem.builder()
+                        .cart(cart)
+                        .product(orderItem.getProduct())
+                        .quantity(orderItem.getQuantity())
+                        .size(orderItem.getSize())
+                        .color(orderItem.getColor())
+                        .build();
+                cart.addItem(newItem);
+            }
+        }
+        cartRepository.save(cart);
     }
 }
