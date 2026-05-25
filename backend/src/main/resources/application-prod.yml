@@ -59,6 +59,9 @@ logging:
     com.d4k.ecommerce: INFO
 
 app:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
   file:
     upload-dir: ${FILE_UPLOAD_DIR:/app/uploads}
 
